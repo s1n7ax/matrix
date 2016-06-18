@@ -6,9 +6,7 @@ var search = function () {};
 
 search.prototype.projectContainerDirPath = null;
 
-/*
- * interface
- */
+/*interface*/
 search.prototype.setPaths = function () {
   this.projectContainerDirPath =  Path.join(__dirname, '../projects');
 };
@@ -26,4 +24,4 @@ search.prototype.getProjectNames = function () {
 
 
 
-module.exports.search = new search();
+module.exports = search;
