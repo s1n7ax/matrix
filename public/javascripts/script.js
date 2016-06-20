@@ -32,7 +32,7 @@ angular.module('automate', ['ngMaterial'])
     };
 
     $scope.getSelectedProject = function () {
-      if ($scope.selectedProject !== undefined){
+      if ($scope.selectedProject !== undefined) {
         console.log(gl);
         $scope.moduleSelectorIsEnabled = false;
         return 'Project : ' + $scope.selectedProject;
@@ -41,20 +41,35 @@ angular.module('automate', ['ngMaterial'])
         return 'Select a project';
     };
 
-
-
-
-
-
     /********** TOOLBAR SELECT MODULE **********/
-    $scope.modules = ['Core HR', 'Core Finance', 'Velocity Travel', 'Time Off'];
-    $scope.selectedModule;
+    $scope.getModuleNames = function () {
+      if (projectName !== undefined) {
+        $http({
+          method: 'POST',
+          url: '/getModuleNames'
+        })
+          .then(function successCallBack(res) {
+            $scope.modules = res.data;
+          }, function errorCallBack(error) {
+            console.error(error);
+          });
+      }
+      else{
+        console.error('project name is not defined');
+      }
+    };
+
     $scope.getSelectedModule = function () {
       if ($scope.selectedModule !== undefined)
         return 'Module : ' + $scope.selectedModule;
       else
         return 'Select a module';
     };
+
+
+
+
+
 
     /********** SIDE NAVIGATOR **********/
     $scope.toggleNav = buildToggle('side-nav');

@@ -21,4 +21,8 @@ router.post('/getProjectNames', function (req, res) {
   res.send(projectNames);
 });
 
+router.post('/getModuleNames', function (req, res) {
+  Search.setPaths();
+});
+
 module.exports = router;
