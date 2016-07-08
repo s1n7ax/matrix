@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "test": "/home/dscript/Projects/automate/node_modules/mocha/bin/mocha /home/dscript/Projects/automate/test"
   },
   "dependencies": {
     "bluebird": "~3.3.5",
@@ -15,8 +15,13 @@
     "file-system": "2.2.1",
     "jsonfile": "~2.3.0",
     "morgan": "~1.6.1",
+    "orientjs": "^2.2.1",
     "path": "^0.12.7",
     "serve-favicon": "~2.3.0",
     "socket.io": "~1.4.5"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
   }
 }
