@@ -3,7 +3,7 @@ const path = require('path');
 
 
 /*****************Service Interface*****************/
-class Service {
+class Services {
 
   constructor() {
 
@@ -16,13 +16,7 @@ class Service {
     this.htmlMessage = htmlMessage;
     Error.captureStackTrace(this);
   }
-  
-}
 
-class test {
-  constructor() {
-    
-  }
 }
 
 
