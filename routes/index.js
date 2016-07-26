@@ -2,7 +2,7 @@ var express = require('express');
 var Path = require('path');
 var router = express.Router();
 
-var SearchPrototype = require('../controllers/search');
+//var SearchPrototype = require('../controllers/search');
 
 var Search = function () { };
 Search = new SearchPrototype();

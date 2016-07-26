@@ -9,7 +9,6 @@ class Services {
 
   }
 
-
   userException(name, message, htmlMessage) {
     this.name = name;
     this.message = message;
@@ -17,6 +16,7 @@ class Services {
     Error.captureStackTrace(this);
   }
 
+  
 }
 
 
