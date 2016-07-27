@@ -1,0 +1,11 @@
+{
+    "hostName":"cmdsnmuhandiram",
+    "portNumber":2480,
+    "userName":"admin",
+    "password":"admin",
+
+    "databaseName":"AutomateProjectDB"
+
+    
+
+}

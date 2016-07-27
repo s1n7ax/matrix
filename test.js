@@ -1,22 +1,15 @@
-let OrientDB = require('orientjs');
+let Promise = require('bluebird');
 
-let server = OrientDB({
-  host: 'cmdsnmuhandiram',
-  port: 2424,
-  username: 'admin',
-  password: 'admin'
-});
-
-let db = server.use('AutomateProjectDB')
-
-db.class.get('test')
-  .then(function (project) {
-    console.log(project.name)
-    console.log(project.superClass)
-
-    project.list().then(function (data) {
-      console.log(data.length);
-    })
-
+function test (){
+  Promise.resolve(function () {
+  }).then(function () {
+    return 'hello';
   })
+} 
 
+Promise.resolve(function () {
+}).then(function () {
+  test()
+}).then(function (data) {
+  console.log(data);
+})
