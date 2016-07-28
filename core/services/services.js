@@ -6,7 +6,6 @@ const path = require('path');
 class Services {
 
   constructor() {
-
   }
 
   userException(name, message, htmlMessage) {

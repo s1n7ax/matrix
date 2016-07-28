@@ -4,48 +4,51 @@ let Path = require('path');
 
 class DAO {
 
-    constructor() {
-        let configFilePath = Path.join(__dirname, '../../', 'configuration', 'database.conf.json');
-        let dbConfig = JsonFile.readFileSync(configFilePath);
+  constructor() {
+    let configFilePath = Path.join(__dirname, '../../', 'configuration', 'database.conf.json');
+    let dbConfig = JsonFile.readFileSync(configFilePath);
 
-        this.hostName = dbConfig.hostName;
-        this.portNumber = dbConfig.portNumber;
-        this.userName = dbConfig.userName;
-        this.password = dbConfig.password;
-        this.databaseName = dbConfig.databaseName;
+    this.hostName = dbConfig.hostName;
+    this.portNumber = dbConfig.portNumber;
+    this.userName = dbConfig.userName;
+    this.password = dbConfig.password;
+    this.databaseName = dbConfig.databaseName;
 
-        this.server = this.createServer();
-        this.database = this.connectDatabase();
-        this.createRecord('test', 'testrec', 'this is a test', null);
-    }
+    this.server = this.createServer();
+    this.database = this.connectDatabase();
+  }
 
-    createServer() {
-        return OrientJS({
-            name: this.hostName,
-            portNumber: this.portNumber,
-            username: this.userName,
-            password: this.password
-        });
-    }
+  createServer() {
+    return OrientJS({
+      name: this.hostName,
+      portNumber: this.portNumber,
+      username: this.userName,
+      password: this.password
+    });
+  }
 
-    connectDatabase() {
-        return this.server.use({
-            name: this.databaseName
-        });
-    }
+  connectDatabase() {
+    return this.server.use({
+      name: this.databaseName
+    });
+  }
 
-    createRecord(className, name, description, links) {
+  setRecord(className, values) {
+    return this.database.insert().into(className).set(values).all();
+  }
 
-        let res = this.database.query('insert into ' + className + ' (name, description, link) values (:name, :description, :links)', {
-            params: {
-                "name": name,
-                "description": description,
-                "links": links
-            }
-        });
-        console.log(res);
-    }
+  getRecord(className, values) {
+    return this.database.select().from(className).where(values).all();
+  }
+
+  deleteRecord(className, values) {
+    return this.database.query('delete from ' + className + '')
+  }
+
+  updateRecord(className, rid, values) {
+    //
+  }
 }
 
-
-let a = new DAO();
+module.exports = DAO;
+//couch db

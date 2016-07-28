@@ -1,15 +1,21 @@
 let Promise = require('bluebird');
 
-function test (){
-  Promise.resolve(function () {
-  }).then(function () {
-    return 'hello';
-  })
-} 
+function getItem(){
 
-Promise.resolve(function () {
-}).then(function () {
-  test()
-}).then(function (data) {
-  console.log(data);
-})
+  Promise.resolve(function () {
+  })
+  .then(function () {
+    getVal1(function (val) {
+      console.log(val)
+    });
+  })
+  
+}
+
+
+function getVal1(func){
+  let a = 'getVal1';
+  func(a);
+}
+
+getItem();
