@@ -1,6 +1,6 @@
-let OrientJS = require('orientjs');
-let JsonFile = require('jsonfile');
-let Path = require('path');
+const OrientJS = require('orientjs');
+const JsonFile = require('jsonfile');
+const Path = require('path');
 
 class DAO {
 
@@ -34,7 +34,7 @@ class DAO {
   }
 
   setRecord(className, values) {
-    return this.database.insert().into(className).set(values).all();
+    return this.database.insert().into(className).set(values).one();
   }
 
   getRecord(className, values) {
@@ -50,5 +50,4 @@ class DAO {
   }
 }
 
-module.exports = DAO;
-//couch db
+module.exports = new DAO;

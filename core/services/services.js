@@ -14,7 +14,22 @@ class Services {
     this.htmlMessage = htmlMessage;
     Error.captureStackTrace(this);
   }
-
+  
+  add() {
+  
+  }
+  
+  delete() {
+    
+  }
+  
+  rename() {
+    
+  }
+  
+  get(){
+    
+  }
   
 }
 
