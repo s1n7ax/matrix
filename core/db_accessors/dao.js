@@ -27,22 +27,13 @@ class DAO {
         this.dbName = dbConfiguration.bcDBName; break;
     
       default:
-        console.log('invalide '+dbType+' database name'); break;
+        console.log('invalide database name : '+dbType);
     }
 
     this.server = this.createServer();
     this.database = this.connectDB();
-
-    // this.server.db.destroy('automate_project_db');
-
-    // this.server.db.create('automate_project_db');
-
-    /*this.database.get('project 2', function (error, message){
-      console.log(error);
-      console.log(message);
-    })*/
-
   }
+
 
   createServer() {
     let url = 'http://' +
@@ -82,15 +73,19 @@ class DAO {
   }
 }
 
-let obj = new DAO('project');
-
-obj.updateDoc({
-  _id : 'project 2',
-  _rev : '2-8abacb8c1cfe0854607706b0df7a3c01',
-  description : 'test'
-}, function (error, data) {
+let a = new DAO('project');
+a.insertDoc({
+  name :'dazz'
+}, 'Project 8', function (error, message, header) {
   if(error)
     console.log(error.message);
-  else
-    console.log(data);
+  else{
+    console.log('Message : ');
+    console.log(message);
+    console.log('Header : ');
+    console.log(header);
+  }
 })
+
+module.exports = DAO;
+
