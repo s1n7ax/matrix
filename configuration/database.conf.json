@@ -1,11 +1,11 @@
 {
-    "hostName":"cmdsnmuhandiram",
-    "portNumber":2480,
+    "hostName":"localhost",
+    "portNumber":3000,
     "userName":"admin",
-    "password":"admin",
+    "password":"admintest1",
 
-    "databaseName":"AutomateProjectDB"
-
-    
-
+    "projectDBName":"automate_project_db",
+    "moduleDBName":"automate_module_db",
+    "tcDBName":"automate_tc_db",
+    "bcDBName":"automate_bc_db"
 }

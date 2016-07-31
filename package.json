@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "/home/dscript/Projects/automate/node_modules/mocha/bin/mocha /home/dscript/Projects/automate/test"
+    "test": "/home/cross/Projects/automate/node_modules/mocha/bin/mocha /home/cross/Projects/automate/test"
   },
   "dependencies": {
     "bluebird": "~3.3.5",
@@ -15,11 +15,11 @@
     "file-system": "2.2.1",
     "jsonfile": "~2.3.0",
     "morgan": "~1.6.1",
-    "orientjs": "^2.2.1",
+    "nano": "^6.2.0",
+    "node-couchdb": "^1.1.0",
     "path": "^0.12.7",
     "serve-favicon": "~2.3.0",
-    "socket.io": "~1.4.5",
-    "stacktrace-js": "^1.3.0"
+    "socket.io": "~1.4.5"
   },
   "devDependencies": {
     "chai": "^3.5.0",
