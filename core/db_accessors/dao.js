@@ -34,7 +34,6 @@ class DAO {
     this.database = this.connectDB();
   }
 
-
   createServer() {
     let url = 'http://' +
       this.userName + ':' +
@@ -72,20 +71,6 @@ class DAO {
     this.database.insert(doc, callback);
   }
 }
-
-let a = new DAO('project');
-a.insertDoc({
-  name :'dazz'
-}, 'Project 8', function (error, message, header) {
-  if(error)
-    console.log(error.message);
-  else{
-    console.log('Message : ');
-    console.log(message);
-    console.log('Header : ');
-    console.log(header);
-  }
-})
 
 module.exports = DAO;
 

@@ -1,30 +1,38 @@
 class Services {
 
+
   constructor() {
+    let self = this;
   }
 
   callbackHandler(values, callback){
-    if(values.Error || !values.Message.ok)
+    
+    if(values.error)
       callback({
         status: false,
         error: values.error.message,
-        date: values.header
+        date: values.error.headers.date
       });
 
-    else{
+    else if(values.message.ok)
       callback({
         status: true,
         id: values.message.id,
         rev: values.message.rev,
         location: values.header.location,
-        date: values.header.date
+        date: values.headers.date
       });
-    }
+      
+    else if(!values.message.ok)
+        callback({
+        status: false,
+        error: 'body.ok is false',
+        date: values.headers.date
+      });
+    
   }
 
   logger(values, errorMessage, successMessage) {
-
-    console.log(new Date(values.header.date));
 
     if(values.error || !values.message.ok){
       console.log(message !== undefined ? errorMessage:'Error!!!' );
@@ -37,18 +45,22 @@ class Services {
     }
   }
 
-  manager(error, message, header) {
-    callbackHandler({
-        'error': error,
-        'message':message,
-        'header': header
-      }, callback);
+  manager(error, message, header, callback) {
+    
+//    console.log(error);
+    let self = new Services;
+    
+    self.callbackHandler({
+      'error': error,
+      'message':message,
+      'header': header
+    }, callback);
 
-      logger({
-        'error':error,
-        'message': message,
-        'header': header
-      }, 'Adding item - Error', 'Adding item - Successful');
+    self.logger({
+      'error':error,
+      'message': message,
+      'header': header
+    }, 'Adding item - Error', 'Adding item - Successful');
   }
 
   add(itemName, values, callback) {
