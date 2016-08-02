@@ -1,4 +1,3 @@
-const DAO = require('../db_accessors/dao');
 const Service = require('./services');
 
 class ProjectService extends Service {
@@ -10,10 +9,4 @@ class ProjectService extends Service {
 }
 
 
-let a = new ProjectService();
-a.add('newProject', {
-  name:'hello world',
-  age:25
-},function (data) {
-  console.log(data.status);
-})
+module.exports = new ProjectService;
