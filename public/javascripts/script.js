@@ -1,6 +1,5 @@
 //$scope.$apply(); use this to update the scope
 
-var gl = 'hello';
 var projectName;
 var moduleName;
 

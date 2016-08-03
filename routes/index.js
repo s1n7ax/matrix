@@ -1,10 +1,7 @@
-var express = require('express');
-var Path = require('path');
-var router = express.Router();
-
-
-//var SearchPrototype = require('../controllers/search');
-
+const Express = require('express');
+const Path = require('path');
+const router = Express.Router();
+const DAO = require('../db_accessors');
 
 
 /* GET home page. */
@@ -13,15 +10,39 @@ router.get('/', function (req, res, next) {
     Path.join(__dirname, '../', 'views/index.html'));
 });
 
+router.get('/Create Project', function (req, res, next) {
+  
+})
 
-router.post('/getProjectNames', function (req, res) {
-  Search.setPaths();
-  var projectNames = Search.getProjectNames();
-  res.send(projectNames);
-});
+class Services {
+  
+  constructor() {
+    this.database = new DAO;
+  }
+  
+  create(res) {
+    this.database.insertDoc('Project', {
+      name:'webTest'
+    })
+    .then(function(data) {
+      res.send('hello world');
+    })
+    .catch(error){
+      console.log(error);
+    }
+  }
+}
 
-router.post('/getModuleNames', function (req, res) {
-  Search.setPaths();
-});
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = router;

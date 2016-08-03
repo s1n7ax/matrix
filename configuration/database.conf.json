@@ -1,11 +1,8 @@
 {
-    "hostName":"localhost",
-    "portNumber":3000,
-    "userName":"admin",
-    "password":"admintest1",
-
-    "projectDBName":"automate_project_db",
-    "moduleDBName":"automate_module_db",
-    "tcDBName":"automate_tc_db",
-    "bcDBName":"automate_bc_db"
+    "host":"localhost",
+    "port":2424,
+    "username":"admin",
+    "password":"admin",
+  
+    "database_name":"AutomateProjectDB"
 }
