@@ -1,48 +1,24 @@
-const Express = require('express');
-const Path = require('path');
-const router = Express.Router();
-const DAO = require('../db_accessors');
+const express = require('express');
+const router = express.Router();
+const Locator = require('../locator');
+const Services = require(Locator.servicesPath.services);
 
 
-/* GET home page. */
-router.get('/', function (req, res, next) {
-  res.sendFile(
-    Path.join(__dirname, '../', 'views/index.html'));
+
+
+
+router.get('/', function(req, res, next) {
+  res.sendFile(Locator.viewsPath.index);
 });
 
-router.get('/Create Project', function (req, res, next) {
-  
-})
 
-class Services {
-  
-  constructor() {
-    this.database = new DAO;
-  }
-  
-  create(res) {
-    this.database.insertDoc('Project', {
-      name:'webTest'
-    })
-    .then(function(data) {
-      res.send('hello world');
-    })
-    .catch(error){
-      console.log(error);
-    }
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
+router.get('/test', function(req, res, next) {
+  let ser = new Services('Project');
+  ser.create(ser, {
+    name: 'test1',
+    description: 'test1'
+  }, res);
+});
 
 
 module.exports = router;

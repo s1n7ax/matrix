@@ -1,21 +1,20 @@
-class test{
-  
-  constructor(){
-  }
-  
-  printName() {
-    console.log('My name is Nisala');
-  }
-  
-  printHello() {
-    let self = new test;
-    console.log('hello');
-      self.printName();
-  }
-  
-  wait() {
-    setTimeout(this.printHello, 1000);
-  }
+let Promise = require('bluebird');
+
+function test (){
+    return new Promise(function (res, rej) {
+        res('hello');
+    });
 }
-let a = new test();
-a.wait();
+
+function test1() {
+    test().then(function () {
+        // console.log('abc');
+        throw new Error('test');
+    }).catch(function () {
+        console.log('error');
+    }).finally(function () {
+        console.log('finally');
+    })
+}
+
+test1()

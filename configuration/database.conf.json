@@ -1,8 +1,0 @@
-{
-    "host":"localhost",
-    "port":2424,
-    "username":"admin",
-    "password":"admin",
-  
-    "database_name":"AutomateProjectDB"
-}
