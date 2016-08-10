@@ -21,7 +21,7 @@ class DAO {
       name: dbConf.database_name
     });
     
-    //this.test();
+    this.test();
   }
   
   insertDoc(className, values) {
@@ -97,17 +97,17 @@ class DAO {
   
   
     // Select
-/*
+
 
   test() {
     this.selectDoc('Project', {
-      name: 'testName1'
+      name: 'test1'
     })
     .then(function (data) {
       console.log(data);
     })
   }
-*/
+
 
 
   
@@ -116,8 +116,8 @@ class DAO {
   
 }
 
-//let a = new DAO;
+let a = new DAO;
 
 
-module.exports = DAO;
+// module.exports = DAO;
 

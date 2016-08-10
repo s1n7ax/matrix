@@ -1,20 +1,43 @@
-let Promise = require('bluebird');
+const co = require('co');
+const fs = require('fs');
+const OrientJS = require('orientjs');
 
-function test (){
-    return new Promise(function (res, rej) {
-        res('hello');
-    });
+function readFile(fileName) {
+    return function (callback) {
+        fs.readFile(fileName, callback);
+    }
 }
 
-function test1() {
-    test().then(function () {
-        // console.log('abc');
-        throw new Error('test');
-    }).catch(function () {
-        console.log('error');
-    }).finally(function () {
-        console.log('finally');
-    })
+function selectFrom (tableName) {
+    return function () {
+        var server = OrientJS({
+            host: dbConf.host,
+            port: dbConf.port,
+            username: dbConf.username,
+            password: dbConf.password
+        });
+
+        var database = server.use('AutomateProjectDB');
+
+        database
+        .select()
+        .from('tableName')
+        .where({'@rid': '#74:0'})
+        .all()
+        .then(function (data) {
+            return data;
+        })
+    }
 }
 
-test1()
+
+co(function* () {
+
+    var res = yield selectFrom('test');
+    console.log(res);
+    var file = yield readFile('file1');
+    console.log(file.toString());
+
+}).catch(function (error) {
+    console.error(error);
+});
