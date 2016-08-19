@@ -6,7 +6,7 @@ var moduleName;
 
 
 angular.module('automate', ['ngMaterial', 'ngMessages'])
-  .controller('automate-ctrl', function ($scope, $mdSidenav, $http) {
+  .controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog) {
 
     /********** TOOLBAR **********/
     $scope.applicationName = 'AutoMate';
@@ -18,7 +18,27 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
         $mdOpenMenu(ev);
 		}
 		
-		$scope.
+		/********** OPTION MENU -> CREATE PROJECT **********/
+		$scope.inputPrompt = function (itemName, ev) {
+			
+			var config = $mdDialog.prompt ()
+			.title(`Enter ${itemName} Name`)
+      .textContent(itemName + ' name should be unique')
+      .placeholder(itemName + 'Name')
+      .ariaLabel(itemName + ' Name')
+      .initialValue('')
+      .targetEvent(ev)
+			.disableParentScroll(true)
+			.clickOutsideToClose(true)
+      .ok('Okay')
+      .cancel('Cancel');
+			
+			$mdDialog.show(config).then(function(result) {
+				console.log(okay);
+			});
+			
+			
+		}
 		
 
 
