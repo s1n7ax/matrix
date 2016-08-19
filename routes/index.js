@@ -15,8 +15,8 @@ router.get('/', function(req, res, next) {
 router.get('/test', function(req, res, next) {
   let ser = new Services('Project');
   ser.create(ser, {
-    name: 'test1',
-    description: 'test1'
+    name: 'test5',
+    description: 'test5'
   }, res);
 });
 

@@ -70,10 +70,28 @@
           <md-icon md-font-icon="material-icons" class="toolbar-icon">account_circle</md-icon>
         </md-button>
 
-        <!-- OPTION MENU -->
-        <md-button class="md-icon-button">
-          <md-icon md-font-icon="material-icons" class="toolbar-icon">list</md-icon>
-        </md-button>
+        <!-- OPTION MENU BUTTON-->
+				<md-menu>
+					
+					<md-button class="md-icon-button" ng-click="openOptionMenu($mdOpenMenu, $event)">
+						<md-icon md-font-icon="material-icons" class="toolbar-icon">list</md-icon>
+					</md-button>
+					
+					<md-menu-content width="4">
+						
+						<md-menu-item>
+							<md-button ng-click="">
+								Create Project
+							</md-button>
+						</md-menu-item>
+						
+						<md-menu-divider></md-menu-divider>
+					
+					</md-menu-content>
+				</md-menu>
+					
+					
+					
 
       </div>
     </md-toolbar>

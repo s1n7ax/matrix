@@ -25,6 +25,10 @@ class Locator {
         this.viewsPath = {
             index: Path.join(__dirname, 'views', 'index.html')
         }
+		
+		this.commonPath = {
+			user_exception: Path.join(__dirname, 'common', 'user_exception')
+		}
     }
 }
 

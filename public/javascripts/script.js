@@ -5,7 +5,7 @@ var projectName;
 var moduleName;
 
 
-angular.module('automate', ['ngMaterial'])
+angular.module('automate', ['ngMaterial', 'ngMessages'])
   .controller('automate-ctrl', function ($scope, $mdSidenav, $http) {
 
     /********** TOOLBAR **********/
@@ -13,7 +13,13 @@ angular.module('automate', ['ngMaterial'])
 
 
 
-
+		/********** OPTION MENU **********/
+		$scope.openOptionMenu = function($mdOpenMenu, ev) {
+        $mdOpenMenu(ev);
+		}
+		
+		$scope.
+		
 
 
     /********** TOOLBAR SELECT PROJECT **********/
