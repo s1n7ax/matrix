@@ -127,13 +127,11 @@
       
     </div>
     
-    <!-- PROGRESS BAR -->
-    <!-- <div flex>
-      <md-progress-linear flex md-mode="indeterminate" class="md-primary md-hue-2"></md-progress-linear>    
-    </div> -->
-
     <!-- STATUS BAR -->
-    <div flex layout="row" md-whiteframe="30"class="status-bar-main">
+    <div flex>
+      <md-progress-linear flex md-mode="indeterminate" class="md-warn md-hue-2"></md-progress-linear>    
+    </div>
+    <div flex layout="row" class="status-bar-main">
       <div flex class="status-bar-container">Error</div>
     </div>
     
