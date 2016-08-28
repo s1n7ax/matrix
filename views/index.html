@@ -46,14 +46,14 @@
         <!-- PROJECT SELECTOR -->
         <md-select ng-click="getProjectNames()" ng-model="selectedProject" md-selected-text="getSelectedProject()" aria-label="Project" class="toolbar-project-selector">
           <md-optgroup label="Projects">
-            <md-option ng-value="project" ng-repeat="project in projects">{{project}}</md-option>
+            <md-option ng-value="project" ng-repeat="project in projects">{{project.name}}</md-option>
           </md-optgroup>
         </md-select>
 
         <!-- MODULE SELECTOR -->
-        <md-select ng-click="getModuleNames()" ng-model="SelectedModule" md-selected-text="getSelectedModule()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsEnabled">
+        <md-select ng-click="getModules()" ng-model="SelectedModule" md-selected-text="getSelectedModule()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsEnabled">
           <md-optgroup label="Projects">
-            <md-option ng-value="module" ng-repeat="module in modules">{{module}}</md-option>
+            <md-option ng-value="module" ng-repeat="module in modules">{{module.name}}</md-option>
           </md-optgroup>
         </md-select>
 
@@ -133,7 +133,7 @@
     </div> -->
 
     <!-- STATUS BAR -->
-    <div flex layout="row" md-whiteframe="30"class="status-bar-main">
+    <div flex layout="row" md-whiteframe="20"class="status-bar-main">
       <div flex class="status-bar-container">Error</div>
     </div>
     

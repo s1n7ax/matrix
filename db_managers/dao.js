@@ -21,7 +21,7 @@ class DAO {
       name: dbConf.database_name
     });
     
-//    this.test();
+   // this.test();
   }
   
   insertDoc(className, values) {
@@ -31,11 +31,18 @@ class DAO {
       .one();
   }
   
-  selectDoc(className, searchDocBy) {
+  selectDocBy(className, searchDocBy) {
     return this.database
       .select()
       .from(className)
       .where(searchDocBy)
+      .all();
+  }
+
+  selectDocs(className) {
+    return this.database
+      .select()
+      .from(className)
       .all();
   }
   
@@ -100,24 +107,15 @@ class DAO {
 
 
 /*  test() {
-    this.selectDoc('Project', {
-      name: 'test1'
-    })
+    this.selectDocs('Project')
     .then(function (data) {
       console.log(data);
     })
   }*/
-
-
-
-  
-  
-  
-  
 }
 
 
-
+// var a = new DAO('Project');
 
 module.exports = DAO;
 

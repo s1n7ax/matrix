@@ -1,6 +1,5 @@
 //$scope.$apply(); use this to update the scope
 
-var gl = 'hello';
 var projectName;
 var moduleName;
 
@@ -41,7 +40,7 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
           data: {name: result}
         })
         .then(function successCallBack(res) {
-          console.log(res);          
+          console.log(res);
         }, function errorCallBack(error) {
           console.error(error);
         });
@@ -58,10 +57,10 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
     $scope.getProjectNames = function () {
       $http({
         method: 'POST',
-        url: '/getProjectNames'
+        url: '/getProjects'
       })
         .then(function successCallBack(res) {
-          $scope.projects = res.data;
+          $scope.projects = res.data.data;
         }, function errorCallBack(error) {
           console.error(error);
         })
@@ -69,33 +68,31 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
 
     $scope.getSelectedProject = function () {
       if ($scope.selectedProject !== undefined) {
-        console.log(gl);
         $scope.moduleSelectorIsEnabled = false;
-        return 'Project : ' + $scope.selectedProject;
+        return 'Project : ' + $scope.selectedProject.name;
       } else
         return 'Select a project';
     };
 
     /********** TOOLBAR SELECT MODULE **********/
-    $scope.getModuleNames = function () {
-      if (projectName !== undefined) {
+    $scope.getModules = function () {
+      if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
         $http({
           method: 'POST',
-          url: '/getModuleNames'
-        })
-          .then(function successCallBack(res) {
-            $scope.modules = res.data;
+          url: '/getModules'
+        }).then(function successCallBack(res) {
+
+          console.log(res.data);
+            $scope.modules = res.data.data;
           }, function errorCallBack(error) {
             console.error(error);
-          });
-      } else {
-        console.error('project name is not defined');
+        });
       }
     };
 
     $scope.getSelectedModule = function () {
       if ($scope.selectedModule !== undefined)
-        return 'Module : ' + $scope.selectedModule;
+        return 'Module : ' + $scope.selectedModule.name;
       else
         return 'Select a module';
     };
