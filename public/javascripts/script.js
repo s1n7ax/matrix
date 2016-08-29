@@ -5,7 +5,7 @@ var moduleName;
 
 
 angular.module('automate', ['ngMaterial', 'ngMessages'])
-  .controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog) {
+  .controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, services) {
 
     /********** TOOLBAR **********/
     $scope.applicationName = 'AutoMate';
@@ -52,19 +52,19 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
 
 
     /********** TOOLBAR SELECT PROJECT **********/
-    $scope.moduleSelectorIsEnabled = true;
+    $scope.moduleSelectorIsDisabled = true;
 
-    $scope.getProjectNames = function () {
-      $http({
-        method: 'POST',
-        url: '/getProjects'
-      })
-        .then(function successCallBack(res) {
-          $scope.projects = res.data.data;
-        }, function errorCallBack(error) {
-          console.error(error);
-        })
-    };
+//    $scope.getProjectNames = function () {
+//      $http({
+//        method: 'POST',
+//        url: '/getProjects'
+//      })
+//        .then(function successCallBack(res) {
+//          $scope.projects = res.data.data;
+//        }, function errorCallBack(error) {
+//          console.error(error);
+//        })
+//    };
 
     $scope.getSelectedProject = function () {
       if ($scope.selectedProject !== undefined) {

@@ -44,15 +44,15 @@
         <div flex=""></div>
 
         <!-- PROJECT SELECTOR -->
-        <md-select ng-click="getProjectNames()" ng-model="selectedProject" md-selected-text="getSelectedProject()" aria-label="Project" class="toolbar-project-selector">
+        <md-select ng-click="getItems('Project')" ng-model="selectedProject" md-selected-text="getSelectedProject()" aria-label="Project" class="toolbar-project-selector">
           <md-optgroup label="Projects">
             <md-option ng-value="project" ng-repeat="project in projects">{{project.name}}</md-option>
           </md-optgroup>
         </md-select>
 
         <!-- MODULE SELECTOR -->
-        <md-select ng-click="getModules()" ng-model="SelectedModule" md-selected-text="getSelectedModule()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsEnabled">
-          <md-optgroup label="Projects">
+        <md-select ng-click="getItems('ProjectModules')" ng-model="SelectedModule" md-selected-text="getSelectedModule()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsDisabled">
+          <md-optgroup label="Modules">
             <md-option ng-value="module" ng-repeat="module in modules">{{module.name}}</md-option>
           </md-optgroup>
         </md-select>
@@ -173,6 +173,7 @@
   <script src="javascripts/codemirror.js"></script>
 
   <!-- Custom js -->
+	<script src="javascripts/services.js"></script>
   <script src="javascripts/script.js"></script>
 
 </body>
