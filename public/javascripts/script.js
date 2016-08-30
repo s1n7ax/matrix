@@ -4,8 +4,8 @@ var projectName;
 var moduleName;
 
 
-angular.module('automate', ['ngMaterial', 'ngMessages'])
-  .controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog) {
+//angular.module('automate', ['ngMaterial', 'ngMessages'])
+  app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, test) {
 
     /********** TOOLBAR **********/
     $scope.applicationName = 'AutoMate';
@@ -100,8 +100,6 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
 
 
 
-
-
     /********** SIDE NAVIGATOR **********/
     $scope.toggleNav = buildToggle('side-nav');
 
@@ -112,6 +110,7 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
     }
 
 
+	
     /********** SIDE NAVIGATOR BAR **********/
     $scope.selectedViewType = 'module-view';
 
@@ -124,5 +123,8 @@ angular.module('automate', ['ngMaterial', 'ngMessages'])
     CodeMirror.fromTextArea(textArea, {
       lineNumbers: true
     });
+	
+		test.myFunc($scope);
+		console.log($scope.test);
 
   });
