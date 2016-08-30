@@ -1,5 +1,11 @@
-app.service('test', function($http) {
-	this.myFunc = function () {
-    return 'hello world';
-	}
+app.service('$rest', function($http) {
+	
+  
+  this.getItems = function (itemType) {
+    return $http.post('/getItems', itemType)
+  }
+  
+  this.createItem = function (itemType) {
+    retunr $http.post('/createItem', itemType)
+  }
 }); 

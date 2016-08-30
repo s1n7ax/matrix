@@ -4,7 +4,7 @@ var projectName;
 var moduleName;
 
 
-app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, test) {
+app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, $rest) {
 
       /********** TOOLBAR **********/
       $scope.applicationName = 'AutoMate';
@@ -17,38 +17,30 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
       }
 
       /********** OPTION MENU -> CREATE PROJECT **********/
-      $scope.inputPrompt = function (itemName, ev) {
-
+      $scope.inputPrompt = function (itemType, ev) {
         var config = $mdDialog.prompt()
-          .title(`Enter ${itemName} Name`)
-          .textContent(itemName + ' name should be unique')
-          .placeholder(itemName + 'Name')
-          .ariaLabel(itemName + ' Name')
+          .title(`Enter ${itemType} Name`)
+          .textContent(itemType + ' name should be unique')
+          .placeholder(itemType + 'Name')
+          .ariaLabel(itemType + ' Name')
           .initialValue('')
           .targetEvent(ev)
-          .viewBoxSize(50)
           .disableParentScroll(true)
           .clickOutsideToClose(true)
           .ok('Okay')
           .cancel('Cancel');
 
         $mdDialog.show(config).then(function (result) {
-
-          $http({
-              method: 'POST',
-              url: '/createProject',
-              data: {
-                name: result
-              }
-            })
-            .then(function successCallBack(res) {
-              console.log(res);
-            }, function errorCallBack(error) {
-              console.error(error);
-            });
+          
+          $rest.createItem().then(
+            function successCallback (data) {
+              console.log(data.data);
+            },
+            function errorCallback (error) {
+              console.error(error) ;
+            }
+          ); 
         });
-
-
       }
 
 
@@ -56,44 +48,47 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
       /********** TOOLBAR SELECT PROJECT **********/
       $scope.moduleSelectorIsDisabled = true;
 
-      //    $scope.getProjectNames = function () {
-      //      $http({
-      //        method: 'POST',
-      //        url: '/getProjects'
-      //      })
-      //        .then(function successCallBack(res) {
-      //          $scope.projects = res.data.data;
-      //        }, function errorCallBack(error) {
-      //          console.error(error);
-      //        })
-      //    };
+      $scope.getProjects = function () {
+        $rest.getItems('Project').then(
+          function successCallback (data) {
+            $scope.projects = data.data;
+          },
+          function errorCallback (error) {
+            console.error(error);
+          }
+        );
+      }
 
       $scope.getSelectedProject = function () {
-        if ($scope.selectedProject !== undefined) {
+        
+        if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
+          
           $scope.moduleSelectorIsEnabled = false;
           return 'Project : ' + $scope.selectedProject.name;
-        } else
+        } 
+        else {
+          
+          $scope.moduleSelectorIsEnabled = true;
           return 'Select a project';
+        }
       };
 
       /********** TOOLBAR SELECT MODULE **********/
       $scope.getModules = function () {
         if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
-          $http({
-            method: 'POST',
-            url: '/getModules'
-          }).then(function successCallBack(res) {
-
-            console.log(res.data);
-            $scope.modules = res.data.data;
-          }, function errorCallBack(error) {
-            console.error(error);
+          
+          $rest.getItems('ProjectModule').then(
+            function successCallback (data) {
+              $scope.modules = data.data;
+            }, 
+            function errorCallback (error) {
+              console.error(error);
           });
         }
       };
 
       $scope.getSelectedModule = function () {
-        if ($scope.selectedModule !== undefined)
+        if ($scope.selectedModule !== undefined && $scope.selectedModule !== null)
           return 'Module : ' + $scope.selectedModule.name;
         else
           return 'Select a module';
@@ -125,9 +120,4 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
       CodeMirror.fromTextArea(textArea, {
         lineNumbers: true
       });
-
-//        test.myFunc();
-      console.log(test.myFunc())
-//        console.log($scope.test)
-
     })

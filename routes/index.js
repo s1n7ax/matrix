@@ -17,11 +17,7 @@ router.get('/', function (req, res, next) {
 /**
  *********** CREATE ITEMS ***********
  */
-
- /**
- * CREATE PROJECT
- */
-router.post('/createProject', function (req, res, next) {
+router.post('/createItem', function (req, res, next) {
 	let service = new Services('Project');
 	console.log(req.body);
   	service.create(service, req.body, res); 
@@ -32,22 +28,12 @@ router.post('/createProject', function (req, res, next) {
 /**
  *********** GET ITEMS ***********
  */
-
- /**
- * GET ALL PROJECT
- */
- router.post('/getProjects', function (req, res, next) {
+ router.post('/getItems', function (req, res, next) {
 	let service = new Services('Project');
   	service.getItems(service, res); 
 });
 
-  /**
- * GET ALL MODULES
- */
- router.post('/getModules', function (req, res, next) {
-	let service = new Services('Module');
-  	service.getItems(service, res); 
-});
+
 
 
 module.exports = router;
