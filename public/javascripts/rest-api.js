@@ -1,5 +1,5 @@
-app.service('test', function() {
-	this.myFunc = function ($scope) {
-		$scope.test = 'hello wrold';
+app.service('test', function($http) {
+	this.myFunc = function () {
+    return 'hello world';
 	}
 }); 
