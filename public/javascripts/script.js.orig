@@ -4,10 +4,13 @@ var projectName;
 var moduleName;
 
 
+<<<<<<< HEAD
 //angular.module('automate', ['ngMaterial', 'ngMessages'])
   app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, test) {
+=======
 angular.module('automate', ['ngMaterial', 'ngMessages'])
   .controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, services) {
+>>>>>>> 132750790d1aac175e73ec21b8cac66b6cfe8a3a
 
     /********** TOOLBAR **********/
     $scope.applicationName = 'AutoMate';
