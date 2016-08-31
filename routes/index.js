@@ -18,19 +18,25 @@ router.get('/', function (req, res, next) {
  *********** CREATE ITEMS ***********
  */
 router.post('/createItem', function (req, res, next) {
-	let service = new Services('Project');
-	console.log(req.body);
-  	service.create(service, req.body, res); 
+  
+	let service = new Services(req.body.itemType);
+  let data = {
+    name: req.body.name,
+    description: req.body.description,
+    link: req.body.link
+  }
+  service.create(service, data, res); 
 });
 
 
 
 /**
  *********** GET ITEMS ***********
+ *This should return all the rows in specific class
  */
  router.post('/getItems', function (req, res, next) {
-	let service = new Services('Project');
-  	service.getItems(service, res); 
+	let service = new Services(req.body.itemType);
+  service.getItems(service, res); 
 });
 
 
