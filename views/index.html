@@ -89,7 +89,7 @@
 						</md-menu-item>
 						
 						<md-menu-item>
-							<md-button ng-click="inputPrompt('ProjectModule', $event)">
+							<md-button ng-click="inputPrompt('Module', $event)">
 								Create Module
 							</md-button>
 						</md-menu-item>
@@ -117,51 +117,21 @@
           <md-nav-item md-nav-click="goto('tree-view')" name="tree-view">tree view</md-nav-item>
         </md-nav-bar>
 
-        <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
-        <div>
-          View : {{selectedViewType}}
+        
+        <div class="view-content-common">
+
+          <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
+          <div class="module-view" ng-if=" selectedViewType === 'module-view' ">
+            <div layout="column" md-whiteframe="1" ng-repeat="test in tests" ng-click="toggleSwitcher()">
+              <div  class="clickable-mouse-point no-select" flex layout="row" layout-align="start center">{{test.name}}</div>
+            </div>
+          </div>
+
+          <!-- SIDE NAVIGATOR TREE VIEW CONTAINER -->
+          <div class="tree-view" ng-if=" selectedViewType === 'tree-view' ">
+          </div>
+          
 					
-					<!-- We will create a family tree using just CSS(3) The markup will be simple nested lists -->
-					<div class="tree">
-							<ul>
-									<li> <a href="#">Parentsssssssssssssssssssssssssssssssssss</a>
-
-											<ul>
-													<li> <a href="#">Child</a>
-
-															<ul>
-																	<li>	<a href="#">Grand Child</a>
-
-																	</li>
-															</ul>
-													</li>
-													<li>	<a href="#">Child</a>
-
-															<ul>
-																	<li><a href="#">Grand Child</a>
-																	</li>
-																	<li>	<a href="#">Grand Child</a>
-
-																			<ul>
-																					<li>	<a href="#">Great Grand Child</a>
-
-																					</li>
-																					<li>	<a href="#">Great Grand Child</a>
-
-																					</li>
-																					<li>	<a href="#">Great Grand Child</a>
-
-																					</li>
-																			</ul>
-																	</li>
-																	<li><a href="#">Grand Child</a>
-																	</li>
-															</ul>
-													</li>
-											</ul>
-									</li>
-							</ul>
-					</div>
 					
 					
 					
@@ -231,7 +201,12 @@
 	<script> let app = angular.module('automate', ['ngMaterial', 'ngMessages']) </script>
 	<script src="javascripts/rest-api.js"></script>
   <script src="javascripts/script.js"></script>
-	<script>
+
+	
+
+
+
+  <script>
 		$(function () {
 			$('.tree li').hide();
 			$('.tree li:first').show();

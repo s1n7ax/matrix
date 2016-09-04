@@ -19,12 +19,11 @@ router.get('/', function (req, res, next) {
  */
 router.post('/createItem', function (req, res, next) {
   
-	let service = new Services(req.body.itemType);
-  let data = {
-    name: req.body.name,
-    description: req.body.description,
-    link: req.body.link
-  }
+
+  let data = req.body;
+  let service = new Services(data.itemType);
+  delete data.itemType;
+  
   service.create(service, data, res); 
 });
 

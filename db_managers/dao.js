@@ -21,7 +21,7 @@ class DAO {
       name: dbConf.database_name
     });
     
-   // this.test();
+   this.test();
   }
   
   insertDoc(className, values) {
@@ -62,60 +62,25 @@ class DAO {
       .all();
   }
   
-  
-//  Insert
+  test () {
+    this.database.update('Project')
+    .set({'subclass_links': '#51:0'})
+    .where({'@rid': '#41:0'})
+    .one()
 
-/*  
-  test() {
-   
-    this.insertDoc('Project', {
-      name: 'testName1',
-      description: 'desc',
-      subclass_links: null
-    })
     .then(function (data) {
       console.log(data);
-    })
-    .catch(function (error) {
+    }).catch(function (error) {
       console.error(error);
     });
+
   }
- */ 
-  
-  
-  
-  
-  
-// Delete  
-  
-/*  
-  test() {
-    this.deleteDoc('Project', {'name':'testName1'})
-    .then(function (data) {
-      console.log(data);
-    })
-    .catch(function (error) {
-      console.error(error);
-    });
-  }
- */ 
-  
-  
-  
-  
-    // Select
 
 
-/*  test() {
-    this.selectDocs('Project')
-    .then(function (data) {
-      console.log(data);
-    })
-  }*/
 }
 
 
-// var a = new DAO('Project');
+var a = new DAO('Project');
 
-module.exports = DAO;
+// module.exports = DAO;
 

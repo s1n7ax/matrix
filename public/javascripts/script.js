@@ -1,9 +1,5 @@
 //$scope.$apply(); use this to update the scope
 
-var projectName;
-var moduleName;
-
-
 app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, $rest) {
 
       /********** TOOLBAR **********/
@@ -31,18 +27,16 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
           .cancel('Cancel');
 
         $mdDialog.show(config).then(function (result) {
-          
-          $rest.createItem({
+          $rest.createItem($scope, {
             'itemType': itemType,
             'name': result
           }).then(
-            function successCallback (res) {
-              console.log(res.data);
-            },
-            function errorCallback (error) {
-              console.error(error) ;
-            }
-          ); 
+          function successCallback (res) {
+            console.log(res);
+          },
+          function errorCallback (error) {
+            console.error(error);
+          });
         });
       }
 
@@ -56,6 +50,7 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
           'itemType': 'Project'
         }).then(
           function successCallback (res) {
+            console.log(res);
             $scope.projects = res.data.data;
           },
           function errorCallback (error) {
@@ -105,8 +100,7 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
           return 'Select a module';
       };
 
-      $scope.onProjectUpdate = function () {
-        $scope.selectedModule = null
+      $scope.onModuletUpdate = function () {
       }
 
 
@@ -130,4 +124,16 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
       CodeMirror.fromTextArea(textArea, {
         lineNumbers: true
       });
+
+
+
+
+
+
+
+
+      $scope.tests = [{name: 'tc_001'}, {name: 'tc_002'}, {name: 'tc_003'}]
+
+
+
     })

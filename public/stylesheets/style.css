@@ -1,3 +1,6 @@
+/**
+ * DEFAULTS
+ */
 html, body{
   min-height: 100%;
   height: 100%;
@@ -5,6 +8,9 @@ html, body{
   overflow-x: hidden; 
 }
 
+/**
+ * NO SELECT
+ */
 .no-select{
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -14,6 +20,10 @@ html, body{
   user-select: none;
 }
 
+
+/**
+ ************* TOOL BAR *************
+ */
 .toolbar{
 }
 
@@ -55,6 +65,43 @@ html, body{
   height: 25px;
   margin: 2px;
 }
+
+
+/**
+ ************* NAV BAR *************
+ */
+
+
+/**
+ * VIEW COMMON
+ */
+ .view-content-common > div > div{
+    background-color: #9ad3de;
+    height: 30px;
+    width: auto;
+    margin: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+
+ }
+ .view-content-common > div > div > span{
+    width: auto;
+ }
+
+ .clickable-mouse-point { cursor: pointer; }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
