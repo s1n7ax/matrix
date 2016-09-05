@@ -10,33 +10,42 @@ class Services {
 		this.itemType = itemType;
 	}
 
-	create (self, values, response) {
+	create (self, selectedItemRID, values, response) {
 
-		self.database.selectDocBy(self.itemType, {
+		self.database.selectDocsBy(self.itemType, {
 			'name': values.name
 		}).then (function (data) {
 
-			if (!data.length > 0)
-				
-				self.database.insertDoc(self.itemType, values.name)
+      if (!data.length > 0) {
+        self.database.insertDoc(self.itemType, values)
 				.then(function (data) {
 
-					if (data['@class'] == 'Project') {
-						response.send({
-							'status': true,
-							'error': false,
-							'data': data
-						});
+					if (
+            data['@class'] == 'ProjectModule' ||
+            data['@class'] == 'ProjectTC' ||
+            data['@class'] == 'ProjectBC'
+          ) {
+            self.database.insertLink(selectedItemRID, data['@rid'])
 					}
-					else if (data['@class'] == 'ProjectModule') {
-						
-					}
-
-				}
-
-		}).catch (function (error) {
-
-		}) 
+				});
+      }
+      
+      return data;
+		})
+    .then(function (data) {
+      response.send({
+        'status': true,
+        'data': data,
+        'error': false
+      });
+    })
+    .catch (function (error) {
+      response.send({
+        'status': false,
+        'error': error,
+        'data': null
+      })
+		});
 	}
 
 	getItems (self, response) {
@@ -61,6 +70,27 @@ class Services {
 			});
 		})
 	}
+  
+  getItemsByRIDs (self, data, response) {
+    self.database.selectDocsByRIDs(self.itemType, data)
+    .then(function (data) {
+      
+      response.send({
+        'status': true,
+        'error': false,
+        'data': data
+      });
+    })
+    .catch(function (error) {
+        response.send({
+          'status': false,
+          'error': error,
+          'data': null
+        });
+    })
+  }
+  
+  
 }
 
 

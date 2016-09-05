@@ -21,39 +21,51 @@ class DAO {
       name: dbConf.database_name
     });
     
-   this.test();
+//   this.test();
   }
   
-  insertDoc(className, values) {
+  
+  insertDoc (className, values) {
     return this.database
       .insert().into(className)
       .set(values)
       .one();
   }
   
-  selectDocBy(className, searchDocBy) {
-    return this.database
-      .select()
-      .from(className)
-      .where(searchDocBy)
-      .all();
-  }
-
-  selectDocs(className) {
+  insertLink (searchDocBy, linkRID) {
+    return this.database.query(`update ${searchDocBy} add subclass_links=${linkRID}`)
+  }  
+  
+  
+  selectDocs (className) {
     return this.database
       .select()
       .from(className)
       .all();
   }
   
-  updateDoc(className, searchDocBy, values) {
+  selectDocsBy (className, searchDocsBy) {
+    return this.database
+      .select()
+      .from(className)
+      .where(searchDocsBy)
+      .all();
+  }
+  
+  selectDocsByRIDs (className, data) {
+    console.log(data.itemRIDs);
+    return this.database.query(`select from ProjectModule where @rid in [${data.itemRIDs}]`);
+  }
+  
+  
+  updateDoc (className, searchDocBy, values) {
     return this.database.update(className)
       .set(values)
       .where(searchDocBy)
       .one();
   }
   
-  deleteDoc(className, searchDocBy) {
+  deleteDoc (className, searchDocBy) {
     return this.database
       .delete()
       .from(className)
@@ -62,25 +74,19 @@ class DAO {
       .all();
   }
   
-  test () {
-    this.database.update('Project')
-    .set({'subclass_links': '#51:0'})
-    .where({'@rid': '#41:0'})
-    .one()
-
+  
+  
+/*  test () {
+    this.selectDocsBy('Project', ['#12:0', '#12:1', '#12:2'])
     .then(function (data) {
       console.log(data);
-    }).catch(function (error) {
-      console.error(error);
-    });
-
-  }
-
+    })
+  }*/
 
 }
 
 
-var a = new DAO('Project');
+//var a = new DAO('Project');
 
-// module.exports = DAO;
+ module.exports = DAO;
 

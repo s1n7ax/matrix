@@ -27,18 +27,21 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
           .cancel('Cancel');
 
         $mdDialog.show(config).then(function (result) {
-          $rest.createItem($scope, {
-            'itemType': itemType,
-            'name': result
-          }).then(
-          function successCallback (res) {
-            console.log(res);
-          },
-          function errorCallback (error) {
-            console.error(error);
-          });
+          if(result !== null && result !== undefined){
+              $rest.createItem($scope, {
+              'itemType': itemType,
+              'name': result
+              }).then(
+              function successCallback (res) {
+                $scope.getProjects();
+                console.log(res);
+              },
+              function errorCallback (error) {
+                console.error(error);
+              });
+          }
         });
-      }
+      };
 
 
       /********** TOOLBAR SELECT PROJECT **********/
@@ -46,18 +49,18 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
 
       $scope.getProjects = function () {
         
-        $rest.getItems({
+        $rest.getItems($scope, {
           'itemType': 'Project'
         }).then(
           function successCallback (res) {
-            console.log(res);
+            console.log(res.data.data);
             $scope.projects = res.data.data;
           },
           function errorCallback (error) {
             console.error(error);
           }
         );
-      }
+      };
 
       $scope.getSelectedProject = function () {
         
@@ -75,14 +78,15 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
   
       $scope.onProjectUpdate = function () {
         $scope.selectedModule = null
-      }
+        console.log($scope.selectedProject.subclass_links)
+      };
 
       
       /********** TOOLBAR SELECT MODULE **********/
       $scope.getModules = function () {
         if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
           
-          $rest.getItems({'itemType': 'ProjectModule'}).then(
+          $rest.getItems($scope, {'itemType': 'Module'}).then(
             function successCallback (res) {
               $scope.modules = res.data.data;
             }, 
@@ -101,7 +105,7 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
       };
 
       $scope.onModuletUpdate = function () {
-      }
+      };
 
 
       /********** SIDE NAVIGATOR **********/
