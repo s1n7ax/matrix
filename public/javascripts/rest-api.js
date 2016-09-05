@@ -8,12 +8,12 @@ app.service('$rest', function($http) {
     }
     else if(data.itemType == 'Module') {
       
+      $scope.selectedProjectUpdater();
+
       data.itemType = 'ProjectModule';
-      data.itemRIDs = $scope.selectedProject.subclass_links
+      data.itemRIDs = $scope.selectedProject.subclass_links;
       return $http.post('/getItemsByRIDs', data);
     }
-    
-      
   }
   
   this.createItem = function ($scope, data) {

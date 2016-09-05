@@ -34,7 +34,6 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
               }).then(
               function successCallback (res) {
                 $scope.getProjects();
-                console.log(res);
               },
               function errorCallback (error) {
                 console.error(error);
@@ -130,13 +129,26 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
       });
 
 
+      /********** UPDATERS **********/
+      $scope.selectedProjectUpdater = function () {
+        
+        console.log('\n-----------------------------------------------------------');
+        console.log('*****Updating Selected Project - Inprogress*****');
+        
+        if($scope.selectedProject !== null && $scope.selectedProject !== undefined){
 
-
-
-
-
-
-      $scope.tests = [{name: 'tc_001'}, {name: 'tc_002'}, {name: 'tc_003'}]
+          $scope.selectedProject = $scope.projects.filter(result=>result['@rid'] == $scope.selectedProject['@rid'])[0];
+          
+          console.log('*****Updating Selected Project - Successful*****');
+          console.log('#Selected Project is ');
+          console.log($scope.selectedProject);
+        }
+        else{
+          console.log('*****Updating Selected Project - Stopped*****')
+          console.log('#Selected Project Is Null Or Undefined');
+        }
+        console.log('-----------------------------------------------------------\n');
+      }
 
 
 
