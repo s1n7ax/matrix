@@ -149,6 +149,8 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
         }
         console.log('-----------------------------------------------------------\n');
       }
+      
+      $scope.tests = [{name:'TC 001'}, {name:'TC 002'}, {name:'TC 003'}];
 
 
 

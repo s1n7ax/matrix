@@ -123,7 +123,11 @@
           <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
           <div class="module-view" ng-if=" selectedViewType === 'module-view' ">
             <div layout="column" md-whiteframe="1" ng-repeat="test in tests" ng-click="toggleSwitcher()">
-              <div  class="clickable-mouse-point no-select" flex layout="row" layout-align="start center">{{test.name}}</div>
+              <div class="clickable-mouse-point no-select" flex layout="row" layout-align="start center">{{test.name}}
+                <div>
+                  
+                </div>
+              </div>
             </div>
           </div>
 
@@ -193,31 +197,12 @@
 
   <!-- CodeMirror js -->
   <script src="javascripts/codemirror.js"></script>
-	
-	<!-- JQuery -->
-	<script   src="https://code.jquery.com/jquery-3.1.0.js"   integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk="   crossorigin="anonymous"></script>
 
   <!-- Custom js -->
 	<script> let app = angular.module('automate', ['ngMaterial', 'ngMessages']) </script>
 	<script src="javascripts/rest-api.js"></script>
   <script src="javascripts/script.js"></script>
 
-	
-
-
-
-  <script>
-		$(function () {
-			$('.tree li').hide();
-			$('.tree li:first').show();
-			$('.tree li').on('click', function (e) {
-					var children = $(this).find('> ul > li');
-					if (children.is(":visible")) children.hide('fast');
-					else children.show('fast');
-					e.stopPropagation();
-			});
-	});
-	</script>
 
 </body>
 
