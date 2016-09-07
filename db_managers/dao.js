@@ -52,9 +52,9 @@ class DAO {
       .all();
   }
   
-  selectDocsByRIDs (className, data) {
+  selectDocsByRIDs (data) {
     console.log(data.itemRIDs);
-    return this.database.query(`select from ProjectModule where @rid in [${data.itemRIDs}]`);
+    return this.database.query(`select from [${data.itemRIDs}]`);
   }
   
   

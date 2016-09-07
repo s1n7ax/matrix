@@ -1,9 +1,22 @@
 //$scope.$apply(); use this to update the scope
 
-app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, $rest) {
+app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, $q, $rest) {
 
-      /********** TOOLBAR **********/
+      /********** INITIALIZING **********/
+
+      /*
+       * TOOLBAR *
+       */
       $scope.applicationName = 'AutoMate';
+
+      $scope.Project = new Array;
+      $scope.Module = new Array;
+      $scope.TestCase = new Array;
+      $scope.Component = new Array;
+
+      $scope.moduleSelectorIsDisabled = true;
+
+      
 
 
       /********** OPTION MENU **********/
@@ -33,7 +46,8 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
               'name': result
               }).then(
               function successCallback (res) {
-                $scope.getProjects();
+                console.log(res.data.data);
+                $scope.deepProjectUpdate();
               },
               function errorCallback (error) {
                 console.error(error);
@@ -44,57 +58,28 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
 
 
       /********** TOOLBAR SELECT PROJECT **********/
-      $scope.moduleSelectorIsDisabled = true;
-
-      $scope.getProjects = function () {
-        
-        $rest.getItems($scope, {
-          'itemType': 'Project'
-        }).then(
-          function successCallback (res) {
-            console.log(res.data.data);
-            $scope.projects = res.data.data;
-          },
-          function errorCallback (error) {
-            console.error(error);
-          }
-        );
-      };
-
       $scope.getSelectedProject = function () {
         
         if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
-          
-          $scope.moduleSelectorIsEnabled = false;
+
+          $scope.moduleSelectorIsDisabled = false;
           return 'Project : ' + $scope.selectedProject.name;
         } 
         else {
-          
-          $scope.moduleSelectorIsEnabled = true;
+
+          $scope.moduleSelectorIsDisabled = true;
           return 'Select a project';
         }
       };
   
-      $scope.onProjectUpdate = function () {
-        $scope.selectedModule = null
-        console.log($scope.selectedProject.subclass_links)
+      $scope.onProjectChange = function () {
+        $scope.selectedModule = undefined;
+        $scope.selectedTestCase = undefined;
+        $scope.selectedComponent = undefined;
       };
 
       
       /********** TOOLBAR SELECT MODULE **********/
-      $scope.getModules = function () {
-        if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
-          
-          $rest.getItems($scope, {'itemType': 'Module'}).then(
-            function successCallback (res) {
-              $scope.modules = res.data.data;
-            }, 
-            function errorCallback (error) {
-              console.error(error);
-          });
-        }
-      };
-
       $scope.getSelectedModule = function () {
         
         if ($scope.selectedModule !== undefined && $scope.selectedModule !== null)
@@ -103,7 +88,7 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
           return 'Select a module';
       };
 
-      $scope.onModuletUpdate = function () {
+      $scope.onModuleChange = function () {
       };
 
 
@@ -130,28 +115,58 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
 
 
       /********** UPDATERS **********/
-      $scope.selectedProjectUpdater = function () {
-        
-        console.log('\n-----------------------------------------------------------');
-        console.log('*****Updating Selected Project - Inprogress*****');
-        
-        if($scope.selectedProject !== null && $scope.selectedProject !== undefined){
+      $scope.deepProjectUpdate = function () {
 
-          $scope.selectedProject = $scope.projects.filter(result=>result['@rid'] == $scope.selectedProject['@rid'])[0];
-          
-          console.log('*****Updating Selected Project - Successful*****');
-          console.log('#Selected Project is ');
+        $scope.Project = new Array;
+        $scope.Module = new Array;
+        $scope.TestCase = new Array;
+        $scope.Component = new Array;
+
+        $http.post('/getAllItems', {'itemType': 'Project'})
+        .then(function successCallback (res) {
+          $scope.Project = res.data.data;
+
+        }, function errorCallback(error) {
+          console.error(error);
+        })
+        .then(function () {
+
+          console.log('selectedProject is :');
           console.log($scope.selectedProject);
-        }
-        else{
-          console.log('*****Updating Selected Project - Stopped*****')
-          console.log('#Selected Project Is Null Or Undefined');
-        }
-        console.log('-----------------------------------------------------------\n');
+          if($scope.selectedProject !== undefined 
+            && $scope.selectedProject !== null
+            && $scope.selectedProject.subclass_links !== undefined) {
+            $scope.projectItemUpdate($scope.selectedProject.subclass_links);
+          }
+        })
       }
-      
-      $scope.tests = [{name:'TC 001'}, {name:'TC 002'}, {name:'TC 003'}];
+
+      $scope.projectItemUpdate = function (itemRIDs) {
+        $http.post('/getItemsByRIDs', {'itemRIDs': itemRIDs})
+        .then(function successCallback(res) {
+          res.data.data.forEach(function (data) {
+            $scope[data['@class']].push(data);
+            $scope.selectedItemUpdate(data);
+          });
+
+          
+        }, function errorCallback(error) {
+          console.error(error);
+        });
+      }
+
+      $scope.selectedItemUpdate = function (data) {
+        if($scope['selected'+data['@class']] !== undefined
+          && $scope['selected'+data['@class']] !== null
+          && $scope['selected'+data['@class']]['@rid'] === data['@rid']) {
+
+          $scope['selected'+data['@class']] = data;
+          
+          if($scope['selected'+data['@class']].subclass_links !== undefined){
+            $scope.projectItemUpdate($scope['selected'+data['@class']].subclass_links);
+          }
+        }
+      }
 
 
-
-    })
+    });

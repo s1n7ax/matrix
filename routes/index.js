@@ -35,19 +35,17 @@ router.post('/createItem', function (req, res, next) {
  *********** GET ITEMS ***********
  *This should return all the rows in specific class
  */
- router.post('/getItems', function (req, res, next) {
+ router.post('/getAllItems', function (req, res, next) {
 	
    let service = new Services(req.body.itemType);
     service.getItems(service, res); 
  });
 
  router.post('/getItemsByRIDs', function (req, res, next) {
-  
-   let data = req.body;
-	 let service = new Services(data.itemType);
-   
-    delete data.itemType;
-    service.getItemsByRIDs(service, data, res); 
+
+ 	console.log(req.body);
+	let service = new Services();
+    service.getItemsByRIDs(service, req.body, res); 
  });
 
 

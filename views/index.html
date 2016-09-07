@@ -47,16 +47,16 @@
         <div flex=""></div>
 
         <!-- PROJECT SELECTOR -->
-        <md-select ng-click="getProjects()" ng-model="selectedProject" md-selected-text="getSelectedProject()" ng-change="onProjectUpdate()" aria-label="Project" class="toolbar-project-selector">
+        <md-select ng-click="deepProjectUpdate()" ng-model="selectedProject" md-selected-text="getSelectedProject()" ng-change="onProjectChange()" aria-label="Project" class="toolbar-project-selector">
           <md-optgroup label="Projects">
-            <md-option ng-value="project" ng-repeat="project in projects">{{project.name}}</md-option>
+            <md-option ng-value="project" ng-repeat="project in Project">{{project.name}}</md-option>
           </md-optgroup>
         </md-select>
 
         <!-- MODULE SELECTOR -->
-        <md-select ng-click="getModules()" ng-model="selectedModule" md-selected-text="getSelectedModule()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsEnabled">
+        <md-select ng-click="deepProjectUpdate()" ng-model="selectedModule" md-selected-text="getSelectedModule()" ng-change="onModuleChange()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsDisabled">
           <md-optgroup label="Modules">
-            <md-option ng-value="module" ng-repeat="module in modules">{{module.name}}</md-option>
+            <md-option ng-value="module" ng-repeat="module in Module">{{module.name}}</md-option>
           </md-optgroup>
         </md-select>
 
@@ -122,14 +122,21 @@
 
           <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
           <div class="module-view" ng-if=" selectedViewType === 'module-view' ">
-            <div layout="column" md-whiteframe="1" ng-repeat="test in tests" ng-click="toggleSwitcher()">
+
+
+            <div layout="column" md-whiteframe="1" ng-repeat="test in tests" ng-click="test = !test">
               <div class="clickable-mouse-point no-select" flex layout="row" layout-align="start center">{{test.name}}
-                <div>
+                <div ng-repete>
                   
                 </div>
               </div>
             </div>
+
+
           </div>
+
+
+
 
           <!-- SIDE NAVIGATOR TREE VIEW CONTAINER -->
           <div class="tree-view" ng-if=" selectedViewType === 'tree-view' ">
@@ -197,6 +204,9 @@
 
   <!-- CodeMirror js -->
   <script src="javascripts/codemirror.js"></script>
+
+  <!-- Blue Bird -->
+  <script src="//cdn.jsdelivr.net/bluebird/3.4.5/bluebird.js"></script>
 
   <!-- Custom js -->
 	<script> let app = angular.module('automate', ['ngMaterial', 'ngMessages']) </script>

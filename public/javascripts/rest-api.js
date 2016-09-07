@@ -1,20 +1,4 @@
 app.service('$rest', function($http) {
-	
-  
-  this.getItems = function ($scope, data) {
-    
-    if(data.itemType == 'Project') {
-      return $http.post('/getItems', data)
-    }
-    else if(data.itemType == 'Module') {
-      
-      $scope.selectedProjectUpdater();
-
-      data.itemType = 'ProjectModule';
-      data.itemRIDs = $scope.selectedProject.subclass_links;
-      return $http.post('/getItemsByRIDs', data);
-    }
-  }
   
   this.createItem = function ($scope, data) {
     
@@ -24,8 +8,10 @@ app.service('$rest', function($http) {
   		return $http.post('/createItem', data);
   	}
   	else if(data.itemType == 'Module' && $scope.selectedProject !== undefined) {
+
+      console.log('$$$$$$$$$$$$$$$$$$$$$$$$')
   		
-  		data.itemType = 'ProjectModule';
+  		data.itemType = 'Module';
   		data.selectedItemRID = $scope.selectedProject['@rid'];
   		return $http.post('/createItem', data);
   	}
