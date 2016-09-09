@@ -8,12 +8,6 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
        * TOOLBAR *
        */
       $scope.applicationName = 'AutoMate';
-
-      $scope.Project = new Array;
-      $scope.Module = new Array;
-      $scope.TestCase = new Array;
-      $scope.Component = new Array;
-
       $scope.moduleSelectorIsDisabled = true;
 
       
@@ -115,58 +109,7 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
 
 
       /********** UPDATERS **********/
-      $scope.deepProjectUpdate = function () {
-
-        $scope.Project = new Array;
-        $scope.Module = new Array;
-        $scope.TestCase = new Array;
-        $scope.Component = new Array;
-
-        $http.post('/getAllItems', {'itemType': 'Project'})
-        .then(function successCallback (res) {
-          $scope.Project = res.data.data;
-
-        }, function errorCallback(error) {
-          console.error(error);
-        })
-        .then(function () {
-
-          console.log('selectedProject is :');
-          console.log($scope.selectedProject);
-          if($scope.selectedProject !== undefined 
-            && $scope.selectedProject !== null
-            && $scope.selectedProject.subclass_links !== undefined) {
-            $scope.projectItemUpdate($scope.selectedProject.subclass_links);
-          }
-        })
-      }
-
-      $scope.projectItemUpdate = function (itemRIDs) {
-        $http.post('/getItemsByRIDs', {'itemRIDs': itemRIDs})
-        .then(function successCallback(res) {
-          res.data.data.forEach(function (data) {
-            $scope[data['@class']].push(data);
-            $scope.selectedItemUpdate(data);
-          });
-
-          
-        }, function errorCallback(error) {
-          console.error(error);
-        });
-      }
-
-      $scope.selectedItemUpdate = function (data) {
-        if($scope['selected'+data['@class']] !== undefined
-          && $scope['selected'+data['@class']] !== null
-          && $scope['selected'+data['@class']]['@rid'] === data['@rid']) {
-
-          $scope['selected'+data['@class']] = data;
-          
-          if($scope['selected'+data['@class']].subclass_links !== undefined){
-            $scope.projectItemUpdate($scope['selected'+data['@class']].subclass_links);
-          }
-        }
-      }
+  
 
 
     });
