@@ -60,7 +60,7 @@ app.controller('automate-ctrl', function ($scope, $mdSidenav, $http, $mdDialog, 
       /********** TOOLBAR SELECT PROJECT **********/
       $scope.getSelectedProject = function () {
         
-        if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
+        if ($scope.selectedProject !== undefined &&   $scope.selectedProject !== null) {
 
           $scope.moduleSelectorIsDisabled = false;
           return 'Project : ' + $scope.selectedProject.name;

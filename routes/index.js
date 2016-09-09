@@ -1,7 +1,8 @@
+const Locator = require('../locator');
 const express = require('express');
 const router = express.Router();
-const Locator = require('../locator');
 const Services = require(Locator.servicesPath.services);
+const DAO = require(Locator.dbManagersPath.dao);
 
 
 
@@ -9,44 +10,48 @@ const Services = require(Locator.servicesPath.services);
 /**
  *********** ROOT ***********
  */
-router.get('/', function (req, res, next) {
-  res.sendFile(Locator.viewsPath.index);
+router.get('/', function(req, res, next) {
+    res.sendFile(Locator.viewsPath.index);
 });
 
 
 /**
  *********** CREATE ITEMS ***********
  */
-router.post('/createItem', function (req, res, next) {
-  
-  let data = req.body;
-  let selectedItemRID = req.body.selectedItemRID;
-  let service = new Services(data.itemType);
-  
-  delete data.itemType;
-  delete data.selectedItemRID;
-  
-  service.create(service, selectedItemRID, data, res); 
-});
 
 
 
 /**
  *********** GET ITEMS ***********
- *This should return all the rows in specific class
  */
- router.post('/getAllItems', function (req, res, next) {
-	
-   let service = new Services(req.body.itemType);
-    service.getItems(service, res); 
- });
+router.post('/deepProjectUpdate', function(req, res) {
 
- router.post('/getItemsByRIDs', function (req, res, next) {
+	console.log('\n');
+    console.log('****** deepProjectUpdate - Inprogress ******');
 
- 	console.log(req.body);
-	let service = new Services();
-    service.getItemsByRIDs(service, req.body, res); 
- });
+    let dao = new DAO;
+    dao.deepSearchByID(req.body.rid)
+        .then(function(data) {
+		
+            res.send({
+				'status': true,
+				'error': null,
+				'data': data 
+			});
+            console.log('****** deepProjectUpdate - Successful ******');
+			console.log('\n');
+        })
+		.catch(function(error) {
+			
+			res.send({
+				'status': false,
+				'error': error,
+				'data': null
+			});
+			console.log('****** deepProjectUpdate - Failed ******')
+			console.log('\n');
+		});
+});
 
 
 

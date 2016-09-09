@@ -166,8 +166,15 @@
     </div> -->
 
     <!-- STATUS BAR -->
-    <div flex layout="row" md-whiteframe="20"class="status-bar-main">
-      <div flex class="status-bar-container">Error</div>
+    <div flex layout="row" 
+		 md-whiteframe="20" 
+		 class="status-bar-main" 
+		 style="background-color: {{
+				if(statusBar.status === undefined){'#3F51B5'}
+				if(statusBar.status) {'#57BC90'}
+				if(!statusBar.status) {'#CD5360'}
+				}}">
+      <div flex class="status-bar-container">{{statusBar.statusName}} : {{statusBar.statusMessage}}</div>
     </div>
     
     
