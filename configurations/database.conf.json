@@ -1,8 +1,8 @@
 {
     "host":"localhost",
-    "port":2424,
-    "username":"root",
-    "password":"root",
+    "port":3000,
+    "username":"admin",
+    "password":"admin",
   
-    "database_name":"AutomateProjectDB"
+    "database":"automate_project_db"
 }

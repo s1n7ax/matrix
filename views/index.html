@@ -49,14 +49,14 @@
         <!-- PROJECT SELECTOR -->
         <md-select ng-click="deepProjectUpdate()" ng-model="selectedProject" md-selected-text="getSelectedProject()" ng-change="onProjectChange()" aria-label="Project" class="toolbar-project-selector">
           <md-optgroup label="Projects">
-            <md-option ng-value="project" ng-repeat="project in Project">{{project.name}}</md-option>
+            <md-option ng-value="project" ng-repeat="project in projects">{{project.name}}</md-option>
           </md-optgroup>
         </md-select>
 
         <!-- MODULE SELECTOR -->
         <md-select ng-click="deepProjectUpdate()" ng-model="selectedModule" md-selected-text="getSelectedModule()" ng-change="onModuleChange()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsDisabled">
           <md-optgroup label="Modules">
-            <md-option ng-value="module" ng-repeat="module in Module">{{module.name}}</md-option>
+            <md-option ng-value="module" ng-repeat="module in modules">{{module.name}}</md-option>
           </md-optgroup>
         </md-select>
 
@@ -160,20 +160,15 @@
       
     </div>
     
-    <!-- PROGRESS BAR -->
-    <!-- <div flex>
-      <md-progress-linear flex md-mode="indeterminate" class="md-primary md-hue-2"></md-progress-linear>    
-    </div> -->
 
     <!-- STATUS BAR -->
     <div flex layout="row" 
 		 md-whiteframe="20" 
 		 class="status-bar-main" 
 		 style="background-color: {{
-				if(statusBar.status === undefined){'#3F51B5'}
-				if(statusBar.status) {'#57BC90'}
-				if(!statusBar.status) {'#CD5360'}
-				}}">
+                                statusBar.status ==true ? 'green' 
+                                : statusBar.status == false ? 'red' : 'blue'
+                              }}">
       <div flex class="status-bar-container">{{statusBar.statusName}} : {{statusBar.statusMessage}}</div>
     </div>
     

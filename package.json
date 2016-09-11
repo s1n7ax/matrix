@@ -16,6 +16,7 @@
     "https": "^1.0.0",
     "jsonfile": "^2.3.1",
     "morgan": "~1.7.0",
+    "nano": "^6.2.0",
     "orientjs": "^2.2.2",
     "serve-favicon": "~2.3.0"
   }
