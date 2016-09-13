@@ -122,7 +122,8 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.deepProjectUpdate = function () {
         $rest.getAllProjects()
             .then(function successCallback(res) {
-                $scope.projects = res.data.data;
+				console.log(res);
+                $scope.projects = res.data.body;
 
                 if($scope.selectedProject !== undefined) {
 
