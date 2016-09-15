@@ -66,6 +66,17 @@ html, body{
   margin: 2px;
 }
 
+.default-status {
+	background-color: #3F51B5;
+}
+.success-status {
+	background-color: green;
+}
+
+.error-status {
+	background-color: red;
+}
+
 
 /**
  ************* NAV BAR *************

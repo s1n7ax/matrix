@@ -1,5 +1,5 @@
 //$scope.$apply(); use this to update the scope
-app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $q, $rest) {
+app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $rest) {
 
     /********** INITIALIZING **********/
 
@@ -14,6 +14,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
      */
     $scope.applicationName = 'AutoMate';
     $scope.moduleSelectorIsDisabled = true;
+	$scope.statusBarColor = 'default-status';
 
 
 
@@ -21,7 +22,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     /********** OPTION MENU **********/
     $scope.openOptionMenu = function($mdOpenMenu, ev) {
         $mdOpenMenu(ev);
-    }
+    };
 
 
     /********** OPTION MENU -> CREATE ITEMS **********/
@@ -61,7 +62,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
 
             $scope.moduleSelectorIsDisabled = false;
-            return 'Project : ' + $scope.selectedProject.name;
+            return 'Project : ' + $scope.selectedProject;
         } else {
 
             $scope.moduleSelectorIsDisabled = true;
@@ -111,95 +112,90 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
 
     /********** STATUS BAR **********/
-    $scope.showStatus = function(status, name, message) {
-        $scope.statusBar.status = status;
-        $scope.statusBar.name = name;
-        $scope.statusBar.message = message;
-    }
+    $scope.showStatus = function(status, message, timeout) {
+		status ? $scope.statusBarColor = 'success-status'
+					:$scope.statusBarColor = 'error-status';
+		
+		$scope.status = message;
+		
+		$timeout(function () {
+			$scope.statusBarColor = 'default-status';
+			$scope.status = '';
+		}, timeout);
+    };
 
     
     /********** UPDATERS **********/
-    $scope.deepProjectUpdate = function () {
-        $rest.getAllProjects()
-            .then(function successCallback(res) {
-				console.log(res);
-                $scope.projects = res.data.body;
+	$scope.projectUpdate = function () {
+		$rest.getAllProjects()
+			.then(function (res) {
+				let data = res.data;
+				$scope.showStatus(data.status, '', 500);
 
-                if($scope.selectedProject !== undefined) {
+				if(data.status)
+					$scope.projects = data.body;
+				else
+					console.error(data.error);
+			});
+	};
 
-                    $rest.deepProjectTreeUpdate($scope.selectedProject['@rid'])
-                    .then(function successCallback(res) {
-                        $scope.projectTree = res.data.data;
-                        console.log('*************');
-                        console.log(res.data.data);
-                    }, function errorCallback(error) {
-                        console.error(error);
-                    })
-                    .then(function () {
-                        
-                        $scope.updateModuleList();
-                        $scope.updateTestCaseList();
-                        $scope.updateComponentList();
-                    });
-                }
+	$scope.moduleUpdate = function () {
+		if($scope.selectedProject !== undefined) {
+			$rest.getAllModules()
+				.then(function (res) {
+					let data = res.data;
+					$scope.showStatus(data.status, '', 500);
+					
+					if(res.status)
+						$scope.modules = data.body;
+					else 
+						console.error(error);
+				});
+		}
+	};
 
-            }, function errorCallback(error) {
-                console.error(error);
-            })
-    }
+	$scope.testcaseUpdate = function () {
+        if($scope.selectedModule !== undefined) {
+            rest.deepSelectById($scope.selectedModule._id)
+                .then(function (res) {
+                    let data = res.data;
+                    $scope.showStatus(data.status, '', 500);
 
-    $scope.updateModuleList = function() {
-        if($scope.selectedProject !== undefined
-            && $scope.selectedProject !== null) {
-
-            if($scope.selectedProject['@rid'] === $scope.projectTree['@rid']) {
-                $scope.modules = $scope.projectTree.subclass_links;
-            }
-            else {
-                $scope.selectedProject = undefined;
-                $scope.projects = undefined;
-            }
-        }  
-    }
-
-    $scope.updateTestCaseList = function() {
-        if($scope.selectedModule !== undefined
-            && $scope.selectedModule !== null) {
-
-            let oldSelectedModuleRID = $scope.selectedModule['@rid'];
-            let newSelectedModule = $scope.modules.filter(result=>result['@rid'] === oldSelectedModuleRID);
-            
-            if(newSelectedModule.length === 1
-                && newSelectedModule.subclass_links !== undefined
-                && newSelectedModule.subclass_links !== null) {
-                $scope.testCases = newSelectedModule[0].subclass_links;
-            }
-            else {
-                $scope.selectedTestCase = undefined;
-                $scope.selectedComponent = undefined;
-
-                $scope.testCases = undefined;
-                $scope.components = undefined;
-            }
+                    if(data.status)
+                        $scope.testcases = data.body;
+                    else
+                        console.error(data.error);
+                });
         }
-    }
+	};
 
-    $scope.updateComponentList = function() {
-        if($scope.selectedTestCase !== undefined
-            && $scope.selectedTestCase !== null) {
+    $scope.componentsUpdate = function () {
+        if($scope.testcases !== undefined) {
+            $rest.deepSelectById($scope.testcases._id)
+                .then(function (res) {
+                    let data = res.data;
+                    $scope.showStatus(data.status, '', 500);
 
-            let oldSelectedTestCaseRID = $scope.selectedTestCase['@rid'];
-            let newSelectedTestCase = $scope.testCases.filter(result=>result['@rid'] === oldSelectedTestCaseRID);
-
-            if(newSelectedTestCase.length === 1
-                && newSelectedTestCase.subclass_links !== undefined
-                && newSelectedTestCase.subclass_links !== null) {
-                $scope.components = newSelectedTestCase[0].subclass_links;
-            }
-            else {
-                $scope.selectedComponent =undefined;
-                $scope.components = undefined;
-            }
+                    if(data.status) 
+                        $scope.components = data.body;
+                    else
+                        console.error(data.error);
+                })
         }
-    }
+    };
+
+    $scope.modules = [
+        {_id: 'Core HR', type: 'module', links:['tc_CoreHR_001', 'tc_CoreHR_002']},
+        {_id: 'Time Off', type: 'module', links:['tc_TimeOff_001', 'tc_TimeOff_002']}
+    ]
+
+    $scope.testcases = [
+        {_id: 'tc_CoreHR_001', type: 'testcase', links: ['bc_CoreHR_001', 'bc_CoreHR_002']},
+        {_id: 'tc_CoreHR_002', type: 'testcase', links: ['bc_CoreHR_001', 'bc_CoreHR_002']}
+    ]
+
+    $scope.components = [
+        {_id: 'bc_CoreHR_001', type: 'component', content: 'type name'},
+        {_id: 'bc_CoreHR_002', type: 'component', content: 'type passwd'}
+    ]
 });

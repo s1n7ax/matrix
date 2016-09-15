@@ -68,26 +68,39 @@ router.post('/getAllProjects', function (req, res, next) {
 			});
 		}
 		else {
-			removeValues.forEach(function(val, index) {
-				console.log('\n');
-				console.log(body);
-				console.log('\n');
-				console.log(body.indexOf(val) > -1);
-				console.log(val);
-				console.log(index);
-				if(body.indexOf(val) > -1){
+			removeValues.forEach(function (val) {
+				if((index = body.indexOf(val)) > -1) {
 					body.splice(index, 1);
-					console.log(body);
 				}
 			});
-			
 			res.send({
 				'status': true,
 				'body': body,
 				'error': null
-			})
+			});
 		}
 	})
+});
+
+router.post('/deepSelectById', function (req, res, next) {
+	let services = Services(req.body.values.projectName);
+	
+	services.deepSelectById(services, req.body.values.id, function (error, body) {
+		if(error) {
+			res.send({
+				'status': false,
+				'data': null,
+				'error': error
+			});
+		}
+		else {
+			res.send({
+				'status': true,
+				'body': body,
+				'error': null
+			});
+		}
+	});
 });
 
 
