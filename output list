@@ -1,0 +1,48 @@
+createProject -
+{ ok: true }
+
+deleteProject -
+{ ok: true }
+
+getAllProjects -
+[ '_replicator', '_users', 'automate_project_db' ]
+
+insertOrUpdateDoc -
+{ ok: true,
+  id: 'Finance',
+  rev: '1-b13a1ac6f5e503e781c8c532031f89c6' }
+
+selectDocById -
+{ _id: 'Core HR',
+  _rev: '11-f07b888dc1dc046ffc78b
+  type: 'module',
+  links: [ 'IRec', 'Time Off' ] }
+
+deleteDocByIdAndRev -
+{ ok: true,
+  id: 'Time Off',
+  rev: '2-ff47dfe6dcacf6c6ede121d745910166' }
+
+copyDocById -
+{ ok: true,
+  id: 'Time Off',
+  rev: '1-3dfe6ef5a625a2ddc7310fbacb4fca5d' }
+
+getAllTypeDocs -
+
+getAllDocs -
+
+deepSelectById -
+[ { _id: 'IRec',
+    _rev: '7-c2887c7d6e98b6b7633711a4baebf5c5',
+    type: 'module',
+    links: [ 'test' ] },
+  { _id: 'Time Off',
+    _rev: '1-3dfe6ef5a625a2ddc7310fbacb4fca5d',
+    type: 'module',
+    links: [ 'IRec', 'Time Off' ] } ]
+
+createAndLinkDoc -
+{ ok: true,
+  id: 'Core HR',
+  rev: '12-7f92937e3a598180e0ee079a1b9cc96e' }

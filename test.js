@@ -1,27 +1,13 @@
-var OrientDB = require('orientjs');
+var a = ['hello', 'world', 'new', 'new2', 'new 3'];
+var rem = ['world', 'new', 'new 3'];
 
-var server = OrientDB({
-   host:       'localhost',
-   port:       2424,
-   username:   'root',
-   password:   'root'
-});
-
-
-var db = server.use({
-   name: 'AutomateProjectDB'
-});
-
-
-
-for(let i =0; i<1000;i++){
-	db.query('insert into Project set name=true')
-	.then(function(data) {
-		console.log(data);
-	})
-	.then(function () {
-		process.exit();
-	})
+function remove () {
+	rem.forEach(function (val) {
+		if((x = a.indexOf(val)) > -1) {
+			a.splice(x, 1);
+		}
+	});
+	console.log(a);
 }
 
-name links order 
+remove();
