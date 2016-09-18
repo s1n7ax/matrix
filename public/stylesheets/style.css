@@ -69,12 +69,13 @@ html, body{
 .default-status {
 	background-color: #3F51B5;
 }
+
 .success-status {
-	background-color: green;
+	background-color: #00a03e;
 }
 
 .error-status {
-	background-color: red;
+	background-color: #dc403b;
 }
 
 
@@ -86,100 +87,30 @@ html, body{
 /**
  * VIEW COMMON
  */
- .view-content-common > div > div{
-    background-color: #9ad3de;
-    height: 30px;
-    width: auto;
-    margin: 4px;
-    padding-left: 8px;
-    padding-right: 8px;
-
- }
- .view-content-common > div > div > span{
-    width: auto;
- }
-
- .clickable-mouse-point { cursor: pointer; }
+.clickable-mouse-point { cursor: pointer; }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/********************************/
-
-
-.tree li {
-    margin: 0px 0;
-    list-style-type: none;
-    position: relative;
-    padding: 5px 5px 0px 5px;
-}
-.tree li::before {
-    content:'';
-    position: absolute;
-    top: 0;
-    width: 1px;
-    height: 100%;
-    right: auto;
-    left: -20px;
-    border-left: 1px solid #ccc;
-    bottom: 50px;
-}
-.tree li::after {
-    content:'';
-    position: absolute;
-    top: 10px;
-    width: 25px;
-    height: 20px;
-    right: auto;
-    left: -20px;
-    border-top: 1px solid #ccc;
-}
-.tree li a {
-    display: inline-block;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    text-decoration: none;
-    color: #666;
-    font-family: arial, verdana, tahoma;
-    font-size: 11px;
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    background-color: red;
-    width: 200px;
-}
-/*Remove connectors before root*/
- .tree > ul > li::before, .tree > ul > li::after {
-    border: 0;
-}
-/*Remove connectors after last child*/
- .tree li:last-child::before {
-    height: 30px;
-}
-/*Time for some hover effects*/
-
-/*We will apply the hover effect the the lineage of the element also*/
- .tree li a:hover, .tree li a:hover+ul li a {
-    background: #c8e4f8;
-    color: #000;
-    border: 1px solid #94a0b4;
-}
-/*Connector styles on hover*/
- .tree li a:hover+ul li::after, .tree li a:hover+ul li::before, .tree li a:hover+ul::before, .tree li a:hover+ul ul::before {
-    border-color: #94a0b4;
+ /**
+  * FILE TREE
+  */
+.file-tree-main {
+  padding: 0 2px 0 2px;
+  margin: 3px 3px 3px 3px;
+  min-width: 100%;
+  border-radius: 3px;
+  font-size: 17px;
+  text-align: left;
+  text-transform: uppercase;
+  text-decoration:none;
+  border: none;
+  outline: none;
+  background-color: #fb9591;
+  color: white;
 }
 
-/*************************************/
+.file-tree-main:not([disabled]):hover {
+  background-color: #fb6964;
+}
+
+
+

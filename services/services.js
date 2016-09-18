@@ -51,10 +51,23 @@ class Services {
 		: this.database.copy(srcID , destID, callback)
 	}
 
-    getAllTypeDocs (keysObject, callback) {
-        keys !== undefined ? 
+
+    getAllModueDocs (keysObject, callback) {
+        keysObject !== undefined ? 
         this.database.view('Automate', 'getAllModules', keysObject, callback)
         : this.database.view('Automate', 'getAllModules', callback)
+    }
+
+    getAllTestCaseDocs (keysObject, callback) {
+        keysObject !== undefined ? 
+        this.database.view('Automate', 'getAllTestCases', keysObject, callback)
+        : this.database.view('Automate', 'getAllTestCases', callback)
+    }
+
+    getAllComponentDocs (keysObject, callback) {
+        keysObject !== undefined ? 
+        this.database.view('Automate', 'getAllComponents', keysObject, callback)
+        : this.database.view('Automate', 'getAllComponents', callback)
     }
 
     getAllDocs (keysObject, callback) {
@@ -71,21 +84,24 @@ class Services {
                 callback(error);
             }
             else {
-				let linksLength = body.links.length;
                 if(body.links !== undefined) {
-                    body.links.forEach(function (id, index) {
-                        self.selectDocById(id, function(error, body) {
-                            if(error) {
-                                callback(error);
-                            }
-                            else {
-                                result.push(body);
-                                if(linksLength === (index + 1)) {
-                                    callback(null, result);
-                                }
-                            }
-                        });
-                    });
+                    self.getAllDocs({'keys': body.links}, function (error, body) {
+                        if(error) {
+                            callback(error);
+                        }
+                        else {
+                            let testcaseArray = new Array;
+
+                            body.rows.forEach(function (data) {
+                                testcaseArray.push(data.value);
+                            });
+                            
+                            callback(false, testcaseArray);
+                        }
+                    })
+                }
+                else {
+                    callback(false, []);
                 }
             }
         });
@@ -117,7 +133,7 @@ class Services {
 								callback(error);
 							}
 							else {
-								callback(null, body);
+								callback(false, body);
 							}
 						});
 					}
@@ -127,6 +143,15 @@ class Services {
 	}
 }
 
+
+/*let a = new Services;
+
+a.getAllModueDocs(undefined, function (error, body) {
+    if(error)
+        console.error(error);
+    else
+        console.log(body.rows);
+})*/
 
 
 module.exports = Services;

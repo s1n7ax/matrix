@@ -4,17 +4,11 @@ const router = express.Router();
 const Services =  require(Locator.servicesPath.services);
 
 
-/**
- *********** ROOT ***********
- */
 router.get('/', function(req, res, next) {
     res.sendFile(Locator.viewsPath.index);
 });
 
 
-/**
- *********** PROJECT ***********
- */
 router.post('/createProject', function (req, res, next) {
 	let services = new Services();
 	
@@ -55,6 +49,8 @@ router.post('/deleteProject', function (req, res, next) {
 		}
 	})
 });
+
+
 router.post('/getAllProjects', function (req, res, next) {
 	let services = new Services;
 	let removeValues = ['_replicator', '_users'];
@@ -81,15 +77,60 @@ router.post('/getAllProjects', function (req, res, next) {
 		}
 	})
 });
+router.post('/getAllModules', function (req, res, next) {
+	let services = new Services(req.projectName);
 
-router.post('/deepSelectById', function (req, res, next) {
-	let services = Services(req.body.values.projectName);
+	services.getAllModueDocs(undefined, function (error, body) {
+		if(error) {
+			res.send({
+				'status': false,
+				'body': null,
+				'error': error
+			});
+		}
+		else {
+			let moduleArray = new Array;
+
+			body.rows.forEach(function (data) {
+				moduleArray.push(data.value);
+			});
+
+			res.send({
+				'status': true,
+				'body': moduleArray,
+				'error': null
+			});
+		}
+	})
+});
+router.post('/getAllTestCases', function (req, res, next) {
+	let services = new Services(req.body.projectName);
 	
-	services.deepSelectById(services, req.body.values.id, function (error, body) {
+	services.deepSelectById(services, req.body.id, function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
 				'data': null,
+				'error': error
+			});
+		}
+		else {			
+			res.send({
+				'status': true,
+				'body': body,
+				'error': null
+			});
+		}
+	});
+});
+router.post('/getAllComponents', function (req, res, next) {
+	let services = new Services(req.body.projectName);
+
+	services.deepSelectById(services, req.body.id, function (error, body) {
+		if(error) {
+			res.send({
+				'status': false,
+				'body': null,
 				'error': error
 			});
 		}
@@ -100,13 +141,8 @@ router.post('/deepSelectById', function (req, res, next) {
 				'error': null
 			});
 		}
-	});
-});
-
-
-/**
- *********** DOCUMENT ***********
- */
+	})
+})
 
 
 module.exports = router;

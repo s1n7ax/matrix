@@ -15,6 +15,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.applicationName = 'AutoMate';
     $scope.moduleSelectorIsDisabled = true;
 	$scope.statusBarColor = 'default-status';
+    $scope.test = true;
 
 
 
@@ -81,12 +82,14 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.getSelectedModule = function() {
 
         if ($scope.selectedModule !== undefined && $scope.selectedModule !== null)
-            return 'Module : ' + $scope.selectedModule.name;
+            return 'Module : ' + $scope.selectedModule._id;
         else
             return 'Select a module';
     };
 
-    $scope.onModuleChange = function() {};
+    $scope.onModuleChange = function() {
+        $scope.testcaseUpdate();
+    };
 
 
     /********** SIDE NAVIGATOR **********/
@@ -141,7 +144,9 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
 	$scope.moduleUpdate = function () {
 		if($scope.selectedProject !== undefined) {
-			$rest.getAllModules()
+			$rest.getAllModules({
+                'projectName': $scope.selectedProject
+            })
 				.then(function (res) {
 					let data = res.data;
 					$scope.showStatus(data.status, '', 500);
@@ -152,11 +157,17 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 						console.error(error);
 				});
 		}
+        else {
+            $scope.showStatus(false, 'Select A Project', 1000);
+        }
 	};
 
 	$scope.testcaseUpdate = function () {
         if($scope.selectedModule !== undefined) {
-            rest.deepSelectById($scope.selectedModule._id)
+            $rest.getAllTestCases({
+                'projectName': $scope.selectedProject,
+                'id': $scope.selectedModule._id
+            })
                 .then(function (res) {
                     let data = res.data;
                     $scope.showStatus(data.status, '', 500);
@@ -170,32 +181,25 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 	};
 
     $scope.componentsUpdate = function () {
-        if($scope.testcases !== undefined) {
-            $rest.deepSelectById($scope.testcases._id)
+        if($scope.selectedTestCase !== undefined) {
+            $rest.getAllComponents({
+                'projectName': $scope.selectedProject,
+                'id': $scope.selectedTestCase._id
+            })
                 .then(function (res) {
                     let data = res.data;
+                    console.log(data);
                     $scope.showStatus(data.status, '', 500);
 
                     if(data.status) 
                         $scope.components = data.body;
-                    else
+                    else 
                         console.error(data.error);
-                })
+                });
         }
     };
 
-    $scope.modules = [
-        {_id: 'Core HR', type: 'module', links:['tc_CoreHR_001', 'tc_CoreHR_002']},
-        {_id: 'Time Off', type: 'module', links:['tc_TimeOff_001', 'tc_TimeOff_002']}
-    ]
-
-    $scope.testcases = [
-        {_id: 'tc_CoreHR_001', type: 'testcase', links: ['bc_CoreHR_001', 'bc_CoreHR_002']},
-        {_id: 'tc_CoreHR_002', type: 'testcase', links: ['bc_CoreHR_001', 'bc_CoreHR_002']}
-    ]
-
-    $scope.components = [
-        {_id: 'bc_CoreHR_001', type: 'component', content: 'type name'},
-        {_id: 'bc_CoreHR_002', type: 'component', content: 'type passwd'}
-    ]
+    $scope.selectTestCase = function (testcase) {
+        $scope.selectedTestCase = testcase;
+    };
 });

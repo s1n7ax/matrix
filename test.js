@@ -1,13 +1,16 @@
-var a = ['hello', 'world', 'new', 'new2', 'new 3'];
-var rem = ['world', 'new', 'new 3'];
+function(doc) { doc.type === 'testcase' && emit(doc._id, doc) }
 
-function remove () {
-	rem.forEach(function (val) {
-		if((x = a.indexOf(val)) > -1) {
-			a.splice(x, 1);
-		}
-	});
-	console.log(a);
-}
 
-remove();
+
+function (doc) {if(doc.type === 'testcase') {emit(doc._id, doc);}}
+
+
+
+
+<div layout="column" md-whiteframe="1" ng-repeat="test in tests" ng-click="test = !test">
+  <div class="clickable-mouse-point no-select" flex layout="row" layout-align="start center">{{test.name}}
+    <div ng-repete>
+      
+    </div>
+  </div>
+</div>
