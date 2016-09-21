@@ -34,6 +34,7 @@ class Services {
      * DOCUMENT
      */
     insertOrUpdateDoc (valuesObject, callback) {
+        console.log(valuesObject);
         this.database.insert(valuesObject, callback);
     }
 
@@ -144,14 +145,17 @@ class Services {
 }
 
 
-/*let a = new Services;
+/*let a = new Services(undefined);
+console.log('*****')
 
-a.getAllModueDocs(undefined, function (error, body) {
+a.selectDocById('_design/Automate', function (error, body) {
     if(error)
         console.error(error);
     else
-        console.log(body.rows);
+        console.log(body);
 })*/
 
 
 module.exports = Services;
+
+

@@ -2,6 +2,8 @@
 
 <head>
 
+  <title>Automate</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Angular Material css -->
@@ -32,7 +34,7 @@
   <div layout="column" style="height:100%">
 
     <!-- TOOLBAR -->
-    <md-toolbar flex="initial" class="toolbar md-whiteframe-2dp light-blue">
+    <md-toolbar flex="initial" class="toolbar md-whiteframe-2dp light-blue" ng-cloak>
       <div class="md-toolbar-tools">
 
         <!-- SHOW SIDE NAVOGATOR BUTTON -->
@@ -56,7 +58,7 @@
         <!-- MODULE SELECTOR -->
         <md-select ng-click="moduleUpdate()" ng-model="selectedModule" md-selected-text="getSelectedModule()" ng-change="onModuleChange()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsDisabled">
           <md-optgroup label="Modules">
-            <md-option ng-value="module" ng-repeat="module in modules">{{module._id}}</md-option>
+            <md-option ng-value="module" ng-repeat="module in modules" ng-click="setSelectedComponent(module)">{{module._id}}</md-option>
           </md-optgroup>
         </md-select>
 
@@ -93,6 +95,12 @@
 								Create Module
 							</md-button>
 						</md-menu-item>
+
+            <md-menu-item>
+              <md-button ng-click="inputPrompt('TestCase', $event)">
+                Create TestCase
+              </md-button>
+            </md-menu-item>
 						
 						<md-menu-divider></md-menu-divider>
 					
@@ -110,7 +118,7 @@
     
       <!-- SIDE NAVIGATOR -->
       <md-sidenav flex="initial" md-is-locked-open="$mdMedia('gt-sm')" class="md-whiteframe-2dp" md-component-id="side-nav" md-is-locked-open="$mdMedia('gt-sm')"
-        class="md-primary md-hue-2">
+        class="md-primary md-hue-2" ng-cloak>
 
         <md-nav-bar md-selected-nav-item="selectedViewType" aria-label="Navigator">
           <md-nav-item md-nav-click="goto('module-view')" name="module-view">module view</md-nav-item>
@@ -125,17 +133,19 @@
             <div ng-if=" selectedViewType === 'module-view' ">
               
               <md-content>
-                <div layout="column"  ng-repeat="testcase in testcases" ng-click="test=!test">
+                <div layout="column"  ng-repeat="testcase in testcases">
                   <md-button class="file-tree-main"
-                    md-whiteframe="1"
-                    ng-click="selectTestCase(testcase); componentsUpdate();">
+                    ng-click="selectTestCase(testcase); componentsUpdate(); test=!test">
                     {{testcase._id}}
                   </md-button>
                   <div ng-hide="test" ng-repeat="component in components">
-                    {{component._id}}
+                    <md-button class="file-tree-sub" ng-click="setSelectedComponent(component); setEditorContent();">
+                      {{component._id}}
+                    </md-button>
                   </div>
                 </div>
               </md-content>
+
             </div>
 
             
@@ -160,7 +170,8 @@
     <div flex layout="row" 
 		 md-whiteframe="20" 
 		 class="status-bar-main" 
-		 ng-class="statusBarColor">
+		 ng-class="statusBarColor"
+     ng-cloak>
       <div flex class="status-bar-container">{{status}}</div>
     </div>
     

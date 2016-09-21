@@ -42,16 +42,62 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
         $mdDialog.show(config).then(function(result) {
             if (result !== null && result !== undefined) {
-                $rest.createItem($scope, {
-                    'itemType': itemType,
-                    'name': result
-                }).then(
-                    function successCallback(res) {
 
-                    },
-                    function errorCallback(error) {
-                        console.error(error);
-                    });
+                if(itemType === 'Project') {
+                    $rest.createProject({
+                        'projectName': result
+                    }).then(
+                        function successCallback(res) {
+                            console.log(res);
+                            (res.data.status) ?
+                            $scope.showStatus(res.data.status, 'Creating Project : Successful!', 2000)
+                            : $scope.showStatus(res.data.status, 'Creating Project : Failed!', 2000)
+                            & console.error(res.data.error)
+                        },
+                        function errorCallback(error) {
+                            $scope.showStatus(false, 'Creating Project : Failed!', 2000);
+                            console.error(error);
+                        });
+                }
+                else if(itemType === 'Module' && $scope.selectedProject !== undefined && $scope.selectedProject !== null) {
+                    $rest.createModule({
+                        'projectName': $scope.selectedProject,
+                        'values': {
+                            '_id': result,
+                            'type': 'module'
+                        }
+                    })
+                        .then(function successCallback(res){
+                            (res.data.status) ? 
+                                $scope.showStatus(res.data.status, 'Creating Module : Successful!', 2000)
+                                : console.error(res.data.error)
+                                & $scope.showStatus(res.data.status, 'Creating Module : Failed!', 2000)
+
+                        }, function errorCallback(error) {
+                            $scope.showStatus(false, 'Creating Module : Failed!', 2000);
+                            console.error(error);
+                        });
+                }
+                else if(itemType === 'TestCase' && $scope.selectedModule !== undefined && $scope.selectedModule !== null) {
+                    $rest.createTestCase({
+                        'projectName': $scope.selectedProject,
+                        'module': $scope.selectedModule,
+                        'values': {
+                            '_id': result,
+                            'type': 'testcase'
+                        }
+                    })
+                        .then(function successCallback(res){
+                            (res.data.status) ? 
+                                $scope.showStatus(res.data.status, 'Creating TestCase : Successful!', 2000)
+                                : console.error(res.data.error)
+                                & $scope.showStatus(res.data.status, 'Creating TestCase : Failed!', 2000)
+
+                        }, function errorCallback(error) {
+                            $scope.showStatus(false, 'Creating Module : Failed!', 2000);
+                            console.error(error);
+                        });
+                }
             }
         });
     };
@@ -109,9 +155,34 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     /********** EDITOR **********/
     var textArea = document.getElementById('textArea');
 
-    CodeMirror.fromTextArea(textArea, {
-        lineNumbers: true
+    $scope.editor = CodeMirror.fromTextArea(textArea, {
+        lineNumbers: true,
     });
+
+    $scope.editor.setOption("extraKeys", {
+      'Cmd-S': function(cm) {
+        if($scope.selectedComponent !== undefined) {
+            console.log(cm.doc.getValue());
+
+            let data = $scope.selectedComponent;
+            data.content = cm.doc.getValue();
+
+            $rest.setComponent({
+                'projetcName': $scope.selectedProject,
+                'values': data
+            })
+                .then(function (res) {
+                    if(res.data.status) {
+                        $scope.showStatus(true, 'Saving Component : Successful!', 5000);
+                    }
+                    else {
+                        $scope.showStatus(false, 'Saving Component : Failed!', 5000);
+                    }
+                })
+        }
+      }
+    });
+
 
 
     /********** STATUS BAR **********/
@@ -131,7 +202,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     /********** UPDATERS **********/
 	$scope.projectUpdate = function () {
 		$rest.getAllProjects()
-			.then(function (res) {
+			.then(function successCallback(res) {
 				let data = res.data;
 				$scope.showStatus(data.status, '', 500);
 
@@ -139,7 +210,11 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 					$scope.projects = data.body;
 				else
 					console.error(data.error);
-			});
+
+			}, function errorCallback(error) {
+                console.error(error);
+                $scope.showStatus(false, '', 500);
+            });
 	};
 
 	$scope.moduleUpdate = function () {
@@ -151,11 +226,15 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 					let data = res.data;
 					$scope.showStatus(data.status, '', 500);
 					
-					if(res.status)
+					if(data.status) 
 						$scope.modules = data.body;
-					else 
-						console.error(error);
-				});
+					else
+						console.log(data.error);
+
+				}, function errorCallback(error) {
+                    console.error(error);
+                    $scope.showStatus(false, '', 500);
+                }) ;
 		}
         else {
             $scope.showStatus(false, 'Select A Project', 1000);
@@ -188,7 +267,6 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             })
                 .then(function (res) {
                     let data = res.data;
-                    console.log(data);
                     $scope.showStatus(data.status, '', 500);
 
                     if(data.status) 
@@ -199,7 +277,20 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         }
     };
 
+
     $scope.selectTestCase = function (testcase) {
         $scope.selectedTestCase = testcase;
     };
+
+    $scope.setSelectedComponent = function (component) {
+        $scope.selectedComponent = component;
+    };
+
+    $scope.setEditorContent = function () {
+        if($scope.selectedComponent.content !== null
+            && $scope.selectedComponent.content !== undefined)
+            $scope.editor.setValue($scope.selectedComponent.content);
+        else
+            $scope.editor.setValue('');
+    }
 });

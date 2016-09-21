@@ -28,12 +28,16 @@ html, body{
 }
 
 .toolbar-project-selector{
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-weight: normal;
   padding-left: 20px;
   padding-right: 20px;
   color: #F0F0F0;
 }
 
 .toolbar-module-selector{
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-weight: normal;
   padding-left: 20px;
   padding-right: 20px;
   color: #F0F0F0;
@@ -61,6 +65,7 @@ html, body{
 
 .status-bar-container{
   font-size: 20px;
+  font-family: "Courier New", Courier, monospace;
   color: white;
   height: 25px;
   margin: 2px;
@@ -98,19 +103,44 @@ html, body{
   margin: 3px 3px 3px 3px;
   min-width: 100%;
   border-radius: 3px;
-  font-size: 17px;
+  font-weight: normal;
+  font-size: 15px;
   text-align: left;
   text-transform: uppercase;
   text-decoration:none;
   border: none;
   outline: none;
-  background-color: #fb9591;
+  background-color: #616161;
   color: white;
 }
 
 .file-tree-main:not([disabled]):hover {
-  background-color: #fb6964;
+  color: black;
+  background-color: #4CAF50;
 }
 
+.file-tree-sub {
+  padding: 0 2px 0 2px;
+  margin: 3px 3px 3px 10px;
+  min-width: 95%;
+  border-radius: 3px;
+  font-weight: normal;
+  font-size: 11px;
+  text-align: left;
+  text-transform: uppercase;
+  text-decoration:none;
+  border: none;
+  outline: none;
+  background-color: #919191;
+  color: white;
+  float: right;
+}
 
+.file-tree-sub:not([disabled]):hover {
+  color: black;
+  background-color: #ffd65e;
+}
 
+.file-tree-sub:not([disabled]):active {
+  background-color: black;
+}
