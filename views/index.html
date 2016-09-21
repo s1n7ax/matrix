@@ -2,222 +2,280 @@
 
 <head>
 
-  <title>Automate</title>
+    <title>Automate</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Angular Material css -->
-  <link rel="stylesheet" href="stylesheets/angular-material.css">
-  <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
+    <!-- Angular Material css -->
+    <link rel="stylesheet" href="stylesheets/angular-material.css">
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
 
-  <!-- Google fonts -->
-  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Poiret+One'>
-  <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Ubuntu:300'>
+    <!-- Google fonts -->
+    <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Poiret+One'>
+    <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Ubuntu:300'>
 
-  <!-- Google icon -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Google icon -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
-  <!-- CodeMirror css -->
-  <link rel="stylesheet" href="stylesheets/codemirror.css">
-	
-	<!-- JS Tree -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+    <!-- CodeMirror css -->
+    <link rel="stylesheet" href="stylesheets/codemirror.css">
 
-  <!-- Custom css -->
-  <link rel="stylesheet" href="stylesheets/style.css">
+    <!-- JS Tree -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css">
+
+    <!-- Custom css -->
+    <link rel="stylesheet" href="stylesheets/style.css">
 
 </head>
 
 <body ng-app="automate" ng-controller="automate-ctrl">
 
 
-  <div layout="column" style="height:100%">
+    <div layout="column" style="height:100%">
 
-    <!-- TOOLBAR -->
-    <md-toolbar flex="initial" class="toolbar md-whiteframe-2dp light-blue" ng-cloak>
-      <div class="md-toolbar-tools">
+        <!-- TOOLBAR -->
+        <md-toolbar flex="initial" class="toolbar md-whiteframe-2dp light-blue"
+        ng-cloak>
+            <div class="md-toolbar-tools">
 
-        <!-- SHOW SIDE NAVOGATOR BUTTON -->
-        <md-button class="md-icon-button md-button md-ink-ripple" ng-click="toggleNav()" hide-gt-sm>
-          <md-icon md-font-icon="material-icons" style="color:white;">reorder</md-icon>
-        </md-button>
+                <!-- SHOW SIDE NAVOGATOR BUTTON -->
+                <md-button class="md-icon-button md-button md-ink-ripple"
+                ng-click="toggleNav()" hide-gt-sm>
+                    <md-icon md-font-icon="material-icons" style="color:white;">reorder</md-icon>
+                </md-button>
 
-        <!-- TOOLBAR HEADER -->
-        <span class="no-select header-text clickable-mouse-point">{{applicationName}}</span>
+                <!-- TOOLBAR HEADER -->
+                <span class="no-select header-text clickable-mouse-point">{{applicationName}}</span>
 
-        <!-- SPACER -->
-        <div flex=""></div>
+                <!-- SPACER -->
+                <div flex=""></div>
 
-        <!-- PROJECT SELECTOR -->
-        <md-select ng-click="projectUpdate()" ng-model="selectedProject" md-selected-text="getSelectedProject()" ng-change="onProjectChange()" aria-label="Project" class="toolbar-project-selector">
-          <md-optgroup label="Projects">
-            <md-option ng-value="project" ng-repeat="project in projects">{{project}}</md-option>
-          </md-optgroup>
-        </md-select>
+                <!-- PROJECT SELECTOR -->
+                <md-select ng-click="projectUpdate()" ng-model="selectedProject"
+                md-selected-text="getSelectedProject()"
+                ng-change="onProjectChange()"
+                aria-label="Project" class="toolbar-project-selector">
+                    <md-optgroup label="Projects">
+                        <md-option ng-value="project" ng-repeat="project in projects">{{project}}</md-option>
+                    </md-optgroup>
+                </md-select>
 
-        <!-- MODULE SELECTOR -->
-        <md-select ng-click="moduleUpdate()" ng-model="selectedModule" md-selected-text="getSelectedModule()" ng-change="onModuleChange()" aria-label="Module" class="toolbar-module-selector" ng-disabled="moduleSelectorIsDisabled">
-          <md-optgroup label="Modules">
-            <md-option ng-value="module" ng-repeat="module in modules" ng-click="setSelectedComponent(module)">{{module._id}}</md-option>
-          </md-optgroup>
-        </md-select>
+                <!-- MODULE SELECTOR -->
+                <md-select ng-click="moduleUpdate()" ng-model="selectedModule"
+                md-selected-text="getSelectedModule()"
+                ng-change="onModuleChange()"
+                aria-label="Module" class="toolbar-module-selector"
+                ng-disabled="moduleSelectorIsDisabled">
+                    <md-optgroup label="Modules">
+                        <md-option ng-value="module" ng-repeat="module in modules"
+                        ng-click="setSelectedComponent(module)">{{module._id}}</md-option>
+                    </md-optgroup>
+                </md-select>
 
-        <!-- SPACER -->
-        <div flex=""></div>
+                <!-- SPACER -->
+                <div flex=""></div>
 
-        <!-- NOTIFICATIONS -->
-        <md-button class="md-icon-button">
-          <md-icon md-font-icon="material-icons" class="toolbar-icon">notifications</md-icon>
-        </md-button>
+                <!-- NOTIFICATIONS -->
+                <md-button class="md-icon-button">
+                    <md-icon md-font-icon="material-icons" class="toolbar-icon">notifications</md-icon>
+                </md-button>
 
-        <!-- PROFILE -->
-        <md-button class="md-icon-button">
-          <md-icon md-font-icon="material-icons" class="toolbar-icon">account_circle</md-icon>
-        </md-button>
+                <!-- PROFILE -->
+                <md-button class="md-icon-button">
+                    <md-icon md-font-icon="material-icons" class="toolbar-icon">account_circle</md-icon>
+                </md-button>
 
-        <!-- OPTION MENU BUTTON-->
-				<md-menu>
-					
-					<md-button class="md-icon-button" ng-click="openOptionMenu($mdOpenMenu, $event)">
-						<md-icon md-font-icon="material-icons" class="toolbar-icon">list</md-icon>
-					</md-button>
-					
-					<md-menu-content width="4">
-						
-						<md-menu-item>
-							<md-button ng-click="inputPrompt('Project', $event)">
-								Create Project
-							</md-button>
-						</md-menu-item>
-						
-						<md-menu-item>
-							<md-button ng-click="inputPrompt('Module', $event)">
-								Create Module
-							</md-button>
-						</md-menu-item>
+                <!-- OPTION MENU BUTTON-->
+                <md-menu>
 
-            <md-menu-item>
-              <md-button ng-click="inputPrompt('TestCase', $event)">
-                Create TestCase
-              </md-button>
-            </md-menu-item>
-						
-						<md-menu-divider></md-menu-divider>
-					
-					</md-menu-content>
-				</md-menu>
-					
-					
-					
-
-      </div>
-    </md-toolbar>
-
-    <!-- CONTENT -->
-    <div flex layout="row">    
-    
-      <!-- SIDE NAVIGATOR -->
-      <md-sidenav flex="initial" md-is-locked-open="$mdMedia('gt-sm')" class="md-whiteframe-2dp" md-component-id="side-nav" md-is-locked-open="$mdMedia('gt-sm')"
-        class="md-primary md-hue-2" ng-cloak>
-
-        <md-nav-bar md-selected-nav-item="selectedViewType" aria-label="Navigator">
-          <md-nav-item md-nav-click="goto('module-view')" name="module-view">module view</md-nav-item>
-          <md-nav-item md-nav-click="goto('tree-view')" name="tree-view">tree view</md-nav-item>
-        </md-nav-bar>
-
-        
-        <div class="view-content-common">
-
-          <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
-
-            <div ng-if=" selectedViewType === 'module-view' ">
-              
-              <md-content>
-                <div layout="column"  ng-repeat="testcase in testcases">
-                  <md-button class="file-tree-main"
-                    ng-click="selectTestCase(testcase); componentsUpdate(); test=!test">
-                    {{testcase._id}}
-                  </md-button>
-                  <div ng-hide="test" ng-repeat="component in components">
-                    <md-button class="file-tree-sub" ng-click="setSelectedComponent(component); setEditorContent();">
-                      {{component._id}}
+                    <md-button class="md-icon-button" ng-click="openOptionMenu($mdOpenMenu, $event)">
+                        <md-icon md-font-icon="material-icons" class="toolbar-icon">list</md-icon>
                     </md-button>
-                  </div>
-                </div>
-              </md-content>
+
+                    <md-menu-content width="4">
+
+                        <md-menu-item>
+                            <md-button ng-click="openDialog($event)">
+                                Create Project
+                            </md-button>
+                        </md-menu-item>
+
+                        <md-menu-item>
+                            <md-button ng-click="inputPrompt('Module', $event)">
+                                Create Module
+                            </md-button>
+                        </md-menu-item>
+
+                        <md-menu-item>
+                            <md-button ng-click="inputPrompt('TestCase', $event)">
+                                Create TestCase
+                            </md-button>
+                        </md-menu-item>
+
+                        <md-menu-divider></md-menu-divider>
+
+                    </md-menu-content>
+                </md-menu>
+
+
+
 
             </div>
+        </md-toolbar>
 
-            
+        <!-- CONTENT -->
+        <div flex layout="row">
+
+            <!-- SIDE NAVIGATOR -->
+            <md-sidenav flex="initial" md-is-locked-open="$mdMedia('gt-sm')"
+            class="md-whiteframe-2dp" md-component-id="side-nav"
+            md-is-locked-open="$mdMedia('gt-sm')"
+            class="md-primary md-hue-2" ng-cloak>
+
+                <md-nav-bar md-selected-nav-item="selectedViewType"
+                aria-label="Navigator">
+                    <md-nav-item md-nav-click="goto('module-view')"
+                    name="module-view">module view</md-nav-item>
+                    <md-nav-item md-nav-click="goto('tree-view')"
+                    name="tree-view">tree view</md-nav-item>
+                </md-nav-bar>
+
+
+                <div class="view-content-common">
+
+                    
+                    <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
+                    <div ng-if=" selectedViewType === 'module-view' ">
+
+                        <md-content>
+                            <div layout="column" ng-repeat="testcase in testcases">
+                                <md-button class="file-tree-main" ng-click="selectTestCase(testcase); componentsUpdate(); test=!test">
+                                    {{testcase._id}}
+                                </md-button>
+                                <div ng-hide="test" ng-repeat="component in components">
+                                    <md-button class="file-tree-sub" ng-click="setSelectedComponent(component); setEditorContent();">
+                                        {{component._id}}
+                                    </md-button>
+                                </div>
+                            </div>
+                        </md-content>
+
+                    </div>
 
 
 
-          <!-- SIDE NAVIGATOR TREE VIEW CONTAINER -->
-          <div class="tree-view" ng-if=" selectedViewType === 'tree-view' ">
-          </div>
 
-				</div>
-      </md-sidenav>
 
-      <!-- EDITOR -->
-      <md-content flex style="display: flex; flex-flow: column;">
-        <textarea id="textArea" style="flex:1"></textarea>
-      </md-content>
+                    <!-- SIDE NAVIGATOR TREE VIEW CONTAINER -->
+                    <div class="tree-view" ng-if=" selectedViewType === 'tree-view' ">
+                    </div>
+
+                </div>
+            </md-sidenav>
+
+            <!-- EDITOR -->
+            <md-content flex style="display: flex; flex-flow: column;">
+                <textarea id="textArea" style="flex:1"></textarea>
+            </md-content>
+        </div>
+
+
+        <!-- STATUS BAR -->
+        <div flex layout="row" md-whiteframe="20"
+        class="status-bar-main" ng-class="statusBarColor"
+        ng-cloak>
+            <div flex class="status-bar-container">{{status}}</div>
+        </div>
+
+
+
+        <!-- TEMPLATES -->
+        <div>
+            <script type="text/ng-template" id="dialog.tmpl.html"><md-dialog aria-label="Autocomplete Dialog Example">
+              <md-toolbar>
+                <div class="md-toolbar-tools">
+                  <h2>Autocomplete Dialog Example</h2>
+                  <span flex></span>
+                  <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                    <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                  </md-button>
+                </div>
+              </md-toolbar>
+
+              <md-dialog-content ng-cloak>
+                <div class="md-dialog-content">
+                  <form ng-submit="$event.preventDefault()">
+                    <p>Use <code>md-autocomplete</code> to search for matches from local or remote data sources.</p>
+                    <md-autocomplete
+                        md-selected-item="ctrl.selectedItem"
+                        md-search-text="ctrl.searchText"
+                        md-items="item in ctrl.querySearch(ctrl.searchText)"
+                        md-item-text="item.display"
+                        md-min-length="0"
+                        placeholder="What is your favorite US state?"
+                        md-autofocus="">
+                      <md-item-template>
+                        <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                      </md-item-template>
+                      <md-not-found>
+                        No states matching "{{ctrl.searchText}}" were found.
+                      </md-not-found>
+                    </md-autocomplete>
+                  </form>
+                </div>
+              </md-dialog-content>
+
+              <md-dialog-actions>
+                <md-button aria-label="Finished" ng-click="ctrl.finish($event)">Finished</md-button>
+              </md-dialog-actions>
+            </md-dialog>
+            </script>
+        </div>
     </div>
-    
-
-    <!-- STATUS BAR -->
-    <div flex layout="row" 
-		 md-whiteframe="20" 
-		 class="status-bar-main" 
-		 ng-class="statusBarColor"
-     ng-cloak>
-      <div flex class="status-bar-container">{{status}}</div>
-    </div>
-    
-    
-  </div>
 
 
 
 
 
+    <!-- Angular js -->
+    <script src="javascripts/angular.js"></script>
+
+    <script src="javascripts/angular-animate.js"></script>
+    <script src="javascripts/angular-aria.js"></script>
+    <script src="javascripts/angular-messages.js"></script>
+    <script src="javascripts/angular-cookies.js"></script>
+    <script src="javascripts/angular-loader.js"></script>
+    <script src="javascripts/angular-message-format.js"></script>
+    <script src="javascripts/angular-mocks.js"></script>
+    <script src="javascripts/angular-parse-ext.js"></script>
+    <script src="javascripts/angular-resource.js"></script>
+    <script src="javascripts/angular-route.js"></script>
+    <script src="javascripts/angular-sanitize.js"></script>
+    <script src="javascripts/angular-scenario.js"></script>
+    <script src="javascripts/angular-touch.js"></script>
 
 
+    <!--  Angular Material js  -->
+    <script src="javascripts/angular-material.js"></script>
 
+    <!-- CodeMirror js -->
+    <script src="javascripts/codemirror.js"></script>
 
-  <!-- Angular js -->
-  <script src="javascripts/angular.js"></script>
+    <!-- Blue Bird -->
+    <script src="//cdn.jsdelivr.net/bluebird/3.4.5/bluebird.js"></script>
 
-  <script src="javascripts/angular-animate.js"></script>
-  <script src="javascripts/angular-aria.js"></script>
-  <script src="javascripts/angular-messages.js"></script>
-  <script src="javascripts/angular-cookies.js"></script>
-  <script src="javascripts/angular-loader.js"></script>
-  <script src="javascripts/angular-message-format.js"></script>
-  <script src="javascripts/angular-mocks.js"></script>
-  <script src="javascripts/angular-parse-ext.js"></script>
-  <script src="javascripts/angular-resource.js"></script>
-  <script src="javascripts/angular-route.js"></script>
-  <script src="javascripts/angular-sanitize.js"></script>
-  <script src="javascripts/angular-scenario.js"></script>
-  <script src="javascripts/angular-touch.js"></script>
+    <!-- Custom js -->
+    <script>
+        let app = angular.module(
+            'automate', [
+                'ngMaterial',
+                'ngMessages'
+            ])
 
-
-  <!--  Angular Material js  -->
-  <script src="javascripts/angular-material.js"></script>
-
-  <!-- CodeMirror js -->
-  <script src="javascripts/codemirror.js"></script>
-
-  <!-- Blue Bird -->
-  <script src="//cdn.jsdelivr.net/bluebird/3.4.5/bluebird.js"></script>
-
-  <!-- Custom js -->
-	<script> let app = angular.module('automate', ['ngMaterial', 'ngMessages']) </script>
-	<script src="javascripts/rest-api.js"></script>
-  <script src="javascripts/automate.js"></script>
-  <script src="javascripts/script.js"></script>
+    </script>
+    <script src="javascripts/rest-api.js"></script>
+    <script src="javascripts/automate.js"></script>
+    <script src="javascripts/script.js"></script>
 
 
 </body>
