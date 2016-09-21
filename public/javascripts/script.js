@@ -15,15 +15,18 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.applicationName = 'AutoMate';
     $scope.moduleSelectorIsDisabled = true;
     $scope.statusBarColor = 'default-status';
-    $scope.test = true;
 
 
 
-    let _project = new Array;
+    let _projects = new Array;
+    let _selectedProject = new String;
     $scope.project = new Object;
     $scope.project.get = function () { return _projects; };
     $scope.project.set = function (value) { _projects = value };
     $scope.project.add = function (value) { _projects.push(value) };
+    $scope.project.getNames = function () { return _projects};
+    $scope.project.getSelected = function () { return _selectedProject; }
+    $scope.project.setSelected = function (value) { _selectedProject = value; }
     $scope.project.update = function () {
         $rest.getAllProjects()
             .then(function successCallback (res) {
@@ -37,6 +40,128 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                 console.error(error);
             });
     };
+
+    let _modules = new Array;
+    let _selectedModule = null;
+    $scope.module = new Object;
+    $scope.module.get = function () { return _modules; };
+    $scope.module.set = function (value) { _modules = value };
+    $scope.module.add = function (value) { _modules.push(value) };
+    $scope.module.getNames = function () {
+        let data = $scope.module.get();
+        let result = new Array;
+
+        for(let i = 0; i < data.length; i++)
+            result.push(data[i]._id);
+
+        return result;
+    };
+    $scope.project.getSelected = function () { return _selectedModule; };
+    $scope.project.setSelected = function (value) { _selectedModule = value; };
+    $scope.module.update = function () {
+        if($scope.project.getSelected !== null) {
+            $rest.getAllModules($scope.project.getSelected()) {
+                .then(function successCallback (res) {
+                    (res.data.status) ?
+                        $scope.showStatus(res.data.status, 'Updating Module List : Successful!', 500) &
+                        $scope.module.set(res.data.body) :
+                        $scope.showStatus(res.data.status, 'Updating Module List : Failed!', 3000) &
+                        console.error(res.data.error)
+                }, function errorCallback (error) {
+                    $scope.showStatus(false, 'Updating Module List : Failed!', 3000);
+                    console.error(error);
+                });
+        }
+        else {
+            $scope.showStatus(false, 'Updating Module List : Failed!', 3000);
+            console.log({
+                name: 'request not allowed',
+                message: 'select a project'
+            });
+        }
+    };
+
+    let _testcases = new Array;
+    let _selectedTestCase = null;
+    $scope.testcase = new Object;
+    $scope.testcase.get = function () { return _testcases; };
+    $scope.testcase.set = function (value) { _testcases = value };
+    $scope.testcase.add = function (value) { _testcases.push(value) };
+    $scope.testcase.getNames = function () {
+        let data = $scope.testcase.get();
+        let result = new Array
+        for(let i = 0; i < data.length; i++)
+            result.push(data[i]._id);
+        
+        return result;
+    };
+    $scope.project.getSelected = function () { return _selectedTestCase; };
+    $scope.project.setSelected = function (value) { _selectedTestCase = value; };
+    $scope.testcase.update = function () {
+        if($scope.module.getSelected !== null) {
+            $rest.getAllTestCases()
+                .then(function successCallback (res) {
+                    (res.data.status) ?
+                        $scope.showStatus(res.data.status, 'Updating Test Case List : Successful!', 500) &
+                        $scope.testcase.set(res.data.body) :
+                        $scope.showStatus(res.data.status, 'Updating Test Case List : Failed!', 3000) &
+                        console.error(res.data.error)
+                }, function errorCallback (error) {
+                    $scope.showStatus(false, 'Updating Test Case List : Failed!', 3000);
+                    console.error(error);
+                });
+        }
+        else {
+            $scope.showStatus(false, 'Updating Test Case List : Failed!', 3000);
+            console.error({
+                name: 'request not allowed',
+                message: 'select a module'
+            });
+        }
+    };
+
+    let _components = new Array;
+    let _selectedComponent = null;
+    $scope.component = new Object;
+    $scope.component.get = function () { return _components; };
+    $scope.component.set = function (value) { _components = value };
+    $scope.component.add = function (value) { _components.push(value) };
+    $scope.component.getNames = function () {
+        let data = $scope.component.get();
+        let result = new Array
+        for(let i = 0; i < data.length; i++)
+            result.push(data[i]._id);
+        
+        return result;
+    };
+    $scope.project.getSelected = function () { return _selectedComponent; };
+    $scope.project.setSelected = function (value) { _selectedComponent = value; };
+    $scope.component.update = function () {
+        if($scope.testcase.getSelected() !== null) {
+            $rest.getAllComponents({
+                'projectName': $scope.project.getSelected()
+            })
+                .then(function successCallback (res) {
+                    (res.data.status) ?
+                        $scope.showStatus(res.data.status, 'Updating Component List : Successful!', 500) &
+                        $scope.component.set(res.data.body) :
+                        $scope.showStatus(res.data.status, 'Updating Component List : Failed!', 3000) &
+                        console.error(res.data.error)
+                }, function errorCallback (error) {
+                    $scope.showStatus(false, 'Updating Component List : Failed!', 3000);
+                    console.error(error);
+                });
+        }
+        else {
+            $scope.showStatus(res.data.status, 'Updating Component List : Failed!', 3000);
+            console.error({
+                name: 'requset not allowed',
+                message: 'select a testcase'
+            });
+        }
+    };
+
+
 
 
 
@@ -138,13 +263,11 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
     /********** TOOLBAR SELECT PROJECT **********/
     $scope.getSelectedProject = function() {
-
-        if ($scope.selectedProject !== undefined && $scope.selectedProject !== null) {
-
+        if ($scope.selectedProject !== undefined && 
+            $scope.selectedProject !== null) {
             $scope.moduleSelectorIsDisabled = false;
             return 'Project : ' + $scope.selectedProject;
         } else {
-
             $scope.moduleSelectorIsDisabled = true;
             return 'Select a project';
         }
@@ -159,8 +282,8 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
     /********** TOOLBAR SELECT MODULE **********/
     $scope.getSelectedModule = function() {
-
-        if ($scope.selectedModule !== undefined && $scope.selectedModule !== null)
+        if ($scope.selectedModule !== undefined && 
+            $scope.selectedModule !== null)
             return 'Module : ' + $scope.selectedModule._id;
         else
             return 'Select a module';
@@ -231,79 +354,6 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             $scope.status = '';
         }, timeout);
     };
-
-
-    /********** UPDATERS **********/
-    $scope.projectUpdate = function() {
-        $rest.getAllProjects()
-            .then(function successCallback(res) {
-                res.data.status ?
-                    $scope.showStatus(res.data.status, 'Updating Project List : Successful!', 500) :
-                    $scope.showStatus(res.data.status, 'Updating Project List : Failed!', 3000) &
-                    console.error(error)
-
-            }, function errorCallback(error) {
-                $scope.showStatus(false, 'Updating Project List : Failed!', 3000);
-                console.error(error);
-            });
-    };
-
-    $scope.moduleUpdate = function() {
-        if ($scope.selectedProject !== undefined) {
-            $rest.getAllModules({
-                    'projectName': $scope.selectedProject
-                })
-                .then(function(res) {
-                    res.data.status ?
-                        $scope.showStatus(res.data.status, 'Updating Module List : Successful!', 500) :
-                        $scope.showStatus(res.data.status, 'Updating Module List : Failed!', 3000) &
-                        console.error(error)
-
-                }, function errorCallback(error) {
-                    console.error(error);
-                    $scope.showStatus(false, '', 500);
-                });
-        } else {
-            $scope.showStatus(false, 'Select A Project', 1000);
-        }
-    };
-
-    $scope.testcaseUpdate = function() {
-        if ($scope.selectedModule !== undefined) {
-            $rest.getAllTestCases({
-                    'projectName': $scope.selectedProject,
-                    'id': $scope.selectedModule._id
-                })
-                .then(function(res) {
-                    let data = res.data;
-                    $scope.showStatus(data.status, '', 500);
-
-                    if (data.status)
-                        $scope.testcases = data.body;
-                    else
-                        console.error(data.error);
-                });
-        }
-    };
-
-    $scope.componentsUpdate = function() {
-        if ($scope.selectedTestCase !== undefined) {
-            $rest.getAllComponents({
-                    'projectName': $scope.selectedProject,
-                    'id': $scope.selectedTestCase._id
-                })
-                .then(function(res) {
-                    let data = res.data;
-                    $scope.showStatus(data.status, '', 500);
-
-                    if (data.status)
-                        $scope.components = data.body;
-                    else
-                        console.error(data.error);
-                });
-        }
-    };
-
 
     $scope.selectTestCase = function(testcase) {
         $scope.selectedTestCase = testcase;

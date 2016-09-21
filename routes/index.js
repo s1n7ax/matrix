@@ -141,8 +141,10 @@ router.post('/createTestCase', function(req, res, next) {
 });
 
 
+/**
+ * GET ALL ITEMS
+ */
 router.post('/getAllProjects', function (req, res, next) {
-	console.log('got it');
 	let services = new Services;
 	let removeValues = ['_replicator', '_users'];
 	
@@ -166,10 +168,11 @@ router.post('/getAllProjects', function (req, res, next) {
 				'error': null
 			});
 		}
-	})
+	});
 });
 router.post('/getAllModules', function (req, res, next) {
 	let services = new Services(req.body.projectName);
+	let result = new Array;
 
 	services.getAllModueDocs(undefined, function (error, body) {
 		if(error) {
@@ -180,24 +183,23 @@ router.post('/getAllModules', function (req, res, next) {
 			});
 		}
 		else {
-			let moduleArray = new Array;
-
 			body.rows.forEach(function (data) {
-				moduleArray.push(data.value);
+				result.push(data.value);
 			});
 
 			res.send({
 				'status': true,
-				'body': moduleArray,
+				'body': result,
 				'error': null
 			});
 		}
-	})
+	});
 });
 router.post('/getAllTestCases', function (req, res, next) {
 	let services = new Services(req.body.projectName);
+	let result = new Array;
 	
-	services.deepSelectById(services, req.body.id, function (error, body) {
+	services.getAllTestCaseDocs(undefined, function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
@@ -205,10 +207,14 @@ router.post('/getAllTestCases', function (req, res, next) {
 				'error': error
 			});
 		}
-		else {			
+		else {
+			body.forEach(function (data) {
+				result.push(data.value);
+			});
+
 			res.send({
 				'status': true,
-				'body': body,
+				'body': result,
 				'error': null
 			});
 		}
@@ -216,8 +222,9 @@ router.post('/getAllTestCases', function (req, res, next) {
 });
 router.post('/getAllComponents', function (req, res, next) {
 	let services = new Services(req.body.projectName);
+	let result = new Array;
 
-	services.deepSelectById(services, req.body.id, function (error, body) {
+	services.getAllComponentDocs(undefined, function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
@@ -226,15 +233,23 @@ router.post('/getAllComponents', function (req, res, next) {
 			});
 		}
 		else {
+			body.forEach(function (data) {
+				result.push(data.value);
+			});
+
 			res.send({
 				'status': true,
-				'body': body,
+				'body': result,
 				'error': null
 			});
 		}
-	})
+	});
 });
 
+
+/**
+ * GET ALL ITEMS
+ */
 router.post('/setComponent', function (req, res, next) {
 	let services = new Services(req.body.projectName);
 
