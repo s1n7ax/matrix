@@ -19,15 +19,24 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
 
 
+    let _project = new Array;
     $scope.project = new Object;
-    $scope.project._projects = new Array
-    $scope.project.get = function () {
-        return this._projects;
-    }
-    
-    $scope.project.set = function (value) {
-        this._projects.push(values);
-    }
+    $scope.project.get = function () { return _projects; };
+    $scope.project.set = function (value) { _projects = value };
+    $scope.project.add = function (value) { _projects.push(value) };
+    $scope.project.update = function () {
+        $rest.getAllProjects()
+            .then(function successCallback (res) {
+                (res.data.status) ?
+                    $scope.showStatus(res.data.status, 'Updating Project List : Successful!', 500) &
+                    $scope.project.set(res.data.body) :
+                    $scope.showStatus(res.data.status, 'Updating Project List : Failed!', 3000) &
+                    console.error(res.data.error)
+            }, function errorCallback (error) {
+                $scope.showStatus(false, 'Updating Project List : Failed!', 3000);
+                console.error(error);
+            });
+    };
 
 
 

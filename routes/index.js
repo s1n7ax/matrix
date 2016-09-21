@@ -142,6 +142,7 @@ router.post('/createTestCase', function(req, res, next) {
 
 
 router.post('/getAllProjects', function (req, res, next) {
+	console.log('got it');
 	let services = new Services;
 	let removeValues = ['_replicator', '_users'];
 	
