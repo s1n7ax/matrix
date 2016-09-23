@@ -140,7 +140,3 @@ html, body{
   color: black;
   background-color: #ffd65e;
 }
-
-.file-tree-sub:not([disabled]):active {
-  background-color: black;
-}

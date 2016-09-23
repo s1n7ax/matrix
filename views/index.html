@@ -28,7 +28,7 @@
 
 </head>
 
-<body ng-app="automate" ng-controller="automate-ctrl">
+<body ng-app="automate" ng-controller="automate_ctrl">
 
 
     <div layout="column" style="height:100%">
@@ -51,7 +51,7 @@
                 <div flex=""></div>
 
                 <!-- PROJECT SELECTOR -->
-                <md-select ng-click="projectUpdate()" ng-model="selectedProject"
+                <md-select ng-model="selectedProject"
                 md-selected-text="getSelectedProject()"
                 ng-change="onProjectChange()"
                 aria-label="Project" class="toolbar-project-selector">
@@ -61,7 +61,7 @@
                 </md-select>
 
                 <!-- MODULE SELECTOR -->
-                <md-select ng-click="moduleUpdate()" ng-model="selectedModule"
+                <md-select ng-model="selectedModule"
                 md-selected-text="getSelectedModule()"
                 ng-change="onModuleChange()"
                 aria-label="Module" class="toolbar-module-selector"
@@ -148,13 +148,15 @@
                     <div ng-if=" selectedViewType === 'module-view' ">
 
                         <md-content>
-                            <div layout="column" ng-repeat="testcase in testcases">
-                                <md-button class="file-tree-main" ng-click="selectTestCase(testcase); componentsUpdate(); test=!test">
-                                    {{testcase._id}}
+                            <div layout="column" ng-repeat="tc in moduleViewTree">
+                                <md-button class="file-tree-main" ng-click="showComponents = !showComponents">
+                                    {{tc._id}}
                                 </md-button>
-                                <div ng-hide="test" ng-repeat="component in components">
-                                    <md-button class="file-tree-sub" ng-click="setSelectedComponent(component); setEditorContent();">
-                                        {{component._id}}
+                                <div ng-show="showComponents" ng-repeat="bc in tc.links">
+                                    <md-button 
+                                        class="file-tree-sub" 
+                                        ng-click="component.setSelected(bc); component.setEditorContent(bc)">
+                                        {{bc._id}}
                                     </md-button>
                                 </div>
                             </div>

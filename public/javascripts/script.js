@@ -1,52 +1,79 @@
-app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $rest) {
+app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $rest) {
 
     /********** INITIALIZING **********/
-    var self = this;
+    var test = this;
 
-    /*
-     * SERVER CLIENT
+
+    /**
+     * CONSTRUCTOR
      */
+     let constructor = function () {
+        $scope.project.update();
+     }
+
+
+    /**
+    * WATCHERS
+    */
+    $scope.$watch('selectedModule', function () {
+        $scope.module.getModuleViewTree();
+    });
 
 
 
-    /*
-     * TOOLBAR *
+    /**
+     * TOOLBAR
      */
     $scope.applicationName = 'AutoMate';
     $scope.moduleSelectorIsDisabled = true;
     $scope.statusBarColor = 'default-status';
 
 
-
-    let _projects = new Array;
-    let _selectedProject = new String;
+    /**
+     * PROJECTS
+     */
+    $scope.projects = new Array;
+    $scope.selectedProject = null;
     $scope.project = new Object;
-    $scope.project.get = function () { return _projects; };
-    $scope.project.set = function (value) { _projects = value };
-    $scope.project.add = function (value) { _projects.push(value) };
-    $scope.project.getNames = function () { return _projects};
-    $scope.project.getSelected = function () { return _selectedProject; }
-    $scope.project.setSelected = function (value) { _selectedProject = value; }
+    $scope.project.add = function (value) { $scope.projects.push(value) };
+    $scope.project.getNames = function () {
+        let data = new Array();
+        $scope.projects.forEach(function (value, index) {
+            data.push({
+                'display': value,
+                'value': value
+            });
+        });
+
+        return data;
+    };
     $scope.project.update = function () {
         $rest.getAllProjects()
             .then(function successCallback (res) {
-                (res.data.status) ?
-                    $scope.showStatus(res.data.status, 'Updating Project List : Successful!', 500) &
-                    $scope.project.set(res.data.body) :
+
+                if(res.data.status) {
+                    $scope.showStatus(res.data.status, 'Updating Project List : Successful!', 500);
+                    $scope.projects = res.data.body;
+                }
+                else {
                     $scope.showStatus(res.data.status, 'Updating Project List : Failed!', 3000) &
                     console.error(res.data.error)
+                }
+                
             }, function errorCallback (error) {
                 $scope.showStatus(false, 'Updating Project List : Failed!', 3000);
                 console.error(error);
             });
     };
 
-    let _modules = new Array;
-    let _selectedModule = null;
+
+    /**
+     * MODULES
+     */
+    $scope.modules = new Array;
+    $scope.selectedModule = null;
     $scope.module = new Object;
-    $scope.module.get = function () { return _modules; };
-    $scope.module.set = function (value) { _modules = value };
-    $scope.module.add = function (value) { _modules.push(value) };
+    $scope.module.add = function (value) { $scope._modules.push(value) };
     $scope.module.getNames = function () {
         let data = $scope.module.get();
         let result = new Array;
@@ -56,17 +83,20 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
         return result;
     };
-    $scope.project.getSelected = function () { return _selectedModule; };
-    $scope.project.setSelected = function (value) { _selectedModule = value; };
     $scope.module.update = function () {
-        if($scope.project.getSelected !== null) {
-            $rest.getAllModules($scope.project.getSelected()) {
+        if($scope.selectedProject !== null) {
+            $rest.getAllModules({
+                'projectName': $scope.selectedProject
+            })
                 .then(function successCallback (res) {
-                    (res.data.status) ?
-                        $scope.showStatus(res.data.status, 'Updating Module List : Successful!', 500) &
-                        $scope.module.set(res.data.body) :
-                        $scope.showStatus(res.data.status, 'Updating Module List : Failed!', 3000) &
-                        console.error(res.data.error)
+                    if(res.data.status) {
+                        $scope.showStatus(res.data.status, 'Updating Module List : Successful!', 1000);
+                        $scope.modules = res.data.body;
+                    } 
+                    else {
+                        $scope.showStatus(res.data.status, 'Updating Module List : Failed!', 3000);
+                        console.error(res.data.error);
+                    }
                 }, function errorCallback (error) {
                     $scope.showStatus(false, 'Updating Module List : Failed!', 3000);
                     console.error(error);
@@ -74,19 +104,37 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         }
         else {
             $scope.showStatus(false, 'Updating Module List : Failed!', 3000);
-            console.log({
+            console.error({
                 name: 'request not allowed',
-                message: 'select a project'
+                message: 'select a project before get all module'
             });
         }
     };
+    $scope.module.getModuleViewTree = function () {
+        let tree = new Array();
 
-    let _testcases = new Array;
-    let _selectedTestCase = null;
+        if($scope.selectedModule !== null && 
+            $scope.selectedModule.links !== undefined){
+            tree = $scope.testcase.getByList($scope.selectedModule.links)
+            tree.forEach(function (result, index) {
+                if(tree[index].links !== undefined) {
+                    tree[index].links = $scope.component.getByList(tree[index].links)
+                }
+            });
+        }
+
+        $scope.moduleViewTree = tree;
+    }
+
+
+    /**
+     * TESTCASES
+     */
+    $scope.testcases = new Array();
+    $scope.selectedTestCase = null;
+    $scope.testcasesView = new Array();
     $scope.testcase = new Object;
-    $scope.testcase.get = function () { return _testcases; };
-    $scope.testcase.set = function (value) { _testcases = value };
-    $scope.testcase.add = function (value) { _testcases.push(value) };
+    $scope.testcase.add = function (value) { $scope.testcases.push(value) };
     $scope.testcase.getNames = function () {
         let data = $scope.testcase.get();
         let result = new Array
@@ -95,17 +143,21 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         
         return result;
     };
-    $scope.project.getSelected = function () { return _selectedTestCase; };
-    $scope.project.setSelected = function (value) { _selectedTestCase = value; };
     $scope.testcase.update = function () {
-        if($scope.module.getSelected !== null) {
-            $rest.getAllTestCases()
+        if($scope.selectedProject !== null) {
+            $rest.getAllTestCases({
+                'projectName': $scope.selectedProject
+            })
                 .then(function successCallback (res) {
-                    (res.data.status) ?
-                        $scope.showStatus(res.data.status, 'Updating Test Case List : Successful!', 500) &
-                        $scope.testcase.set(res.data.body) :
-                        $scope.showStatus(res.data.status, 'Updating Test Case List : Failed!', 3000) &
-                        console.error(res.data.error)
+
+                    if(res.data.status) {
+                        $scope.showStatus(res.data.status, 'Updating Test Case List : Successful!', 1000);
+                        $scope.testcases = res.data.body;
+                    }
+                    else {
+                        $scope.showStatus(res.data.status, 'Updating Test Case List : Failed!', 3000);
+                        console.error(res.data.error);
+                    }
                 }, function errorCallback (error) {
                     $scope.showStatus(false, 'Updating Test Case List : Failed!', 3000);
                     console.error(error);
@@ -115,17 +167,30 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             $scope.showStatus(false, 'Updating Test Case List : Failed!', 3000);
             console.error({
                 name: 'request not allowed',
-                message: 'select a module'
+                message: 'select a project before get all testcase'
             });
         }
     };
+    $scope.testcase.getByList = function (value) {
+        let result = new Array();
 
-    let _components = new Array;
-    let _selectedComponent = null;
+        for(let i = 0; i < value.length; i++)
+            for(let j = 0; j < $scope.testcases.length; j++)
+                if(value[i] === $scope.testcases[j]._id)
+                    result.push($scope.testcases[j]);
+
+        return result;
+    }
+
+
+    /**
+     * COMPONENTS
+     */
+    $scope.components = new Array;
+    $scope.selectedComponent = null;
+    $scope.viewTestCases = new Array();
     $scope.component = new Object;
-    $scope.component.get = function () { return _components; };
-    $scope.component.set = function (value) { _components = value };
-    $scope.component.add = function (value) { _components.push(value) };
+    $scope.component.add = function (value) { $scope.components.push(value) };
     $scope.component.getNames = function () {
         let data = $scope.component.get();
         let result = new Array
@@ -134,39 +199,56 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         
         return result;
     };
-    $scope.project.getSelected = function () { return _selectedComponent; };
-    $scope.project.setSelected = function (value) { _selectedComponent = value; };
     $scope.component.update = function () {
-        if($scope.testcase.getSelected() !== null) {
+        if($scope.selectedProject !== null) {
             $rest.getAllComponents({
-                'projectName': $scope.project.getSelected()
+                'projectName': $scope.selectedProject
             })
                 .then(function successCallback (res) {
-                    (res.data.status) ?
-                        $scope.showStatus(res.data.status, 'Updating Component List : Successful!', 500) &
-                        $scope.component.set(res.data.body) :
-                        $scope.showStatus(res.data.status, 'Updating Component List : Failed!', 3000) &
-                        console.error(res.data.error)
+                    if(res.data.status) {
+                        $scope.showStatus(res.data.status, 'Updating Component List : Successful!', 1000);
+                        $scope.components = res.data.body;
+                    }
+                    else {
+                        $scope.showStatus(res.data.status, 'Updating Component List : Failed!', 3000);
+                        console.error(res.data.error);
+                    }                        
                 }, function errorCallback (error) {
                     $scope.showStatus(false, 'Updating Component List : Failed!', 3000);
                     console.error(error);
                 });
         }
         else {
-            $scope.showStatus(res.data.status, 'Updating Component List : Failed!', 3000);
+            $scope.showStatus(false, 'Updating Component List : Failed!', 3000);
             console.error({
-                name: 'requset not allowed',
-                message: 'select a testcase'
+                name: 'request not allowed',
+                message: 'select a project before get all components'
             });
         }
     };
+    $scope.component.getByList = function (value) {
+        let result = new Array();
+
+        for(let i = 0; i < value.length; i++)
+            for(let j = 0; j < $scope.components.length; j++)
+                if(value[i] === $scope.components[j]._id)
+                    result.push($scope.components[j]);
+
+        return result;
+    }
+    $scope.component.setEditorContent = function (value) {
+        if (value.content !== null &&
+            value.content !== undefined)
+            $scope.editor.setValue(value.content);
+        else
+            $scope.editor.setValue('');
+    }
+    $scope.component.setSelected = function(component) {
+        $scope.selectedComponent = component;
+    };
 
 
-
-
-
-
-
+    
 
 
     /********** OPTION MENU **********/
@@ -274,23 +356,27 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     };
 
     $scope.onProjectChange = function() {
-        $scope.selectedModule = undefined;
-        $scope.selectedTestCase = undefined;
-        $scope.selectedComponent = undefined;
+        $scope.selectedModule = null;
+        $scope.selectedTestCase = null;
+        $scope.selectedComponent = null;
+
+        $scope.module.update();
+        $scope.testcase.update();
+        $scope.component.update();
     };
 
 
     /********** TOOLBAR SELECT MODULE **********/
     $scope.getSelectedModule = function() {
-        if ($scope.selectedModule !== undefined && 
-            $scope.selectedModule !== null)
+        if ($scope.selectedModule !== null)
             return 'Module : ' + $scope.selectedModule._id;
         else
             return 'Select a module';
     };
 
     $scope.onModuleChange = function() {
-        $scope.testcaseUpdate();
+        $scope.selectedTestCase = null;
+        $scope.selectedComponent = null;
     };
 
 
@@ -317,9 +403,9 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
     $scope.editor.setOption("extraKeys", {
         'Cmd-S': function(cm) {
-            if ($scope.selectedComponent !== undefined) {
-                console.log(cm.doc.getValue());
+            console.log($scope.selectedComponent)
 
+            if ($scope.selectedComponent !== undefined) {
                 let data = $scope.selectedComponent;
                 data.content = cm.doc.getValue();
 
@@ -335,7 +421,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                             $scope.showStatus(false, 'Saving Component : Failed!',
                                 5000);
                         }
-                    })
+                    });
             }
         }
     });
@@ -359,18 +445,6 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         $scope.selectedTestCase = testcase;
     };
 
-    $scope.setSelectedComponent = function(component) {
-        $scope.selectedComponent = component;
-    };
-
-    $scope.setEditorContent = function() {
-        if ($scope.selectedComponent.content !== null &&
-            $scope.selectedComponent.content !== undefined)
-            $scope.editor.setValue($scope.selectedComponent.content);
-        else
-            $scope.editor.setValue('');
-    }
-
 
     $scope.openDialog = function($event) {
         $mdDialog.show({
@@ -381,7 +455,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             targetEvent: $event,
             clickOutsideToClose: true
         });
-    }
+    };
 
 
     function DialogCtrl($timeout, $q, $scope, $mdDialog) {
@@ -389,6 +463,8 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
         // list of `state` value/display objects
         self.states = loadAll();
+        // self.states = $scope.project.getNames();
+        // console.log(self.states);
         self.querySearch = querySearch;
 
         // ******************************
@@ -411,7 +487,7 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
          * remote dataservice call.
          */
         function querySearch(query) {
-            return query ? self.states.filter(createFilterFor(query)) : self.states;
+            return query ? self1.states.filter(createFilterFor(query)) : self.states;
         }
 
         /**
@@ -446,6 +522,8 @@ app.controller('automate-ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             };
 
         }
-    }
+    };
+
+    constructor();
 
 });

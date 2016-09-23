@@ -1,0 +1,6 @@
+'error 301'
+$scope.testcase.getLinks
+
+
+'error 302'
+$scope.component.getLinks

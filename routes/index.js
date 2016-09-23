@@ -183,6 +183,7 @@ router.post('/getAllModules', function (req, res, next) {
 			});
 		}
 		else {
+			console.log(body);
 			body.rows.forEach(function (data) {
 				result.push(data.value);
 			});
@@ -208,7 +209,7 @@ router.post('/getAllTestCases', function (req, res, next) {
 			});
 		}
 		else {
-			body.forEach(function (data) {
+			body.rows.forEach(function (data) {
 				result.push(data.value);
 			});
 
@@ -233,7 +234,7 @@ router.post('/getAllComponents', function (req, res, next) {
 			});
 		}
 		else {
-			body.forEach(function (data) {
+			body.rows.forEach(function (data) {
 				result.push(data.value);
 			});
 
