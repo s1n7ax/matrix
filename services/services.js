@@ -34,7 +34,6 @@ class Services {
      * DOCUMENT
      */
     insertOrUpdateDoc (valuesObject, callback) {
-        console.log(valuesObject);
         this.database.insert(valuesObject, callback);
     }
 

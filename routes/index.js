@@ -99,9 +99,6 @@ router.post('/createTestCase', function(req, res, next) {
 	let services = new Services(req.body.projectName);
 
 	services.insertOrUpdateDoc(req.body.values, function (error, body) {
-		console.log('**************');
-		console.log(req.body.module);
-		console.log('**************');
 		if(error) {
 			console.error(error);
 			res.send({
@@ -113,7 +110,7 @@ router.post('/createTestCase', function(req, res, next) {
 		else {
 			
 			if(req.body.module.links === undefined) {
-				req.body.module.links = new Array;
+				req.body.module.links = new Array();
 				req.body.module.links.push(body.id);
 			}
 			else {

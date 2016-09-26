@@ -1,3 +1,5 @@
+/* global let */
+
 app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $rest) {
 
     /********** INITIALIZING **********/
@@ -35,17 +37,14 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.projects = new Array;
     $scope.selectedProject = null;
     $scope.project = new Object;
-    $scope.project.add = function (value) { $scope.projects.push(value) };
-    $scope.project.getNames = function () {
-        let data = new Array();
-        $scope.projects.forEach(function (value, index) {
-            data.push({
-                'display': value,
-                'value': value
-            });
+    $scope.project.add = function (value) { $scope.projects.push(value); };
+    $scope.project.getAutocompleteMap = function () {
+        return $scope.projects.map(function (data) {
+            return {
+                value: data,
+                display: data
+            };
         });
-
-        return data;
     };
     $scope.project.update = function () {
         $rest.getAllProjects()
@@ -57,7 +56,7 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                 }
                 else {
                     $scope.showStatus(res.data.status, 'Updating Project List : Failed!', 3000) &
-                    console.error(res.data.error)
+                    console.error(res.data.error);
                 }
                 
             }, function errorCallback (error) {
@@ -73,15 +72,14 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.modules = new Array;
     $scope.selectedModule = null;
     $scope.module = new Object;
-    $scope.module.add = function (value) { $scope._modules.push(value) };
-    $scope.module.getNames = function () {
-        let data = $scope.module.get();
-        let result = new Array;
-
-        for(let i = 0; i < data.length; i++)
-            result.push(data[i]._id);
-
-        return result;
+    $scope.module.add = function (value) { $scope._modules.push(value); };
+    $scope.module.getAutocompleteMap = function () {
+        return $scope.modules.map(function (data) {
+            return {
+                value: data._id.toLowerCase(),
+                display: data._id
+            };
+        });
     };
     $scope.module.update = function () {
         if($scope.selectedProject !== null) {
@@ -115,16 +113,16 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
         if($scope.selectedModule !== null && 
             $scope.selectedModule.links !== undefined){
-            tree = $scope.testcase.getByList($scope.selectedModule.links)
+            tree = $scope.testcase.getByList($scope.selectedModule.links);
             tree.forEach(function (result, index) {
                 if(tree[index].links !== undefined) {
-                    tree[index].links = $scope.component.getByList(tree[index].links)
+                    tree[index].links = $scope.component.getByList(tree[index].links);
                 }
             });
         }
 
         $scope.moduleViewTree = tree;
-    }
+    };
 
 
     /**
@@ -134,14 +132,14 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.selectedTestCase = null;
     $scope.testcasesView = new Array();
     $scope.testcase = new Object;
-    $scope.testcase.add = function (value) { $scope.testcases.push(value) };
-    $scope.testcase.getNames = function () {
-        let data = $scope.testcase.get();
-        let result = new Array
-        for(let i = 0; i < data.length; i++)
-            result.push(data[i]._id);
-        
-        return result;
+    $scope.testcase.add = function (value) { $scope.testcases.push(value); };
+    $scope.testcase.getAutocompleteMap = function () {
+        return $scope.testcases.map(function (data) {
+            return {
+                value: data._id.toLowerCase(),
+                display: data._id
+            };
+        });
     };
     $scope.testcase.update = function () {
         if($scope.selectedProject !== null) {
@@ -180,7 +178,7 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                     result.push($scope.testcases[j]);
 
         return result;
-    }
+    };
 
 
     /**
@@ -190,14 +188,14 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.selectedComponent = null;
     $scope.viewTestCases = new Array();
     $scope.component = new Object;
-    $scope.component.add = function (value) { $scope.components.push(value) };
-    $scope.component.getNames = function () {
-        let data = $scope.component.get();
-        let result = new Array
-        for(let i = 0; i < data.length; i++)
-            result.push(data[i]._id);
-        
-        return result;
+    $scope.component.add = function (value) { $scope.components.push(value); };
+    $scope.component.getAutocompleteMap = function () {
+        return $scope.components.map(function (data) {
+            return {
+                value: data._id.toLowerCase(),
+                display: data._id
+            };
+        });           
     };
     $scope.component.update = function () {
         if($scope.selectedProject !== null) {
@@ -235,14 +233,14 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                     result.push($scope.components[j]);
 
         return result;
-    }
+    };
     $scope.component.setEditorContent = function (value) {
         if (value.content !== null &&
             value.content !== undefined)
             $scope.editor.setValue(value.content);
         else
             $scope.editor.setValue('');
-    }
+    };
     $scope.component.setSelected = function(component) {
         $scope.selectedComponent = component;
     };
@@ -255,94 +253,7 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.openOptionMenu = function($mdOpenMenu, ev) {
         $mdOpenMenu(ev);
     };
-
-
-    /********** OPTION MENU -> CREATE ITEMS **********/
-    $scope.inputPrompt = function(itemType, ev) {
-        var config = $mdDialog.prompt()
-            .title(`Enter ${itemType} Name`)
-            .textContent(itemType + ' name should be unique')
-            .placeholder(itemType + 'Name')
-            .ariaLabel(itemType + ' Name')
-            .initialValue('')
-            .targetEvent(ev)
-            .disableParentScroll(true)
-            .clickOutsideToClose(true)
-            .ok('Okay')
-            .cancel('Cancel');
-
-        $mdDialog.show(config).then(function(result) {
-            if (result !== null && result !== undefined) {
-
-                if (itemType === 'Project') {
-                    $rest.createProject({
-                        'projectName': result
-                    }).then(
-                        function successCallback(res) {
-                            console.log(res);
-                            (res.data.status) ?
-                            $scope.showStatus(res.data.status,
-                                    'Creating Project : Successful!', 2000): $scope.showStatus(
-                                    res.data.status,
-                                    'Creating Project : Failed!', 2000) &
-                                console.error(res.data.error)
-                        },
-                        function errorCallback(error) {
-                            $scope.showStatus(false, 'Creating Project : Failed!',
-                                2000);
-                            console.error(error);
-                        });
-                } else if (itemType === 'Module' && $scope.selectedProject !== undefined &&
-                    $scope.selectedProject !== null) {
-                    $rest.createModule({
-                            'projectName': $scope.selectedProject,
-                            'values': {
-                                '_id': result,
-                                'type': 'module'
-                            }
-                        })
-                        .then(function successCallback(res) {
-                            (res.data.status) ?
-                            $scope.showStatus(res.data.status,
-                                    'Creating Module : Successful!', 2000): console.error(
-                                    res.data.error) &
-                                $scope.showStatus(res.data.status,
-                                    'Creating Module : Failed!', 2000)
-
-                        }, function errorCallback(error) {
-                            $scope.showStatus(false, 'Creating Module : Failed!',
-                                2000);
-                            console.error(error);
-                        });
-                } else if (itemType === 'TestCase' && $scope.selectedModule !== undefined &&
-                    $scope.selectedModule !== null) {
-                    $rest.createTestCase({
-                            'projectName': $scope.selectedProject,
-                            'module': $scope.selectedModule,
-                            'values': {
-                                '_id': result,
-                                'type': 'testcase'
-                            }
-                        })
-                        .then(function successCallback(res) {
-                            (res.data.status) ?
-                            $scope.showStatus(res.data.status,
-                                    'Creating TestCase : Successful!', 2000): console
-                                .error(res.data.error) &
-                                $scope.showStatus(res.data.status,
-                                    'Creating TestCase : Failed!', 2000)
-
-                        }, function errorCallback(error) {
-                            $scope.showStatus(false, 'Creating Module : Failed!',
-                                2000);
-                            console.error(error);
-                        });
-                }
-            }
-        });
-    };
-
-
+    
     /********** TOOLBAR SELECT PROJECT **********/
     $scope.getSelectedProject = function() {
         if ($scope.selectedProject !== undefined && 
@@ -379,6 +290,21 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         $scope.selectedComponent = null;
     };
 
+    $scope.onTCRightClick = 
+    `<div>
+        <ul id='contextmenu-node'>
+            <li class='contextmenu-item' ng-click='clickedItem1()'> Item 1 </li>
+            <li class='contextmenu-item' ng-click='clickedItem2()'> Item 2 </li>
+        </ul>
+    </div>`
+
+    $scope.clickedItem1 = function(){
+        console.log("Clicked item 1.");
+    };
+    $scope.clickedItem2 = function(){
+        console.log("Clicked item 2.");
+    };
+
 
     /********** SIDE NAVIGATOR **********/
     $scope.toggleNav = buildToggle('side-nav');
@@ -386,7 +312,7 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     function buildToggle(componentID) {
         return function() {
             $mdSidenav(componentID).toggle();
-        }
+        };
     }
 
 
@@ -402,8 +328,8 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     });
 
     $scope.editor.setOption("extraKeys", {
-        'Cmd-S': function(cm) {
-            console.log($scope.selectedComponent)
+        'Ctrl-L': function(cm) {
+            console.log('this is a test');
 
             if ($scope.selectedComponent !== undefined) {
                 let data = $scope.selectedComponent;
@@ -446,84 +372,159 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     };
 
 
-    $scope.openDialog = function($event) {
+    $scope.openDialog = function($event, itemType) {
         $mdDialog.show({
             controller: DialogCtrl,
             controllerAs: 'ctrl',
             templateUrl: 'dialog.tmpl.html',
             parent: angular.element(document.body),
             targetEvent: $event,
-            clickOutsideToClose: true
+            clickOutsideToClose: true,
+            locals: {
+                'items' :{
+                    projects: $scope.project.getAutocompleteMap(),
+                    modules: $scope.module.getAutocompleteMap(),
+                    testcases: $scope.testcase.getAutocompleteMap(),
+                    components: $scope.component.getAutocompleteMap()
+                    
+                },
+                'itemType': itemType,
+                'selectedItems': {
+                    project: $scope.selectedProject,
+                    module: $scope.selectedModule,
+                    testcase: $scope.selectedTestCase,
+                    component: $scope.selectedComponent 
+                }
+            }
         });
-    };
 
 
-    function DialogCtrl($timeout, $q, $scope, $mdDialog) {
-        var self = this;
+        function DialogCtrl($timeout, $q, $scope, $mdDialog, items, itemType, selectedItems) {
+            var self = this;
+            $scope.itemType = itemType;
 
-        // list of `state` value/display objects
-        self.states = loadAll();
-        // self.states = $scope.project.getNames();
-        // console.log(self.states);
-        self.querySearch = querySearch;
+            switch(itemType) {
+                case 'Project': self.states = items.projects; break;
+                case 'Module': self.states = items.modules; break;
+                case 'Testcase': self.states = items.testcases; break;
+                case 'Component': self.states = items.components; break;
+            }
 
-        // ******************************
-        // Template methods
-        // ******************************
+            self.querySearch = querySearch;
 
-        self.cancel = function($event) {
-            $mdDialog.cancel();
-        };
-        self.finish = function($event) {
-            $mdDialog.hide();
-        };
+            self.cancel = function($event) {
+                $mdDialog.cancel();
+            };
+            self.ok = function($event) {
+                if(self.searchText !== null &&
+                    self.searchText !== undefined){
+                    
+                    if(itemType === 'Project') {
+                        $rest.createProject({
+                            'projectName': self.searchText
+                        })
+                        .then(function successCallback(res) {
+                            let status, 
+                                message = `Creating ${itemType} : `;
 
-        // ******************************
-        // Internal methods
-        // ******************************
+                            if(res.data.status)
+                                (status = true) & 
+                                (message = message+ 'Successful!')
+                            else
+                                (status = false) & 
+                                (message = message+ 'Failed!') &
+                                console.error(res.data.error)
 
-        /**
-         * Search for states... use $timeout to simulate
-         * remote dataservice call.
-         */
-        function querySearch(query) {
-            return query ? self1.states.filter(createFilterFor(query)) : self.states;
-        }
+                            showStatus(status, message);
+                        });
+                    }
+                    else if(itemType === 'Module') {
+                        if(selectedItems.project !== null) {
+                            $rest.createModule({
+                                'projectName': selectedItems.project,
+                                'values': {
+                                    _id: self.searchText,
+                                    type: 'module'
+                                }
+                            })
+                            .then(function successCallback(res) {
+                                let status, 
+                                    message = `Creating ${itemType} : `;
 
-        /**
-         * Build `states` list of key/value pairs
-         */
-        function loadAll() {
-            var allStates =
-                'Alabama, Alaska, Arizona, Arkansas, California, Colorado, Connecticut, Delaware,\
-              Florida, Georgia, Hawaii, Idaho, Illinois, Indiana, Iowa, Kansas, Kentucky, Louisiana,\
-              Maine, Maryland, Massachusetts, Michigan, Minnesota, Mississippi, Missouri, Montana,\
-              Nebraska, Nevada, New Hampshire, New Jersey, New Mexico, New York, North Carolina,\
-              North Dakota, Ohio, Oklahoma, Oregon, Pennsylvania, Rhode Island, South Carolina,\
-              South Dakota, Tennessee, Texas, Utah, Vermont, Virginia, Washington, West Virginia,\
-              Wisconsin, Wyoming';
+                                if(res.data.status)
+                                    (status = true) & 
+                                    (message = message+ 'Successful!')
+                                else
+                                    (status = false) & 
+                                    (message = message+ 'Failed!') &
+                                    console.error(res.data.error)
+                            });
+                        }
+                    }
+                    else if(itemType === 'TestCase') {
+                        if(selectedItems.module !== null) {
+                            $rest.createTestCase({
+                                'projectName': selectedItems.project,
+                                'values': {
+                                    _id: self.searchText,
+                                    type: 'testcase'
+                                },
+                                'module': selectedItems.module
+                            })
+                            .then(function successCallback(res) {
+                                let status, 
+                                    message = `Creating ${itemType} : `;
 
-            return allStates.split(/, +/g).map(function(state) {
-                return {
-                    value: state.toLowerCase(),
-                    display: state
-                };
-            });
-        }
-
-        /**
-         * Create filter function for a query string
-         */
-        function createFilterFor(query) {
-            var lowercaseQuery = angular.lowercase(query);
-
-            return function filterFn(state) {
-                return (state.value.indexOf(lowercaseQuery) === 0);
+                                if(res.data.status)
+                                    (status = true) & 
+                                    (message = message+ 'Successful!')
+                                else
+                                    (status = false) & 
+                                    (message = message+ 'Failed!') &
+                                    console.error(res.data.error)
+                            });
+                        }
+                    }
+                }
+                $mdDialog.hide();
             };
 
+            function querySearch(query) {
+                return query ? self.states.filter(createFilterFor(query)) : self.states;
+            }
+
+            function createFilterFor(query) {
+                var lowercaseQuery = angular.lowercase(query);
+
+                return function filterFn(state) {
+                    return (state.value.indexOf(lowercaseQuery) === 0);
+                };
+
+            }
         }
     };
 
     constructor();
 
+})
+.directive( "contextMenu", function($compile){
+    contextMenu = {};
+    contextMenu.restrict = "AE";
+    contextMenu.link = function( lScope, lElem, lAttr ){
+        lElem.on("contextmenu", function (e) {
+            e.preventDefault(); // default context menu is disabled
+            //  The customized context menu is defined in the main controller. To function the ng-click functions the, contextmenu HTML should be compiled.
+            lElem.append( $compile( lScope[ lAttr.contextMenu ])(lScope) );
+            // The location of the context menu is defined on the click position and the click position is catched by the right click event.
+            $("#contextmenu-node").css("left", e.clientX);
+            $("#contextmenu-node").css("top", e.clientY);            
+        });
+        lElem.on("mouseleave", function(e){
+            console.log("Leaved the div");
+            // on mouse leave, the context menu is removed.
+            if($("#contextmenu-node") )
+                $("#contextmenu-node").remove();
+        });
+    };
+    return contextMenu;
 });

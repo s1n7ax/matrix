@@ -95,19 +95,19 @@
                     <md-menu-content width="4">
 
                         <md-menu-item>
-                            <md-button ng-click="openDialog($event)">
+                            <md-button ng-click="openDialog($event, 'Project')">
                                 Create Project
                             </md-button>
                         </md-menu-item>
 
                         <md-menu-item>
-                            <md-button ng-click="inputPrompt('Module', $event)">
+                            <md-button ng-click="openDialog($event, 'Module')">
                                 Create Module
                             </md-button>
                         </md-menu-item>
 
                         <md-menu-item>
-                            <md-button ng-click="inputPrompt('TestCase', $event)">
+                            <md-button ng-click="openDialog($event, 'TestCase')">
                                 Create TestCase
                             </md-button>
                         </md-menu-item>
@@ -149,9 +149,15 @@
 
                         <md-content>
                             <div layout="column" ng-repeat="tc in moduleViewTree">
-                                <md-button class="file-tree-main" ng-click="showComponents = !showComponents">
-                                    {{tc._id}}
-                                </md-button>
+                                <div 
+                                context-menu="onTCRightClick" 
+                                style="width:98%">
+                                    <md-button 
+                                    class="file-tree-main" 
+                                    ng-click="showComponents = !showComponents">
+                                        {{tc._id}}
+                                    </md-button>
+                                </div>
                                 <div ng-show="showComponents" ng-repeat="bc in tc.links">
                                     <md-button 
                                         class="file-tree-sub" 
@@ -193,10 +199,10 @@
 
         <!-- TEMPLATES -->
         <div>
-            <script type="text/ng-template" id="dialog.tmpl.html"><md-dialog aria-label="Autocomplete Dialog Example">
+            <script type="text/ng-template" id="dialog.tmpl.html"><md-dialog aria-label="Create New Item">
               <md-toolbar>
                 <div class="md-toolbar-tools">
-                  <h2>Autocomplete Dialog Example</h2>
+                  <h2>Create New {{itemType}}</h2>
                   <span flex></span>
                   <md-button class="md-icon-button" ng-click="ctrl.cancel()">
                     <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
@@ -228,7 +234,7 @@
               </md-dialog-content>
 
               <md-dialog-actions>
-                <md-button aria-label="Finished" ng-click="ctrl.finish($event)">Finished</md-button>
+                <md-button aria-label="Okay" ng-click="ctrl.ok($event)">Okay</md-button>
               </md-dialog-actions>
             </md-dialog>
             </script>
@@ -259,6 +265,9 @@
 
     <!--  Angular Material js  -->
     <script src="javascripts/angular-material.js"></script>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
     <!-- CodeMirror js -->
     <script src="javascripts/codemirror.js"></script>

@@ -1,37 +1,40 @@
 app.service('$rest', function($http) {
+
+    let self = this;
     
-    this.getAllProjects = function() {
+    self.getAllProjects = function() {
         return $http.post('/getAllProjects');
-    }
+    };
 
-    this.getAllModules = function (projectName) {
+    self.getAllModules = function (projectName) {
         return $http.post('/getAllModules', projectName);
-    }
+    };
 
-    this.getAllTestCases = function (values) {
+    self.getAllTestCases = function (values) {
         return $http.post('/getAllTestCases', values);
-    }
+    };
 
-    this.getAllComponents = function (values) {
+    self.getAllComponents = function (values) {
         return $http.post('/getAllComponents', values);
-    }
+    };
 
 
 
-    this.createProject = function (projectName) {
-        return $http.post('/createProject', projectName);
-    }
 
-    this.createModule = function (values) {
+    self.createProject = function (values) {
+        return $http.post('/createProject', values);
+    };
+
+    self.createModule = function (values) {
         return $http.post('/createModule', values);
-    }
+    };
 
-    this.createTestCase = function (values) {
+    self.createTestCase = function (values) {
         return $http.post('/createTestCase', values);
     } 
 
 
-    this.setComponent = function (values) {
-        return $http.post('/setComponent', values)
-    }
+    self.setComponent = function (values) {
+        return $http.post('/setComponent', values);
+    };
 }); 
