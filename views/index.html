@@ -146,22 +146,19 @@
                     
                     <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
                     <div ng-if=" selectedViewType === 'module-view' ">
-
                         <md-content>
                             <div layout="column" ng-repeat="tc in moduleViewTree">
-                                <div 
-                                context-menu="onTCRightClick" 
-                                style="width:98%">
+                                <context-menu contextmenu-template="onTCRightClick" onRight>
                                     <md-button 
-                                    class="file-tree-main" 
-                                    ng-click="showComponents = !showComponents">
-                                        {{tc._id}}
+                                        class="file-tree-main" 
+                                        ng-click="showComponents = !showComponents; test()">
+                                            {{tc._id}}
                                     </md-button>
-                                </div>
+                                </context-menu>
                                 <div ng-show="showComponents" ng-repeat="bc in tc.links">
                                     <md-button 
                                         class="file-tree-sub" 
-                                        ng-click="component.setSelected(bc); component.setEditorContent(bc)">
+                                        ng-click="component.setSelected(bc); component.setEditorContent(bc); test2($event)">
                                         {{bc._id}}
                                     </md-button>
                                 </div>
@@ -169,10 +166,6 @@
                         </md-content>
 
                     </div>
-
-
-
-
 
                     <!-- SIDE NAVIGATOR TREE VIEW CONTAINER -->
                     <div class="tree-view" ng-if=" selectedViewType === 'tree-view' ">
@@ -280,7 +273,7 @@
         let app = angular.module(
             'automate', [
                 'ngMaterial',
-                'ngMessages'
+                'ngMessages',
             ])
 
     </script>

@@ -1,9 +1,42 @@
 /* global let */
+app.directive( "contextMenu", function($compile){
+    contextMenu = {};
+    contextMenu.restrict = "AE";
+    /*contextMenu.controller = function ($scope) {
+        console.log($scope.onRightClick)
+    }*/
+    contextMenu.link = function( lScope, lElem, lAttr){
+        lElem.on("contextmenu", function (e) {
+            // console.log(lScope);
+            // console.log(lElem); 
+            console.log($compile(lScope[lAttr.contextmenuTemplate])(lScope));
+            lScope.test1 = 10;
+
+            e.preventDefault(); 
+
+            if($("#contextmenu-node"))
+                $("#contextmenu-node").remove();
+
+            lElem.append( $compile( lScope[ lAttr.contextmenuTemplate ])(lScope) );
+            // The location of the context menu is defined on the click position and the click position is catched by the right click event.
+            $("#contextmenu-node").css("left", e.clientX);
+            $("#contextmenu-node").css("top", e.clientY - 55);            
+        });
+
+        lElem.on("mouseleave", function(e){
+            if($("#contextmenu-node"))
+                $("#contextmenu-node").remove();
+        });
+    };
+
+    
+
+    return contextMenu;
+});
 
 app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $rest) {
 
     /********** INITIALIZING **********/
-    var test = this;
 
 
     /**
@@ -291,12 +324,12 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     };
 
     $scope.onTCRightClick = 
-    `<div>
-        <ul id='contextmenu-node'>
-            <li class='contextmenu-item' ng-click='clickedItem1()'> Item 1 </li>
-            <li class='contextmenu-item' ng-click='clickedItem2()'> Item 2 </li>
-        </ul>
-    </div>`
+    `   <div id='contextmenu-node'>
+            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
+            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
+            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
+        </div>
+    `
 
     $scope.clickedItem1 = function(){
         console.log("Clicked item 1.");
@@ -328,8 +361,7 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     });
 
     $scope.editor.setOption("extraKeys", {
-        'Ctrl-L': function(cm) {
-            console.log('this is a test');
+        'Ctrl-S': function(cm) {
 
             if ($scope.selectedComponent !== undefined) {
                 let data = $scope.selectedComponent;
@@ -504,27 +536,9 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
         }
     };
 
-    constructor();
+    $scope.test = function () {
+        console.log($scope.test1);
+    }
 
-})
-.directive( "contextMenu", function($compile){
-    contextMenu = {};
-    contextMenu.restrict = "AE";
-    contextMenu.link = function( lScope, lElem, lAttr ){
-        lElem.on("contextmenu", function (e) {
-            e.preventDefault(); // default context menu is disabled
-            //  The customized context menu is defined in the main controller. To function the ng-click functions the, contextmenu HTML should be compiled.
-            lElem.append( $compile( lScope[ lAttr.contextMenu ])(lScope) );
-            // The location of the context menu is defined on the click position and the click position is catched by the right click event.
-            $("#contextmenu-node").css("left", e.clientX);
-            $("#contextmenu-node").css("top", e.clientY);            
-        });
-        lElem.on("mouseleave", function(e){
-            console.log("Leaved the div");
-            // on mouse leave, the context menu is removed.
-            if($("#contextmenu-node") )
-                $("#contextmenu-node").remove();
-        });
-    };
-    return contextMenu;
+    constructor();
 });
