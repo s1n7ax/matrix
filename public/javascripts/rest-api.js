@@ -6,8 +6,8 @@ app.service('$rest', function($http) {
         return $http.post('/getAllProjects');
     };
 
-    self.getAllModules = function (projectName) {
-        return $http.post('/getAllModules', projectName);
+    self.getAllModules = function (values) {
+        return $http.post('/getAllModules', values);
     };
 
     self.getAllTestCases = function (values) {
@@ -17,8 +17,6 @@ app.service('$rest', function($http) {
     self.getAllComponents = function (values) {
         return $http.post('/getAllComponents', values);
     };
-
-
 
 
     self.createProject = function (values) {

@@ -1,17 +1,53 @@
 const Locator = require('../locator');
 const Nano = require('nano');
 const JsonFile = require('jsonfile');
+const io = require('socket.io')(3001);
 const Path = require('path');
 
-class Services {
 
-    constructor(dbName = 'automate_project_db') {
+/*class Service {
+    constructor(dbName) {
 
         let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
         let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
         
         this.server = Nano(connectionQuery);
-        this.database = this.server.use(dbName);
+    }
+
+    createProject () {
+        console.log('hello')
+    }
+}
+
+let a = new Service();
+console.log(a);
+a.createProject();*/
+
+class Service {
+
+
+
+    constructor(dbName) {
+
+        let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
+        let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
+        
+        this.server = Nano(connectionQuery);
+
+
+
+        if(dbName !== undefined){
+            this.dbName = dbName;
+            this.database = this.server.use(dbName)
+            this.feed = this.database.follow({since: "now"})
+            this.socket = io.of('/'+dbName);
+
+            this.startSocket();
+            this.followDB();
+        }
+        else {
+            console.log('db Name : '+dbName)
+        }
     }
 
     /* 
@@ -141,20 +177,64 @@ class Services {
 			}
 		});
 	}
+
+
+    followDB () {
+        let self = this;
+
+        this.feed.on('change', function(change) {
+            self.selectDocById(change.id, function (error, body) {
+                error ? console.log(error) : self.broadcast(body.type)
+            });
+        });
+
+        this.feed.follow();
+        /*process.nextTick(function () {
+            callback();
+        });*/
+    }
+
+    broadcast (type) {
+        this.socket.emit('updates', type);
+    }
+
+    startSocket () {
+        let user = 0;
+        /*io.on('connection', function (socket) {
+            console.log('connecting user')
+
+            socket.send('this is a message');
+
+            io.sockets.emit('broadcast', 'broadcasting');
+
+            socket.on('disconnect', function () {
+                console.log('disconnecting user');
+            });
+
+            setTimeout(function () {
+                io.sockets.emit('broadcast', 'broadcasting after 5 sec');
+            }, 5000);
+        });*/
+
+        
+        this.socket.on('connection', function (socket) {
+            console.log('User '+(++user)+' connected');
+
+            socket.on('disconnect', function () {
+                console.log('User '+(--user)+' disconnected');
+            });
+        });
+
+        
+
+        /*this.socket.on('connection', function (socket) {
+            socket.emit('test', 'test');
+        });*/
+    } 
 }
 
 
-/*let a = new Services(undefined);
-console.log('*****')
 
-a.selectDocById('_design/Automate', function (error, body) {
-    if(error)
-        console.error(error);
-    else
-        console.log(body);
-})*/
-
-
-module.exports = Services;
+module.exports = Service;
 
 

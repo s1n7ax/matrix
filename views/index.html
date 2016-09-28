@@ -107,8 +107,8 @@
                         </md-menu-item>
 
                         <md-menu-item>
-                            <md-button ng-click="openDialog($event, 'TestCase')">
-                                Create TestCase
+                            <md-button ng-click="openDialog($event, 'Testcase')">
+                                Create Testcase
                             </md-button>
                         </md-menu-item>
 
@@ -148,17 +148,17 @@
                     <div ng-if=" selectedViewType === 'module-view' ">
                         <md-content>
                             <div layout="column" ng-repeat="tc in moduleViewTree">
-                                <context-menu contextmenu-template="onTCRightClick" onRight>
+                                <context-menu contextmenu-template="onTCRightClick">
                                     <md-button 
                                         class="file-tree-main" 
-                                        ng-click="showComponents = !showComponents; test()">
+                                        ng-click="showComponents = !showComponents">
                                             {{tc._id}}
                                     </md-button>
                                 </context-menu>
                                 <div ng-show="showComponents" ng-repeat="bc in tc.links">
                                     <md-button 
                                         class="file-tree-sub" 
-                                        ng-click="component.setSelected(bc); component.setEditorContent(bc); test2($event)">
+                                        ng-click="component.setSelected(bc); component.setEditorContent();">
                                         {{bc._id}}
                                     </md-button>
                                 </div>
@@ -268,15 +268,11 @@
     <!-- Blue Bird -->
     <script src="//cdn.jsdelivr.net/bluebird/3.4.5/bluebird.js"></script>
 
-    <!-- Custom js -->
-    <script>
-        let app = angular.module(
-            'automate', [
-                'ngMaterial',
-                'ngMessages',
-            ])
+    <!-- Socket.IO -->
+    <script src="http://cmdsnmuhandiram:3001/socket.io/socket.io.js"></script>
 
-    </script>
+    <!-- Custom js -->
+    <script> let app = angular.module('automate', ['ngMaterial', 'ngMessages']) </script>
     <script src="javascripts/rest-api.js"></script>
     <script src="javascripts/automate.js"></script>
     <script src="javascripts/script.js"></script>

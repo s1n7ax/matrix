@@ -1,7 +1,35 @@
 const Locator = require('../locator');
+const http = require('http');
 const express = require('express');
 const router = express.Router();
-const Services =  require(Locator.servicesPath.services);
+const Service =  require(Locator.servicesPath.services);
+
+let service = new Service();
+let services = new Object();
+
+let serviceProvider = function () {
+	let removeValues = ['_replicator', '_users'];
+	
+	service.getAllProjects(function (error, body) {
+		error ?
+			console.error(error) :
+			removeValues.forEach(function (val) {
+				if((index = body.indexOf(val)) > -1) {
+					body.splice(index, 1);
+				}
+			})
+
+		
+		body.forEach(function (val) {
+			services[val] = new Service(val);
+		});
+
+		console.log('Service Providers : Ready!')
+	});
+}
+
+serviceProvider();
+
 
 
 router.get('/', function(req, res, next) {
@@ -10,9 +38,8 @@ router.get('/', function(req, res, next) {
 
 
 router.post('/createProject', function (req, res, next) {
-	let services = new Services();
 	
-	services.createProject(req.body.projectName, function (error, body) {
+	service.createProject(req.body.projectName, function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
@@ -73,11 +100,9 @@ router.post('/deleteProject', function (req, res, next) {
 });
 
 router.post('/createModule', function (req, res, next) {
-	let services = new Services(req.body.projectName);
+	let projectService = services[req.body.projectName];
 
-	console.log(req.body);
-
-	services.insertOrUpdateDoc(req.body.values, function (error, body) {
+	projectService.insertOrUpdateDoc(req.body.values, function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
@@ -96,9 +121,9 @@ router.post('/createModule', function (req, res, next) {
 });
 
 router.post('/createTestCase', function(req, res, next) {
-	let services = new Services(req.body.projectName);
+	let projectService = services[req.body.projectName];
 
-	services.insertOrUpdateDoc(req.body.values, function (error, body) {
+	projectService.insertOrUpdateDoc(req.body.values, function (error, body) {
 		if(error) {
 			console.error(error);
 			res.send({
@@ -117,7 +142,7 @@ router.post('/createTestCase', function(req, res, next) {
 				req.body.module.links.push(body.id);
 			}
 
-			services.insertOrUpdateDoc(req.body.module, function (error, body) {
+			projectService.insertOrUpdateDoc(req.body.module, function (error, body) {
 				if(error) {
 					res.send({
 						'status': false,
@@ -130,7 +155,7 @@ router.post('/createTestCase', function(req, res, next) {
 						'status': true,
 						'body': body,
 						'error': null
-					})
+					});
 				}
 			});
 		}
@@ -142,10 +167,9 @@ router.post('/createTestCase', function(req, res, next) {
  * GET ALL ITEMS
  */
 router.post('/getAllProjects', function (req, res, next) {
-	let services = new Services;
 	let removeValues = ['_replicator', '_users'];
 	
-	services.getAllProjects(function (error, body) {
+	service.getAllProjects(function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
@@ -168,11 +192,12 @@ router.post('/getAllProjects', function (req, res, next) {
 	});
 });
 router.post('/getAllModules', function (req, res, next) {
-	let services = new Services(req.body.projectName);
+	let projectService = services[req.body.projectName];
 	let result = new Array;
-
-	services.getAllModueDocs(undefined, function (error, body) {
+	
+	projectService.getAllModueDocs(undefined, function (error, body) {
 		if(error) {
+			console.error(error)
 			res.send({
 				'status': false,
 				'body': null,
@@ -180,7 +205,6 @@ router.post('/getAllModules', function (req, res, next) {
 			});
 		}
 		else {
-			console.log(body);
 			body.rows.forEach(function (data) {
 				result.push(data.value);
 			});
@@ -194,10 +218,10 @@ router.post('/getAllModules', function (req, res, next) {
 	});
 });
 router.post('/getAllTestCases', function (req, res, next) {
-	let services = new Services(req.body.projectName);
+	let projectService = services[req.body.projectName];
 	let result = new Array;
 	
-	services.getAllTestCaseDocs(undefined, function (error, body) {
+	projectService.getAllTestCaseDocs(undefined, function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
@@ -219,10 +243,10 @@ router.post('/getAllTestCases', function (req, res, next) {
 	});
 });
 router.post('/getAllComponents', function (req, res, next) {
-	let services = new Services(req.body.projectName);
+	let projectService = services[req.body.projectName];
 	let result = new Array;
 
-	services.getAllComponentDocs(undefined, function (error, body) {
+	projectService.getAllComponentDocs(undefined, function (error, body) {
 		if(error) {
 			res.send({
 				'status': false,
@@ -249,10 +273,13 @@ router.post('/getAllComponents', function (req, res, next) {
  * GET ALL ITEMS
  */
 router.post('/setComponent', function (req, res, next) {
-	let services = new Services(req.body.projectName);
+	console.log('/setComponent');
+	console.log(services[req.body.projectName].dbName);
+	let projectService = services[req.body.projectName];
 
-	services.insertOrUpdateDoc(req.body.values, function (error, body) {
+	projectService.insertOrUpdateDoc(req.body.values, function (error, body) {
 		if(error) {
+			console.error(error);
 			res.send({
 				'status': false,
 				'body': null,

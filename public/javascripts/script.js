@@ -1,16 +1,24 @@
-/* global let */
 app.directive( "contextMenu", function($compile){
     contextMenu = {};
     contextMenu.restrict = "AE";
     /*contextMenu.controller = function ($scope) {
         console.log($scope.onRightClick)
     }*/
+
+    /*contextMenu.template = 
+    `   <div id='contextmenu-node'>
+            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
+            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
+            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
+        </div>
+    `*/
     contextMenu.link = function( lScope, lElem, lAttr){
         lElem.on("contextmenu", function (e) {
             // console.log(lScope);
             // console.log(lElem); 
-            console.log($compile(lScope[lAttr.contextmenuTemplate])(lScope));
-            lScope.test1 = 10;
+            // console.log($compile(lScope[lAttr.contextmenuTemplate])(lScope));
+            // console.log($compile(contextMenu.template)());
+            // lScope.test1 = 10;
 
             e.preventDefault(); 
 
@@ -36,7 +44,27 @@ app.directive( "contextMenu", function($compile){
 
 app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $rest) {
 
-    /********** INITIALIZING **********/
+
+    /********** SOCKET MODULES **********/
+    let socket = io('http://cmdsnmuhandiram:3001/automate_project_db');
+
+    /*socket.on('connect', function () {
+        console.log('Starting Socket');
+    });*/
+
+    socket.on('updates', function (data) {
+        switch(data) {
+            case 'module': $scope.module.update(); break;
+            case 'testcase': $scope.testcase.update(); break;
+            case 'component': $scope.component.update(); break;
+            default : console.error('Invalide Update Type');
+        }
+    });
+
+    /*socket.on('broadcast', function (data) {
+        console.log(data);
+    });*/
+
 
 
     /**
@@ -50,9 +78,24 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     /**
     * WATCHERS
     */
+    $scope.$watch('modules', function () {
+        $scope.module.updateSelected();
+    });
+
+    $scope.$watch('testcases', function () {
+        $scope.module.getModuleViewTree();
+    });
+
+    $scope.$watch('components', function () {
+        $scope.module.getModuleViewTree();
+        $scope.component.setEditorContent();
+    })
+
     $scope.$watch('selectedModule', function () {
         $scope.module.getModuleViewTree();
     });
+
+    
 
 
 
@@ -63,6 +106,21 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
     $scope.moduleSelectorIsDisabled = true;
     $scope.statusBarColor = 'default-status';
 
+
+    $scope.common = new Object();
+    /**
+     * getNewObjectByObject method can be used only objects with string properties
+     * @return Object
+     */
+    $scope.common.getNewObjectByObject = function (object) {
+        let keys = Object.keys(object);
+        let obj = new Object();
+        keys.forEach(function (val) {
+            obj[val] = object[val];
+        });
+
+        return obj;
+    }
 
     /**
      * PROJECTS
@@ -141,6 +199,12 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             });
         }
     };
+    $scope.module.updateSelected = function () {
+        if($scope.selectedModule !== null) {
+            let result = $scope.modules.filter(result=>result._id === $scope.selectedModule._id);
+            $scope.selectedModule = result.length > 0 ? result[0] : null
+        }     
+    }
     $scope.module.getModuleViewTree = function () {
         let tree = new Array();
 
@@ -202,13 +266,30 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             });
         }
     };
+    /** IMPORTANT
+     * getByList should not return references of main project content. 
+     * use getNewObjectByObject get complete new object copy.
+     * @return Array
+     */
     $scope.testcase.getByList = function (value) {
         let result = new Array();
 
-        for(let i = 0; i < value.length; i++)
+        /*for(let i = 0; i < value.length; i++)
             for(let j = 0; j < $scope.testcases.length; j++)
                 if(value[i] === $scope.testcases[j]._id)
                     result.push($scope.testcases[j]);
+
+        
+
+        value.filter(function (val, index) {
+
+        })*/
+
+        value.forEach(function (val, index) {
+            let filteredArr = $scope.testcases.filter(result=>val === result._id);
+            let objectCopy = $scope.common.getNewObjectByObject(filteredArr[0]);
+            result.push(objectCopy);
+        });
 
         return result;
     };
@@ -257,20 +338,33 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
             });
         }
     };
+    /** IMPORTANT
+     * getByList should not return references of main project content. 
+     * use getNewObjectByObject get complete new object copy.
+     * @return Array
+     */
     $scope.component.getByList = function (value) {
         let result = new Array();
 
-        for(let i = 0; i < value.length; i++)
+        /*for(let i = 0; i < value.length; i++)
             for(let j = 0; j < $scope.components.length; j++)
                 if(value[i] === $scope.components[j]._id)
-                    result.push($scope.components[j]);
+                    result.push($scope.components[j]);*/
+
+
+
+        value.forEach(function (val, index) {
+            let filteredArr = $scope.components.filter(result=>val === result._id);
+            let objectCopy = $scope.common.getNewObjectByObject(filteredArr[0]);
+            result.push(objectCopy);
+        });
 
         return result;
     };
-    $scope.component.setEditorContent = function (value) {
-        if (value.content !== null &&
-            value.content !== undefined)
-            $scope.editor.setValue(value.content);
+    $scope.component.setEditorContent = function () {
+        if ($scope.selectedComponent !== null &&
+            $scope.selectedComponent.content !== null)
+            $scope.editor.setValue($scope.selectedComponent.content);
         else
             $scope.editor.setValue('');
     };
@@ -325,14 +419,14 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
 
     $scope.onTCRightClick = 
     `   <div id='contextmenu-node'>
-            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
-            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
-            <div class='contextmenu-item' ng-click='clickedItem1()'>Create Component</div>
+            <div class='contextmenu-item' ng-click='clickedItem1($event, tc)'>Create Component</div>
+            <div class='contextmenu-item' ng-click='clickedItem1($event, tc)'>Create Component</div>
+            <div class='contextmenu-item' ng-click='clickedItem1($event, tc)'>Create Component</div>
         </div>
     `
 
-    $scope.clickedItem1 = function(){
-        console.log("Clicked item 1.");
+    $scope.clickedItem1 = function($event, tc){
+        console.log("tc");
     };
     $scope.clickedItem2 = function(){
         console.log("Clicked item 2.");
@@ -368,17 +462,17 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                 data.content = cm.doc.getValue();
 
                 $rest.setComponent({
-                        'projetcName': $scope.selectedProject,
+                        'projectName': $scope.selectedProject,
                         'values': data
                     })
-                    .then(function(res) {
+                    .then(function successCallback(res) {
                         if (res.data.status) {
-                            $scope.showStatus(true, 'Saving Component : Successful!',
-                                5000);
+                            console.log(res);
                         } else {
-                            $scope.showStatus(false, 'Saving Component : Failed!',
-                                5000);
+                            console.error(error)
                         }
+                    }, function errorCallback(error) {
+                        console.error(error);
                     });
             }
         }
@@ -493,7 +587,7 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                             });
                         }
                     }
-                    else if(itemType === 'TestCase') {
+                    else if(itemType === 'Testcase') {
                         if(selectedItems.module !== null) {
                             $rest.createTestCase({
                                 'projectName': selectedItems.project,
@@ -531,14 +625,9 @@ app.controller('automate_ctrl', function($scope, $mdSidenav, $http, $mdDialog, $
                 return function filterFn(state) {
                     return (state.value.indexOf(lowercaseQuery) === 0);
                 };
-
             }
         }
     };
-
-    $scope.test = function () {
-        console.log($scope.test1);
-    }
 
     constructor();
 });
