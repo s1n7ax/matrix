@@ -1,7 +1,6 @@
 <html>
 
 <head>
-
     <title>Automate</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,14 +13,18 @@
     <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Poiret+One'>
     <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Ubuntu:300'>
 
+    <!-- Custom Fonts-->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Cantarell" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Bitter" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Aldrich" />
+
     <!-- Google icon -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
 
     <!-- CodeMirror css -->
-    <link rel="stylesheet" href="stylesheets/codemirror.css">
-
-    <!-- JS Tree -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/codemirror.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/show-hint.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/docs.css">
 
     <!-- Custom css -->
     <link rel="stylesheet" href="stylesheets/style.css">
@@ -34,9 +37,8 @@
     <div layout="column" style="height:100%">
 
         <!-- TOOLBAR -->
-        <md-toolbar flex="initial" class="toolbar md-whiteframe-2dp light-blue"
-        ng-cloak>
-            <div class="md-toolbar-tools">
+        <md-toolbar flex class="toolbar" ng-cloak>
+            <div class="md-toolbar-tools toolbar">
 
                 <!-- SHOW SIDE NAVOGATOR BUTTON -->
                 <md-button class="md-icon-button md-button md-ink-ripple"
@@ -51,64 +53,51 @@
                 <div flex=""></div>
 
                 <!-- PROJECT SELECTOR -->
-                <md-select ng-model="selectedProject"
-                md-selected-text="getSelectedProject()"
-                ng-change="onProjectChange()"
+                <md-select ng-model="project.selected"
+                md-selected-text="project.selectMenuString"
+                ng-change="project.onSelect()"
+                ng-click="project.onClick()"
                 aria-label="Project" class="toolbar-project-selector">
                     <md-optgroup label="Projects">
-                        <md-option ng-value="project" ng-repeat="project in projects">{{project}}</md-option>
-                    </md-optgroup>
-                </md-select>
-
-                <!-- MODULE SELECTOR -->
-                <md-select ng-model="selectedModule"
-                md-selected-text="getSelectedModule()"
-                ng-change="onModuleChange()"
-                aria-label="Module" class="toolbar-module-selector"
-                ng-disabled="moduleSelectorIsDisabled">
-                    <md-optgroup label="Modules">
-                        <md-option ng-value="module" ng-repeat="module in modules"
-                        ng-click="setSelectedComponent(module)">{{module._id}}</md-option>
+                        <md-option ng-value="project" ng-repeat="project in project.nameList">{{project}}</md-option>
                     </md-optgroup>
                 </md-select>
 
                 <!-- SPACER -->
                 <div flex=""></div>
 
-                <!-- NOTIFICATIONS -->
+                <!-- MATRIX -->
                 <md-button class="md-icon-button">
-                    <md-icon md-font-icon="material-icons" class="toolbar-icon">notifications</md-icon>
-                </md-button>
-
-                <!-- PROFILE -->
-                <md-button class="md-icon-button">
-                    <md-icon md-font-icon="material-icons" class="toolbar-icon">account_circle</md-icon>
+                    <a target="_blank" aria-label="matrixLink" href="http://cmdsnmuhandiram:3000/reporter">
+                        <md-icon md-svg-src="img/icons/ic_assignment_white_24px.svg" aria-label="matrix" class="toolbar-icon"></md-icon>
+                    </a>
                 </md-button>
 
                 <!-- OPTION MENU BUTTON-->
                 <md-menu>
 
-                    <md-button class="md-icon-button" ng-click="openOptionMenu($mdOpenMenu, $event)">
-                        <md-icon md-font-icon="material-icons" class="toolbar-icon">list</md-icon>
+                    <md-button class="md-icon-button" 
+                    ng-click="optionMenu.openOptionMenu($mdOpenMenu, $event)">
+                        <md-icon md-svg-src="img/icons/ic_list_white_24px.svg" class="toolbar-icon">list</md-icon>
                     </md-button>
 
                     <md-menu-content width="4">
 
                         <md-menu-item>
-                            <md-button ng-click="openDialog($event, 'Project')">
+                            <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'project' )">
                                 Create Project
                             </md-button>
                         </md-menu-item>
 
                         <md-menu-item>
-                            <md-button ng-click="openDialog($event, 'Module')">
-                                Create Module
+                            <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'testsuite' )">
+                                Create Test Suite
                             </md-button>
                         </md-menu-item>
 
                         <md-menu-item>
-                            <md-button ng-click="openDialog($event, 'Testcase')">
-                                Create Testcase
+                            <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'library')">
+                                Create Library
                             </md-button>
                         </md-menu-item>
 
@@ -116,10 +105,6 @@
 
                     </md-menu-content>
                 </md-menu>
-
-
-
-
             </div>
         </md-toolbar>
 
@@ -128,47 +113,77 @@
 
             <!-- SIDE NAVIGATOR -->
             <md-sidenav flex="initial" md-is-locked-open="$mdMedia('gt-sm')"
-            class="md-whiteframe-2dp" md-component-id="side-nav"
+            md-component-id="side-nav"
             md-is-locked-open="$mdMedia('gt-sm')"
-            class="md-primary md-hue-2" ng-cloak>
+            class="md-primary md-hue-2"
+            style="overflow-x: hidden; height: 92%;" ng-cloak>
 
-                <md-nav-bar md-selected-nav-item="selectedViewType"
+                <md-nav-bar md-selected-nav-item="sideNav.selectedViewType"
                 aria-label="Navigator">
-                    <md-nav-item md-nav-click="goto('module-view')"
-                    name="module-view">module view</md-nav-item>
+                    <md-nav-item md-nav-click="goto('module-browser')"
+                    name="module-browser">Test Suite</md-nav-item>
                     <md-nav-item md-nav-click="goto('tree-view')"
-                    name="tree-view">tree view</md-nav-item>
+                    name="tree-view">Libraries</md-nav-item>
                 </md-nav-bar>
 
 
                 <div class="view-content-common">
 
                     
-                    <!-- SIDE NAVIGATOR MODULE VIEW CONTAINER -->
-                    <div ng-if=" selectedViewType === 'module-view' ">
-                        <md-content>
-                            <div layout="column" ng-repeat="tc in moduleViewTree">
-                                <context-menu contextmenu-template="onTCRightClick">
+                    <!-- SIDE NAVIGATOR TEST SUITE VIEW CONTAINER -->
+                    <div ng-if=" sideNav.selectedViewType === 'module-browser'">
+                        <md-content style="height: 92%; overflow-x: hidden;">
+                            <div layout="column" ng-repeat="node in testsuiteTree.list" style="position: relative;">
+                                <context-menu contextmenu-template="onTestSuite">
                                     <md-button 
-                                        class="file-tree-main" 
-                                        ng-click="showComponents = !showComponents">
-                                            {{tc._id}}
+                                        class="file-tree-main square-buttons"
+                                        style="text-transform: none;"
+                                        ng-click="node.isExpanded = !node.isExpanded; testsuiteTree.tsOnClick();">
+                                            {{node.testsuite}}
                                     </md-button>
                                 </context-menu>
-                                <div ng-show="showComponents" ng-repeat="bc in tc.links">
-                                    <md-button 
-                                        class="file-tree-sub" 
-                                        ng-click="component.setSelected(bc); component.setEditorContent();">
-                                        {{bc._id}}
-                                    </md-button>
+                                <div ng-show="node.isExpanded" ng-repeat="testcase in node.testcase">
+                                    <context-menu contextmenu-template="onTestcase">
+                                        <md-button
+                                            class="file-tree-sub square-buttons"
+                                            style="text-transform: none;"
+                                            ng-class="fileTree.cssMainFileTreeButtonClass(testcase)"
+                                            ng-click="testsuiteTree.tcOnClick(testcase); fileTree.setFocus(testcase);">
+                                            {{testcase}}
+                                        </md-button>
+                                    </context-menu>
                                 </div>
                             </div>
                         </md-content>
-
                     </div>
 
-                    <!-- SIDE NAVIGATOR TREE VIEW CONTAINER -->
-                    <div class="tree-view" ng-if=" selectedViewType === 'tree-view' ">
+                    <!-- SIDE NAVIGATOR LIBRARY VIEW CONTAINER -->
+                    <div class="tree-view" ng-if=" sideNav.selectedViewType === 'tree-view' ">
+                        <md-content style="height: 92%; overflow-x: hidden;">
+                            <div layout="column" ng-repeat="node in libraryTree.list" style="position: relative;" >
+                                <context-menu contextmenu-template="onLibrary">
+                                    <md-button 
+                                        class="file-tree-main square-buttons"
+                                        style="text-transform: none;"
+                                        ng-click="node.isExpanded = !node.isExpanded;">
+                                            {{node.library}}
+                                    </md-button>
+                                </context-menu>
+                                <div
+                                    ng-show="node.isExpanded"
+                                    ng-repeat="component in node.components">
+                                    <context-menu contextmenu-template="onComponent">
+                                        <md-button
+                                            class="file-tree-sub square-buttons"
+                                            style="text-transform: none;"
+                                            ng-class="fileTree.cssMainFileTreeButtonClass(component)"
+                                            ng-click="libraryTree.cOnClick(component, 'component'); fileTree.setFocus(component);">
+                                            {{component}}
+                                        </md-button>
+                                    </context-menu>
+                                </div>
+                            </div>
+                        </md-content>
                     </div>
 
                 </div>
@@ -176,62 +191,351 @@
 
             <!-- EDITOR -->
             <md-content flex style="display: flex; flex-flow: column;">
-                <textarea id="textArea" style="flex:1"></textarea>
+                <div
+                    style="
+                        background-color: #545454;
+                        height: 50px;
+                        color: white;" ng-cloak>
+                    <div
+                        style="
+                            padding: 0 10px 0 30px;
+                            font-size: 30px;
+                            margin: 0;
+                            height: 50px;
+                            ">
+                        {{editor.content.name ? editor.content.name : ''}}
+                    </div>
+                </div>
+                <textarea id="code" style="flex:1"></textarea>
             </md-content>
         </div>
 
 
-        <!-- STATUS BAR -->
-        <div flex layout="row" md-whiteframe="20"
-        class="status-bar-main" ng-class="statusBarColor"
-        ng-cloak>
-            <div flex class="status-bar-container">{{status}}</div>
-        </div>
-
-
-
         <!-- TEMPLATES -->
-        <div>
-            <script type="text/ng-template" id="dialog.tmpl.html"><md-dialog aria-label="Create New Item">
-              <md-toolbar>
-                <div class="md-toolbar-tools">
-                  <h2>Create New {{itemType}}</h2>
-                  <span flex></span>
-                  <md-button class="md-icon-button" ng-click="ctrl.cancel()">
-                    <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
-                  </md-button>
-                </div>
-              </md-toolbar>
 
-              <md-dialog-content ng-cloak>
-                <div class="md-dialog-content">
-                  <form ng-submit="$event.preventDefault()">
-                    <p>Use <code>md-autocomplete</code> to search for matches from local or remote data sources.</p>
-                    <md-autocomplete
-                        md-selected-item="ctrl.selectedItem"
-                        md-search-text="ctrl.searchText"
-                        md-items="item in ctrl.querySearch(ctrl.searchText)"
-                        md-item-text="item.display"
-                        md-min-length="0"
-                        placeholder="What is your favorite US state?"
-                        md-autofocus="">
-                      <md-item-template>
-                        <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
-                      </md-item-template>
-                      <md-not-found>
-                        No states matching "{{ctrl.searchText}}" were found.
-                      </md-not-found>
-                    </md-autocomplete>
-                  </form>
-                </div>
-              </md-dialog-content>
+            <!-- CREATE DIALOG TEMPLATE -->
+            <div ng-cloak>
+                <script type="text/ng-template" id="create-dialog-template"><md-dialog aria-label="Create New Item">
+                  <md-toolbar>
+                    <div class="md-toolbar-tools">
+                      <span style="font-size: 30px; font-family: Cantarell;">
+                                Would you like to create {{itemType}}?
+                        </span>
+                      <span flex></span>
+                      <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                        <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                      </md-button>
+                    </div>
+                  </md-toolbar>
 
-              <md-dialog-actions>
-                <md-button aria-label="Okay" ng-click="ctrl.ok($event)">Okay</md-button>
-              </md-dialog-actions>
-            </md-dialog>
-            </script>
-        </div>
+                  <md-dialog-content ng-cloak>
+                    <div class="md-dialog-content">
+                      <form ng-submit="$event.preventDefault()" style="padding: 0; margin: 0;">
+                        <p style="font-size: 18px;">
+                          Make sure <code>{{itemType}}</code> name is unique and meaningful
+                        </p>
+
+                          <md-input-container
+                                  class="md-block"
+                                  ng-hide="ctrl.ownerTXTIsHidden"
+                                  style="margin-bottom: 10px;">
+                              <label>{{itemType}} Owner</label>
+                              <md-select
+                                 ng-model="ctrl.owner"
+                                 md-selected-text="ctrl.ownerSelectMenuString()">
+                                  <md-option ng-repeat="user in users.list" ng-value="user">
+                                      {{user}}
+                                  </md-option>
+                              </md-select>
+                              <!--<input ng-model="ctrl.owner" md-autofocus="true">-->
+                          </md-input-container>
+
+                        <md-autocomplete
+                            md-autofocus="ctrl.ownerTXTIsHidden"
+                            md-selected-item="ctrl.selectedItem"
+                            md-search-text="ctrl.searchText"
+                            md-items="item in ctrl.querySearch(ctrl.searchText)"
+                            md-item-text="item.display"
+                            md-min-length="0"
+                            placeholder="Name of the {{itemType}}">
+                          <md-item-template>
+                            <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.display}}</span>
+                          </md-item-template>
+                          <md-not-found>
+                            No states matching "{{ctrl.searchText}}" were found.
+                          </md-not-found>
+                        </md-autocomplete>
+
+                          <md-chips
+                                  ng-model="ctrl.userNames"
+                                  ng-hide="ctrl.chipIsHidden"
+                                  name="userName"
+                                  readonly="ctrl.readonly"
+                                  md-removable="ctrl.removable"
+                                  md-max-chips="20">
+                              <md-chip-template>
+                                  <strong>{{$chip}}</strong>
+                              </md-chip-template>
+                          </md-chips>
+
+
+
+                      </form>
+                    </div>
+                  </md-dialog-content>
+
+                  <md-dialog-actions>
+                    <md-button aria-label="Okay" ng-click="ctrl.ok($event)">Okay</md-button>
+                  </md-dialog-actions>
+                </md-dialog>
+                </script>
+            </div>
+
+            <!-- DELETE DIALOG TEMPLATE -->
+            <div ng-cloak>
+                <script type="text/ng-template" id="delete-dialog-template"><md-dialog aria-label="Create New Item">
+                <md-toolbar>
+                    <div class="md-toolbar-tools">
+                        <span
+                            style="font-size: 30px; font-family: Cantarell;">
+                                Would you like to delete {{itemType}}?
+                        </span>
+                        <span flex></span>
+                        <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                            <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                        </md-button>
+                    </div>
+                </md-toolbar>
+
+                <md-dialog-content ng-cloak>
+                    <div class="md-dialog-content">
+                        <form ng-submit="$event.preventDefault()">
+                            <p style="font-size: 18px;">
+                                Are you sure you want to delete <code>{{name}} {{itemType}}</code>?
+                            </p>
+                            <p style="font-size: 14px; font-family: Aldrich;
+                                color: red;">This action can not be undone!
+                            </p>
+                        </form>
+                    </div>
+                </md-dialog-content>
+
+                <md-dialog-actions>
+                    <md-button
+                        class="md-raised"
+                        aria-label="Okay"
+                        ng-click="ctrl.ok($event)">
+                            Okay
+                    </md-button>
+                </md-dialog-actions>
+                </md-dialog>
+                </script>
+            </div>
+
+            <!-- ADD DIALOG TEMPLATE -->
+            <div ng-cloak>
+                <script type="text/ng-template" id="add-dialog-template"><md-dialog aria-label="Add New Item" style="width: 600px;">
+                <md-toolbar>
+                    <div class="md-toolbar-tools">
+                        <span
+                            style="font-size: 30px; font-family: Cantarell;">
+                                Would you like to add {{itemType}}?
+                        </span>
+                        <span flex></span>
+                        <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                            <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                        </md-button>
+                    </div>
+                </md-toolbar>
+
+                <md-dialog-content ng-cloak>
+                    <div class="md-dialog-content">
+                        <form ng-submit="$event.preventDefault()">
+                            <p style="font-size: 18px;">
+                                Are you sure you want to add components to <code>{{name}}</code>?
+                            </p>
+
+                            <md-select
+                                    aria-label="LibrarySelectMenu"
+                                    ng-model="selectedLibrary"
+                                    md-selected-text="librarySelectText()"
+                                    ng-change="onLibraryChange()"
+                                    style="width: 500px; margin: 20px auto 20px auto;">
+                                <md-optgroup label="Libraries">
+                                    <md-option ng-value="library" ng-repeat="library in library.nameList">{{library}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+
+                            <md-select
+                                    aria-label="ComponentToppingsMenu"
+                                    ng-model="selectedComponents"
+                                    md-selected-text="componentSelectText()"
+                                    multiple=""
+                                    ng-disabled="componentSelectorIsDisabled()"
+                                    style="width: 500px; margin: 20px auto 20px auto;">
+                                <md-optgroup label="Components">
+                                    <md-option ng-value="component" ng-repeat="component in getComponentsOfLib()">{{component}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+
+                        </form>
+                    </div>
+                </md-dialog-content>
+
+                <md-dialog-actions>
+                    <md-button
+                        class="md-raised"
+                        aria-label="Okay"
+                        ng-click="ctrl.ok($event)">
+                            Okay
+                    </md-button>
+                </md-dialog-actions>
+                </md-dialog>
+                </script>
+            </div>
+
+            <!-- CHANGE OWNER TEMPLATE -->
+            <div ng-cloak>
+                <script type="text/ng-template" id="set-owner-template"><md-dialog aria-label="Add New Item" style="width: 600px;">
+                <md-toolbar>
+                    <div class="md-toolbar-tools">
+                            <span
+                                    style="font-size: 30px; font-family: Cantarell;">
+                                    Would you like to change owner?
+                            </span>
+                        <span flex></span>
+                        <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                            <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                        </md-button>
+                    </div>
+                </md-toolbar>
+
+                <md-dialog-content ng-cloak>
+                    <div class="md-dialog-content">
+                        <form ng-submit="$event.preventDefault()">
+                            <p style="font-size: 18px;">
+                                Are you sure you want to change the owner of <code>{{name}}</code>?
+                            </p>
+
+
+                            <md-select
+                                    aria-label="OwnerSelectMenu"
+                                    ng-model="ctrl.owner"
+                                    md-selected-text="ctrl.ownerSelectText()"
+                                    ng-change="ctrl.onOwnerChange()"
+                                    style="width: 500px; margin: 20px auto 20px auto;">
+                                <md-optgroup label="Owner">
+                                    <md-option ng-value="stat" ng-repeat="stat in ctrl.list">{{stat}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </form>
+                    </div>
+                </md-dialog-content>
+
+                <md-dialog-actions>
+                    <md-button
+                            class="md-raised"
+                            aria-label="Okay"
+                            ng-click="ctrl.ok($event)">
+                        Okay
+                    </md-button>
+                </md-dialog-actions>
+                </md-dialog>
+                </script>
+            </div>
+
+            <!-- CHANGE STATUS DIALOG TEMPLATE -->
+            <div ng-cloak>
+                <script type="text/ng-template" id="change-status-dialog-template"><md-dialog aria-label="Add New Item" style="width: 600px;">
+                <md-toolbar>
+                    <div class="md-toolbar-tools">
+                            <span
+                                    style="font-size: 30px; font-family: Cantarell;">
+                                    Would you like to change status?
+                            </span>
+                        <span flex></span>
+                        <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                            <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                        </md-button>
+                    </div>
+                </md-toolbar>
+
+                <md-dialog-content ng-cloak>
+                    <div class="md-dialog-content">
+                        <form ng-submit="$event.preventDefault()">
+                            <p style="font-size: 18px;">
+                                Are you sure you want to change status of {{name}}?
+                            </p>
+
+                            <md-select
+                                    aria-label="StatusSelectMenu"
+                                    ng-model="selectedStatus"
+                                    md-selected-text="statusSelectText()"
+                                    ng-change="onStatusChange()"
+                                    style="width: 500px; margin: 20px auto 20px auto;">
+                                <md-optgroup label="Status">
+                                    <md-option ng-value="stat" ng-repeat="stat in list">{{stat}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </form>
+                    </div>
+                </md-dialog-content>
+
+                <md-dialog-actions>
+                    <md-button
+                            class="md-raised"
+                            aria-label="Okay"
+                            ng-click="ctrl.ok($event)">
+                        Okay
+                    </md-button>
+                </md-dialog-actions>
+                </md-dialog>
+                </script>
+            </div>
+
+            <!-- ERROR MESSAGE DIALOG TEMPLATE -->
+            <div ng-cloak>
+                <script type="text/ng-template" id="error-dialog-template"><md-dialog aria-label="Error Message" style="width: 600px;">
+                <md-toolbar style="background-color: #f96b6b">
+                    <div class="md-toolbar-tools">
+                        <span
+                            style="font-size: 30px; font-family: Cantarell;">
+                            An Error Occurred!
+                        </span>
+                        <span flex></span>
+                        <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                            <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                        </md-button>
+                    </div>
+                </md-toolbar>
+
+                <md-dialog-content ng-cloak>
+                    <div class="md-dialog-content">
+                        <form ng-submit="$event.preventDefault()">
+                            <p style="font-size: 18px;">
+                                Error : {{error}}
+                            </p>
+
+                            <p>
+                                {{message}}
+                            </p>
+                        </form>
+                    </div>
+                </md-dialog-content>
+
+                <md-dialog-actions>
+                    <md-button
+                            class="md-raised"
+                            aria-label="Okay"
+                            style="background-color: #f96b6b; color: white;"
+                            ng-click="ctrl.ok($event)">
+                        Okay
+                    </md-button>
+                </md-dialog-actions>
+                </md-dialog>
+                </script>
+            </div>
+
     </div>
 
 
@@ -239,43 +543,58 @@
 
 
     <!-- Angular js -->
-    <script src="javascripts/angular.js"></script>
+    <script src="javascripts/angular-modules/angular.js"></script>
 
-    <script src="javascripts/angular-animate.js"></script>
-    <script src="javascripts/angular-aria.js"></script>
-    <script src="javascripts/angular-messages.js"></script>
-    <script src="javascripts/angular-cookies.js"></script>
-    <script src="javascripts/angular-loader.js"></script>
-    <script src="javascripts/angular-message-format.js"></script>
-    <script src="javascripts/angular-mocks.js"></script>
-    <script src="javascripts/angular-parse-ext.js"></script>
-    <script src="javascripts/angular-resource.js"></script>
-    <script src="javascripts/angular-route.js"></script>
-    <script src="javascripts/angular-sanitize.js"></script>
-    <script src="javascripts/angular-scenario.js"></script>
-    <script src="javascripts/angular-touch.js"></script>
+    <script src="javascripts/angular-modules/angular-animate.js"></script>
+    <script src="javascripts/angular-modules/angular-aria.js"></script>
+    <script src="javascripts/angular-modules/angular-messages.js"></script>
+    <script src="javascripts/angular-modules/angular-cookies.js"></script>
+    <script src="javascripts/angular-modules/angular-loader.js"></script>
+    <script src="javascripts/angular-modules/angular-message-format.js"></script>
+    <script src="javascripts/angular-modules/angular-mocks.js"></script>
+    <script src="javascripts/angular-modules/angular-parse-ext.js"></script>
+    <script src="javascripts/angular-modules/angular-resource.js"></script>
+    <script src="javascripts/angular-modules/angular-route.js"></script>
+    <script src="javascripts/angular-modules/angular-sanitize.js"></script>
+    <script src="javascripts/angular-modules/angular-scenario.js"></script>
+    <script src="javascripts/angular-modules/angular-touch.js"></script>
 
 
     <!--  Angular Material js  -->
-    <script src="javascripts/angular-material.js"></script>
+    <script src="javascripts/angular-modules/angular-material.js"></script>
 
     <!-- JQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
     <!-- CodeMirror js -->
-    <script src="javascripts/codemirror.js"></script>
+    <script src="javascripts/codemirror-modules/codemirror.js"></script>
+    <script src="javascripts/codemirror-modules/show-hint.js"></script>
+    <!--<script src="javascripts/codemirror-modules/javascript-hint.js"></script>-->
+    <script src="javascripts/codemirror-modules/javascript.js"></script>
+    <!--<script src="javascripts/codemirror-modules/markdown.js"></script>-->
+    <!--<script src="javascripts/codemirror-modules/anyword-hint.js"></script>-->
 
-    <!-- Blue Bird -->
-    <script src="//cdn.jsdelivr.net/bluebird/3.4.5/bluebird.js"></script>
+
+    <!-- XLSX Module -->
+    <!--<script lang="javascript" src="dist/xlsx.core.min.js"></script>-->
+    <script lang="javascript" src="javascripts/excellentexport.js"></script>
 
     <!-- Socket.IO -->
     <script src="http://cmdsnmuhandiram:3001/socket.io/socket.io.js"></script>
 
-    <!-- Custom js -->
-    <script> let app = angular.module('automate', ['ngMaterial', 'ngMessages']) </script>
-    <script src="javascripts/rest-api.js"></script>
-    <script src="javascripts/automate.js"></script>
-    <script src="javascripts/script.js"></script>
+    <script> let app = angular.module('automate', ['ngMaterial']) </script>
+    <script src="javascripts/automate-modules/services/super-service.js"></script>
+    <script src="javascripts/automate-modules/services/project-service.js"></script>
+    <script src="javascripts/automate-modules/services/testsuite-service.js"></script>
+    <script src="javascripts/automate-modules/services/testcase-service.js"></script>
+    <script src="javascripts/automate-modules/services/component-service.js"></script>
+    <script src="javascripts/automate-modules/services/library-service.js"></script>
+    <script src="javascripts/automate-modules/services/rest-service.js"></script>
+    <script src="javascripts/automate-modules/services/editor-service.js"></script>
+
+    <script src="javascripts/automate-modules/services/test-suite-tree-service.js"></script>
+    <script src="javascripts/automate-modules/services/complex-scope-updater-service.js"></script>
+    <script src="javascripts/automate-modules/script.js"></script>
 
 
 </body>

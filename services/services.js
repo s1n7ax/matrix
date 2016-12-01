@@ -5,48 +5,41 @@ const io = require('socket.io')(3001);
 const Path = require('path');
 
 
-/*class Service {
-    constructor(dbName) {
-
-        let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
-        let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
-        
-        this.server = Nano(connectionQuery);
-    }
-
-    createProject () {
-        console.log('hello')
-    }
-}
-
-let a = new Service();
-console.log(a);
-a.createProject();*/
-
 class Service {
 
+    dbErrorLogger(customMsg, error) {
+        console.log('\n');
+        console.log('****************************');
+        console.error(customMsg);
+        console.error(error.error);
+        console.error(error.reason);
+        console.log('\n');
+        console.log('Request Details:');
+        console.log(error.request.body);
+        console.log(error.request.uri);
+        console.log('\n');
+        console.log('Date & Time:');
+        console.log(error.headers.date);
+        console.log('****************************');
+    }   
 
-
-    constructor(dbName) {
+    constructor(dbName, startSocket) {
 
         let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
         let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
         
         this.server = Nano(connectionQuery);
 
+        this.dbName = dbName;
+        this.database = this.server.use(dbName);
 
-
-        if(dbName !== undefined){
-            this.dbName = dbName;
-            this.database = this.server.use(dbName)
-            this.feed = this.database.follow({since: "now"})
+        if((dbName !== undefined) && startSocket){
+            console.log('ok it\'s true '+this.dbName);
+            this.feed = this.database.follow({since: "now"});
             this.socket = io.of('/'+dbName);
 
             this.startSocket();
             this.followDB();
-        }
-        else {
-            console.log('db Name : '+dbName)
         }
     }
 
@@ -76,22 +69,33 @@ class Service {
     selectDocById (id, callback) {
         this.database.get(id, callback);
     }
+
+    deleteDocById (id, callback) {
+        let self = this;
+        self.selectDocById(id, function (error, body) {
+            if(error) {
+                self.dbErrorLogger('Error : 301', error);
+            }
+            else {
+                self.deleteDocByIdAndRev(body._id, body._rev, callback)
+            }
+        })
+    }
 	
 	deleteDocByIdAndRev (id, rev, callback) {
 		this.database.destroy(id, rev, callback);
 	}
 	
-	copyDocById(srcID, destID, opts, callback) {
-		opts !== undefined ?
-		this.database.copy(srcID , destID, opts, callback)
-		: this.database.copy(srcID , destID, callback)
+	copyDocById(srcID, destID, callback) {
+        this.database.copy(srcID , destID, callback)
 	}
 
 
-    getAllModueDocs (keysObject, callback) {
+
+    getAllTestsuiteDocs (keysObject, callback) {
         keysObject !== undefined ? 
-        this.database.view('Automate', 'getAllModules', keysObject, callback)
-        : this.database.view('Automate', 'getAllModules', callback)
+        this.database.view('Automate', 'getAllTestsuites', keysObject, callback)
+        : this.database.view('Automate', 'getAllTestsuites', callback)
     }
 
     getAllTestCaseDocs (keysObject, callback) {
@@ -106,10 +110,23 @@ class Service {
         : this.database.view('Automate', 'getAllComponents', callback)
     }
 
+    getAllLibraryDocs (keysObject, callback) {
+            keysObject !== undefined ?
+            this.database.view('Automate', 'getAllLibraries', keysObject, callback)
+            : this.database.view('Automate', 'getAllLibraries', callback)
+        }
+
     getAllDocs (keysObject, callback) {
         keysObject !== undefined ?
         this.database.view('Automate', 'getAll', keysObject, callback)
         : this.database.view('Automate', 'getAll', callback)
+    }
+
+
+    getAllUsers (keysObject, callback) {
+        keysObject !== undefined ?
+        this.database.view('Automate', 'getAllUsers', keysObject, callback)
+        : this.database.view('Automate', 'getAllUsers', callback)
     }
 
     deepSelectById (self, id, callback) {
@@ -180,12 +197,36 @@ class Service {
 
 
     followDB () {
+        console.log('following DB');
         let self = this;
 
         this.feed.on('change', function(change) {
-            self.selectDocById(change.id, function (error, body) {
-                error ? console.log(error) : self.broadcast(body.type)
-            });
+            let result;
+
+            if(change.deleted) {
+                self.broadcast({
+                    change: 'delete',
+                    val: {
+                        _id: change.id
+                    }
+                });
+            }
+            else {
+                self.selectDocById(change.id, function (error, body) {
+                    error ?
+                        /**
+                         * This can be occurred because db is down
+                         */
+                        console.error('error 305') &
+                        console.error(error) :
+                        self.broadcast({
+                            change: 'add',
+                            val: body
+                        });
+                });
+            }
+
+
         });
 
         this.feed.follow();
@@ -199,40 +240,20 @@ class Service {
     }
 
     startSocket () {
-        let user = 0;
-        /*io.on('connection', function (socket) {
-            console.log('connecting user')
+        let self = this;
+        console.log('********** Starting socket - Successful! **********')
 
-            socket.send('this is a message');
-
-            io.sockets.emit('broadcast', 'broadcasting');
-
-            socket.on('disconnect', function () {
-                console.log('disconnecting user');
-            });
-
-            setTimeout(function () {
-                io.sockets.emit('broadcast', 'broadcasting after 5 sec');
-            }, 5000);
-        });*/
-
-        
         this.socket.on('connection', function (socket) {
-            console.log('User '+(++user)+' connected');
+            socket.emit('ServerMessage', `Server : Connecting to project "${self.dbName}" socket server - Successful!`);
 
             socket.on('disconnect', function () {
-                console.log('User '+(--user)+' disconnected');
+                console.log('user disconnected');
             });
         });
 
-        
 
-        /*this.socket.on('connection', function (socket) {
-            socket.emit('test', 'test');
-        });*/
     } 
 }
-
 
 
 module.exports = Service;

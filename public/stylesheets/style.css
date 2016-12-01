@@ -14,6 +14,24 @@ div {
   padding: 0px;
 }
 
+
+.bg-high-pri {
+    background-color: rgba(252, 113, 113, 5);
+}
+
+.bg-medium-pri {
+    background-color: rgba(255, 248, 119, 5);
+}
+
+.bg-low-pri {
+    background-color: rgba(113, 173, 252, 5);
+}
+
+.bg-none {
+}
+
+
+
 /**
  * NO SELECT
  */
@@ -26,11 +44,16 @@ div {
   user-select: none;
 }
 
+.square-buttons {
+    border-radius: 0 !important;
+}
+
 
 /**
  ************* TOOL BAR *************
  */
 .toolbar{
+    /*background-color: #2196F3;*/
 }
 
 .toolbar-project-selector{
@@ -105,7 +128,7 @@ div {
   * FILE TREE
   */
 .file-tree-main {
-  padding: 0 2px 0 2px;
+  padding: 0 2px 0 5px;
   margin: 3px 3px 3px 3px;
   min-width: 98%;
   max-width: 98%;
@@ -127,7 +150,7 @@ div {
 }
 
 .file-tree-sub {
-  padding: 0 2px 0 2px;
+  padding: 0 2px 0 5px;
   margin: 3px 3px 3px 10px;
   min-width: 95%;
   border-radius: 3px;
@@ -141,6 +164,15 @@ div {
   background-color: #919191;
   color: white;
   float: right;
+}
+
+.sub-button-released {
+    color: black;
+    background-color: #919191;
+}
+.sub-button-selected {
+    color: black;
+    background-color: #ffd65e;
 }
 
 .file-tree-sub:not([disabled]):hover {
@@ -157,19 +189,15 @@ div {
     z-index: 1;
     position: fixed;
     background-color: white;
-
-
-
+    border: 1px solid black;
     margin: 0;
-    padding: 0;
+    padding: 0 300px 0, 100px;
 
     top: 0;
     left: 0;
     right: 0;
 
     width: 200px;
-
-
 }
 
 .contextmenu-item{

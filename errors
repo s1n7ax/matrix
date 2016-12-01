@@ -1,6 +1,97 @@
+/**
+ * Client Errors
+ */
+Error : 001
+User trying to create item. but "createItem" got no argument.
+The issue may be the selected project is null or undefined.
+
+
+Error : 002
+script.js > DeleteConfirmDialogCtrl()
+Specific testcase is not found in the module's links. Unknown Issue.
+
+Error : 003
+script.js > DeleteConfirmDialogCtrl();
+Parent Library not found in the library list. Unknown reason
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Server Errors
+ */
+Error : 301
+service.js > deleteDocById()
+Unknown reason
+
+
+Error : 302
+index.js > deleteDeep2()
+this occurs while deleting child nodes. Unknown reason
+db admin may have to delete rest of the children manually
+
+Error : 303
+index.js > deleteItemAndChildren
+Unknown reason.
+
+
+
+
+
+
+
+
+
+
+
+
 'error 301'
 $scope.testcase.getLinks
 
 
 'error 302'
 $scope.component.getLinks
+
+
+'error 303'
+router.post('/createComponent', function (req, res, next)
+/**
+ * Error can be occurred because rev is changed.
+ * DB admin has to delete created component manually.
+ */
+
+
+'error 304'
+router.post('/createTestCase', function(req, res, next)
+/**
+ * Error can be occurred because rev is changed.
+ * DB admin has to delete created component manually.
+ */
+
+
+'error 305'
+followDB ()
+/** * This can be occurred because db is down
+    */

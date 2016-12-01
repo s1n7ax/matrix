@@ -1,0 +1,188 @@
+<html>
+    <head>
+
+        <title>Sanitize Reporter</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Angular Material css -->
+        <link rel="stylesheet" href="stylesheets/angular-material.css">
+        <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
+
+        <!-- Google fonts -->
+        <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Poiret+One'>
+        <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Ubuntu:300'>
+
+        <!-- Custom Fonts-->
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Cantarell" />
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Bitter" />
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Aldrich" />
+
+        <!-- Bootstrap css-->
+        <link rel="stylesheet" href="stylesheets/bootstrap.min.css">
+
+        <!-- Custom css -->
+        <link rel="stylesheet" href="stylesheets/style.css">
+
+        <style>
+            table {
+                width: initial;
+            }
+            tr {
+
+            }
+            th {
+                border-style: solid;
+                border-color: #b5b5b5;
+                border-width: 1px;
+                padding: 7px 20px 7px 20px;
+                background-color: #e8e8e8;
+            }
+            td {
+                border-color: #b5b5b5;
+                border-style: solid;
+                border-width: 1px;
+                padding: 7px 20px 7px 20px !important;
+            }
+            .table-container {
+                overflow: auto;
+            }
+        </style>
+    </head>
+    <body ng-app="reporter" ng-controller="reporter_ctrl as ctrl">
+        <div layout="column" style="height:100%" ng-cloak>
+
+            <!-- TOOL BAR -->
+            <md-toolbar flex="initial" layout="row" class="toolbar md-whiteframe-2dp" ng-cloak>
+                <div class="md-toolbar-tools" flex>
+                    <span class="no-select header-text clickable-mouse-point">
+                        {{applicationName}}
+                    </span>
+
+                    <div flex=""></div>
+
+                    <md-select ng-model="project.selected"
+                               md-selected-text="project.getSelectMenuString()"
+                               ng-change="project.onChange()"
+                               ng-click="project.onSelectClick()"
+                               aria-label="ProjectListSelector" class="toolbar-project-selector"
+                               flex>
+                        <md-optgroup label="ProjectsList">
+                            <md-option ng-value="project" ng-repeat="project in project.list">{{project}}</md-option>
+                        </md-optgroup>
+                    </md-select>
+
+                    <div flex=""></div>
+
+                    <md-button class="md-icon-button" ng-hide="project.selected === null" aria-label="Download report">
+                        <a download="BCMatrix.xls" href="#" onclick="return ExcellentExport.excel(this, 'metrix', 'BC Matrix');">
+                            <md-icon md-svg-src="img/icons/ic_file_download_white_24px.svg" aria-label="matrix" class="toolbar-icon"></md-icon>
+                        </a>
+                    </md-button>
+
+                    <!-- OPTION MENU BUTTON-->
+                    <md-menu>
+                        <md-button class="md-icon-button"
+                                   ng-click="optionMenu.openOptionMenu($mdOpenMenu, $event)">
+                            <md-icon md-svg-src="img/icons/ic_list_white_24px.svg" class="toolbar-icon">list</md-icon>
+                        </md-button>
+
+                        <md-menu-content width="4">
+
+                            <md-menu-item>
+                                <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'project' )">
+                                    Create Project
+                                </md-button>
+                            </md-menu-item>
+
+                            <md-menu-item>
+                                <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'testsuite' )">
+                                    Create Test Suite
+                                </md-button>
+                            </md-menu-item>
+
+                            <md-menu-item>
+                                <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'library')">
+                                    Create Library
+                                </md-button>
+                            </md-menu-item>
+
+                            <md-menu-divider></md-menu-divider>
+
+                        </md-menu-content>
+                    </md-menu>
+                </div>
+            </md-toolbar>
+
+
+
+
+            <div flex layout="row" class="table-container" ng-show="project.selected && showTable" ng-cloak>
+                <table id="metrix" flex class="table">
+                    <tr class="text-nowrap">
+                        <td ng-repeat="column in matrix.getNameList() track by $index">{{column}}</td>
+                    </tr>
+                    <tr class="text-nowrap">
+                        <td ng-repeat="column in matrix.getStatus() track by $index">{{column}}</td>
+                    </tr>
+                    <tr class="text-nowrap">
+                        <td class="{{getComponentStepCountBGColorClass(column)}}"
+                            ng-repeat="column in matrix.getStepCount() track by $index">{{column}}</td>
+                    </tr>
+                    <tr class="text-nowrap">
+                        <td ng-repeat="column in matrix.getOwner() track by $index">{{column}}</td>
+                    </tr>
+                    <tr class="text-nowrap">
+                        <td class={{getComponentPriorityBGColorClass(column)}}
+                            ng-repeat="column in matrix.getUsage() track by $index">{{column}}</td>
+                    </tr>
+                    <tr class="text-nowrap">
+                        <th ng-repeat="column in matrix.getTCHeader() track by $index">{{column}}</th>
+                    </tr>
+                    <tr ng-repeat="column in matrix.tcMatrix track by $index">
+                        <td ng-repeat="row in column track by $index">{{row}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- Angular js -->
+        <script src="javascripts/angular-modules/angular.js"></script>
+
+        <script src="javascripts/angular-modules/angular-animate.js"></script>
+        <script src="javascripts/angular-modules/angular-aria.js"></script>
+        <script src="javascripts/angular-modules/angular-messages.js"></script>
+        <script src="javascripts/angular-modules/angular-cookies.js"></script>
+        <script src="javascripts/angular-modules/angular-loader.js"></script>
+        <script src="javascripts/angular-modules/angular-message-format.js"></script>
+        <script src="javascripts/angular-modules/angular-mocks.js"></script>
+        <script src="javascripts/angular-modules/angular-parse-ext.js"></script>
+        <script src="javascripts/angular-modules/angular-resource.js"></script>
+        <script src="javascripts/angular-modules/angular-route.js"></script>
+        <script src="javascripts/angular-modules/angular-sanitize.js"></script>
+        <script src="javascripts/angular-modules/angular-scenario.js"></script>
+        <script src="javascripts/angular-modules/angular-touch.js"></script>
+
+        <!-- JQuery Modules -->
+        <script src="javascripts/jquery-3.1.1.min.js"></script>
+
+        <!-- Bootstrap Modules -->
+        <script src="javascripts/bootstrap.min.js"></script>
+
+
+        <!--  Angular Material js  -->
+        <script src="javascripts/angular-modules/angular-material.js"></script>
+
+        <!-- XLSX Module -->
+        <script lang="javascript" src="javascripts/excellentexport.js"></script>
+
+        <!-- App Module -->
+        <script>let reporter = angular.module('reporter', ['ngMaterial', 'ngMessages'])</script>
+        <script src="javascripts/automate-modules/services/rest-service.js"></script>
+        <script src="javascripts/reporter-modules/script.js"></script>
+    </body>
+</html>

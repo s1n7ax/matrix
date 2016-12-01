@@ -105,7 +105,8 @@
 .cm-link {text-decoration: underline;}
 .cm-strikethrough {text-decoration: line-through;}
 
-.cm-s-default .cm-keyword {color: #708;}
+/*.cm-s-default .cm-keyword {color: #708;} */
+.cm-s-default .cm-keyword {color: #0f6bff;}
 .cm-s-default .cm-atom {color: #219;}
 .cm-s-default .cm-number {color: #164;}
 .cm-s-default .cm-def {color: #00f;}
@@ -237,7 +238,7 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   border-width: 0;
   background: transparent;
   font-family: inherit;
-  font-size: inherit;
+  font-size: 18px;
   margin: 0;
   white-space: pre;
   word-wrap: normal;

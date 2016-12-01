@@ -1,0 +1,61 @@
+app.service('$libraryService', libraryService);
+
+function libraryService($superService, $restService) {
+<<<<<<< HEAD
+=======
+    "use strict";
+
+>>>>>>> dbf31d455fbd3e5ff1ce88f02bdd1a3aee4eb9d0
+    angular.extend(libraryService.prototype, $superService);
+
+    this.dbRetreve = function (projectName) {
+        let self = this;
+
+        $restService.getAllLibraries({
+<<<<<<< HEAD
+            projectName: projectName
+        })
+            .then(function successCallback(res) {
+                if(res.data.status) {
+                    console.log('\n');
+					console.log('Getting all libraries - Successful!');
+					console.log(res.data.val);
+                    self._list = res.data.val;
+                }
+                else {
+                    console.log('\n');
+					console.error('Getting all libraries - Failed!');
+					console.log(res.data.error);
+                }
+            },
+            function errorCallback(error){
+                console.log('\n');
+                console.error('Getting all libraries - Failed!');
+                console.log(error);
+            })
+    }
+
+
+=======
+        	projectName: projectName
+        })
+            .then(
+            function successCallback(res) {
+                if(res.data.status) {
+                    console.log('\n');
+                    console.log('Getting all Libraries - Successful!');
+					console.log(res.data.val);
+					self._list = res.data.val;
+                }
+                else {
+                    console.error('Getting all Libraries - Failed!');
+                    console.log(res.data.error);
+                }
+            },
+            function errorCallback(error) {
+                console.error('Getting all Libraries - Failed!');
+                console.log(error);
+            });
+    }
+>>>>>>> dbf31d455fbd3e5ff1ce88f02bdd1a3aee4eb9d0
+}
