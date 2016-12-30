@@ -9,8 +9,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var backup = require(locator.servicesPath.backup);
 
-console.log(backup);
-
 var routes = require('./routes/index');
 var users = require('./routes/users');
 

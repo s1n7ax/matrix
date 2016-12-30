@@ -102,6 +102,17 @@ function restService($http) {
         return $http.post('/renameComponent', values);
     }
 
+    self.renameTestcase = function (values) {
+        return $http.post('/renameTestcase', values);
+    }
+
+    self.renameLibrary = function (values) {
+        return $http.post('/renameLibrary', values);
+    }
+
+    self.renameTestsuite = function (values) {
+        return $http.post('/renameTestsuite', values);
+    }
 
 
     /**

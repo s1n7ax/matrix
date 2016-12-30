@@ -1,7 +1,7 @@
 reporter.controller('reporter_ctrl', reporterCtrl);
 reporter.service('$restService',restService);
 
-function reporterCtrl ($scope, $restService) {
+function reporterCtrl ($scope, $restService, $mdDialog) {
     /**
      * Common Properties
      */
@@ -13,6 +13,34 @@ function reporterCtrl ($scope, $restService) {
     $scope.maxUsage;
     $scope.minUsage;
 
+    /**
+     * RegExp
+     */
+    let noSpaceRegExp = new RegExp(/\S/);
+    let startWithCallRegExp = new RegExp(/^call/, 'i');
+
+    let commandList = [
+        "Comment", "KeyPress", "GetObjectCount", "CheckDBResults", "SetDBResult", "CreateDBConnection", "Screenshot", "Fail", "Loop",
+        "Else", "CheckChartContent", "If", "CheckPattern", "NavigateToURL", "Type", "DoubleClick", "Call", "SwitchUser", "ClickAt",
+        "Click", "EditVariable", "CheckElementPresent", "GoBack", "Select", "Retrieve", "EndLoop", "MouseMoveAndClick", "SetVarProperty",
+        "ElseIf", "DoubleClickAt", "CheckTextPresent", "SelectFrame", "WriteToReport", "HandlePopup", "EndIf", "SelectWindow", "FireEvent",
+        "CheckTable", "CreateUser", "SetVariable", "Store", "StartComment", "Pause", "CheckObjectProperty", "MouseOver", "Open", "EndComment",
+        "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
+    ];
+
+    let getRegExpOfCmds = function () {
+        let result = '';
+        commandList.forEach((ele, index) => {
+            result = result + ele;
+
+            if( commandList.length > (1 + index) )
+                result = result + '|'
+        });
+
+        return result;
+    };
+
+    let commandsRegExp = new RegExp(getRegExpOfCmds(), 'i');
 
     /**
      * Common
@@ -27,9 +55,44 @@ function reporterCtrl ($scope, $restService) {
     let successLog = function (message, data) {
         console.log('\n***************************');
         console.log(message);
-        console.log(data);
+        data && console.log(data);
         console.log('***************************');
     };
+
+    /**
+     * Dialog
+     */
+    $scope.dialog = new Object();
+    $scope.dialog.openErrorPromptDialog = function (error) {
+            let config = {
+                controller: ErrorPromptDialogCtrl,
+                controllerAs: 'ctrl',
+                templateUrl: 'templates/error-dialog.html',
+                parent: angular.element(document.body),
+                clickOutsideToClose: false,
+                locals: {
+                     lscope: $scope,
+                     error: error
+                }
+            };
+
+            $mdDialog.show(config);
+
+
+            function ErrorPromptDialogCtrl ($scope, lscope, error) {
+                let self = this;
+
+                $scope.error = error.error;
+                $scope.message = error.message;
+
+                self.ok = function ($event) {
+                    //$mdDialog.hide();
+                }
+                self.cancel = function($event) {
+                    //$mdDialog.cancel();
+                };
+            }
+        };
 
     /**
      * Project
@@ -54,11 +117,21 @@ function reporterCtrl ($scope, $restService) {
                 successLog('Getting All Project - Successful!', res.data);
                 $scope.project.list = res.data.val;
             }
-            else
+            else{
                 errorLog('Getting All Project - Failed!', res.data.error);
+                $scope.dialog.openErrorPromptDialog({
+                    error: res.data.error.error,
+                    message: res.data.error.message,
+                });
+            }
+
         },
         function errorCallback(error) {
             errorLog('Getting All Project - Failed!', error);
+            $scope.dialog.openErrorPromptDialog({
+                error: error.error,
+                message: error.message,
+            });
         });
     };
 
@@ -75,10 +148,18 @@ function reporterCtrl ($scope, $restService) {
                 }
                 else {
                     errorLog('Getting All Components - Failed!', res.data.error);
+                    $scope.dialog.openErrorPromptDialog({
+                        error: res.data.error.error,
+                        message: res.data.error.message,
+                    });
                 }
             },
             function errorCallback (error) {
                 errorLog('Getting All Components - Failed!', res.data.error);
+                $scope.dialog.openErrorPromptDialog({
+                    error: error.error,
+                    message: error.message,
+                });
             })
 
             .then(function () {
@@ -104,7 +185,15 @@ function reporterCtrl ($scope, $restService) {
                 $scope.component.setUsageMaxAndMin();
                 $scope.showTable = true;
                 $scope.matrix.setTCMatrix();
-            });
+            }).then(function (){
+                setTimeout(function () {
+                    var table = $('#metrix').DataTable();
+                    let searchInput = document.evaluate('//div[@id=\'metrix_filter\']/label', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                    console.log(searchInput);
+                    searchInput.style.float = "left";
+                }, 5000);
+
+            })
         }
     };
 
@@ -113,77 +202,142 @@ function reporterCtrl ($scope, $restService) {
      */
     $scope.component = {};
     $scope.component.list;
-    $scope.component.commonMap;
+    $scope.component.getObj = function(id) {
+        return $scope.component.list.find(e => e._id === id);
+    };
+
+    let currentMappingBCName = '*****';
 
     $scope.component.setCommonMap = function () {
+        successLog('Setting component map - Starting!');
         let obj = {};
 
         $scope.component.list.forEach((element) => {
+            currentMappingBCName = element._id;
+            successLog('Setting component map of '+element._id+' - Starting!', element);
+
             obj[element._id] = {};
             obj[element._id]['status'] = element.status;
-            obj[element._id]['stepCount'] = $scope.component.getStepCount(element.content);
+            obj[element._id]['stepCount'] = $scope.component.getStepCountById(element._id);
+            obj[element._id]['calledComponents'] = ($scope.matrix.getCalledComponents(element.content).components);
             obj[element._id]['owner'] = element.owner;
-            obj[element._id]['usage']  = $scope.component.getUsage(element._id);
+            obj[element._id]['usage']  = $scope.matrix.getTotComponentUsage(element._id);
         });
 
         $scope.component.commonMap = obj;
+        successLog('Setting component map - Finished!');
     };
 
-    $scope.component.getStepCount = function (content) {
-        if(content !== undefined) {
-            filteredArr = content.split('\n').filter(e => e.match(/\S/));
-            return filteredArr.length;
-        }
-        else {
-            return 0;
-        }
-    };
+    $scope.component.getStepCountById = function (id) {
+        let obj = $scope.component.getObj(id);
+        let componentName;
 
-    $scope.component.getUsage = function (id) {
-        let count = 0;
+        if(!obj){
+            let currentBC = id ? id : currentMappingBCName;
+            let errMsg;
 
-        $scope.testcase.list.forEach((element1) => {
-            let calledCMP = $scope.testcase.getCalledComponents(element1.content).components;
-            calledCMP.forEach((element2) => {
-                if(element2 === id)
-                    count++;
+            if(!id){
+                errMsg = 'An error occurred while getting step count of '
+                    + currentMappingBCName + ' component\nNot found a component name after call command';
+            }
+            else{
+                errMsg = 'An error occurred while getting step count of '
+                    + currentMappingBCName + ' component\nFound nothing called '
+                    + id +' in original component list';
+            }
+
+            $scope.dialog.openErrorPromptDialog({
+                error: errMsg,
+                message: 'Please enter component name after call command'
             });
-        });
+        }
+        else{
+            componentName = obj._id;
 
-        return count;
+            if(obj.content) {
+                let arr = obj.content.split('\n');
+                let count = 0;
+
+                for(let i = 0; i < arr.length; i++) {
+                    if(noSpaceRegExp.test(arr[i])) {
+                        if(startWithCallRegExp.test(arr[i])) {
+                            if(arr[i].indexOf(componentName)){
+                                count += $scope.component.getStepCountById(arr[i].split(/\s+/)[1]);
+                            }
+                            else{
+                                errorLog(componentName + ' is called inside ' + arr[i] + '\nInvalide implementation of components', obj);
+                                $scope.dialog.openErrorPromptDialog({
+                                    error: '',
+                                    message: 'Please contact system admin'
+                                });
+                            }
+                        }
+                        else {
+                            if( commandsRegExp.test(arr[i]) && !(arr[i].startsWith('//')))
+                                count++;
+                        }
+                    }
+                }
+                return count;
+            }
+            else
+                return 0;
+        }
     };
 
     $scope.component.setStepCountMaxAndMin = function () {
         let keys = Object.keys($scope.component.commonMap);
 
-        $scope.maxStepCount = $scope.component.commonMap[keys[0]].stepCount;
-        $scope.minStepCount = $scope.maxStepCount;
+        if(~keys.length) {
+            $scope.maxStepCount = $scope.component.commonMap[keys[0]].stepCount;
+            $scope.minStepCount = $scope.maxStepCount;
 
-        for(let i = 0; i < keys.length; i++) {
-            let stepC = $scope.component.commonMap[keys[i]].stepCount;
+            for(let i = 0; i < keys.length; i++) {
+                let stepC = $scope.component.commonMap[keys[i]].stepCount;
 
-            if(stepC > $scope.maxStepCount)
-                $scope.maxStepCount = stepC;
-            if(stepC < $scope.minStepCount)
-                $scope.minStepCount = stepC;
-
+                if(stepC > $scope.maxStepCount)
+                    $scope.maxStepCount = stepC;
+                if(stepC < $scope.minStepCount)
+                    $scope.minStepCount = stepC;
+            }
+        }
+        else{
+            $scope.maxStepCount = 0;
+            $scope.minStepCount = 0;
         }
     };
 
     $scope.component.setUsageMaxAndMin = function () {
         let keys = Object.keys($scope.component.commonMap);
 
-        $scope.maxUsage = $scope.component.commonMap[keys[0]].usage;
-        $scope.minUsage = $scope.maxUsage;
+        if(~keys.length){
+            $scope.maxUsage = $scope.component.commonMap[keys[0]].usage;
+            $scope.minUsage = $scope.maxUsage;
 
-        for(let i = 0; i < keys.length; i++) {
-            let usageC = $scope.component.commonMap[keys[i]].usage;
+            for(let i = 0; i < keys.length; i++) {
+                let usageC = $scope.component.commonMap[keys[i]].usage;
 
-            if(usageC > $scope.maxUsage)
-                $scope.maxUsage = usageC;
-            if(usageC < $scope.minUsage)
-                $scope.minUsage = usageC;
+                if(usageC > $scope.maxUsage)
+                    $scope.maxUsage = usageC;
+                if(usageC < $scope.minUsage)
+                    $scope.minUsage = usageC;
+            }
         }
+    };
+
+    $scope.component.getComponentUsageInBCs = function (id) {
+        let count = 0;
+
+        for(let i = 0; i < $scope.component.list.length; i++){
+            let calledCmp = $scope.matrix.getCalledComponents($scope.component.list[i].content).components;
+
+            for(let j = 0; j < calledCmp.length; j++){
+                if(calledCmp[j] === id)
+                    count++
+            }
+        }
+
+        return count;
     };
 
 
@@ -200,8 +354,8 @@ function reporterCtrl ($scope, $restService) {
         $scope.testcase.list.forEach((element) => {
             obj[element._id] = {};
             obj[element._id]['owner'] = element.owner;
-            obj[element._id]['calledComponents'] = $scope.testcase.getCalledComponents(element.content).components;
-            obj[element._id]['calledStatements'] = $scope.testcase.getCalledComponents(element.content).statements;
+            obj[element._id]['calledComponents'] = $scope.matrix.getCalledComponents(element.content).components;
+            obj[element._id]['calledStatements'] = $scope.matrix.getCalledComponents(element.content).statements;
             obj[element._id]['calledComponentCount'] =  obj[element._id]['calledComponents'].length;
             obj[element._id]['status'] =
                 $scope.testcase.getStatus($scope.project.selected, element._id, element.status, obj[element._id]['calledComponents']);
@@ -210,40 +364,6 @@ function reporterCtrl ($scope, $restService) {
        });
 
        $scope.testcase.commonMap = obj;
-    };
-
-    $scope.testcase.getCalledComponents = function (content) {
-        if(content) {
-            let contentArr = content.split('\n').filter(element => element.match(/\S/));
-
-            let components = [];
-            let statements = [];
-            for(let i = 0; i < contentArr.length; i++) {
-                let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
-
-                if(val){
-                    components.push(val[0]);
-                }
-                else {
-                    statements.push(contentArr[i]);
-                }
-            }
-
-            return {
-                components: components,
-                statements: statements
-            };
-
-            /*return contentArr.map(function (element) {
-                let val = element.match(/\bbc\S+/);
-                return val[0];
-            });*/
-        }
-        else
-            return {
-                components: [],
-                statements: []
-            }
     };
 
     $scope.testcase.getStatus = function (project, id, actualStatus, calledComponents) {
@@ -257,7 +377,6 @@ function reporterCtrl ($scope, $restService) {
                     status = false;
                     return 0;
                 }
-
             });
 
             if(status) {
@@ -266,13 +385,13 @@ function reporterCtrl ($scope, $restService) {
                     projectName: project,
                     _id: id,
                     val: {
-                        status: 'Completed'
+                        status: 'Ready to automate'
                     }
                 })
                 .then(function (res) {
                     console.log(id);
                     if(res.data.status) {
-                        successLog('Updating '+id+' status to "Complete" - Successful!', res.data);
+                        successLog('Updating '+id+' status to "Ready to automate" - Successful!', res.data);
                         $scope.project.onChange();
                     }
                     else {
@@ -294,7 +413,14 @@ function reporterCtrl ($scope, $restService) {
             stepCount += $scope.component.commonMap[element]['stepCount'];
         });
 
-        return stepCount + calledStatements.length;
+        //return stepCount + calledStatements.length;
+
+        calledStatements.forEach((ele) => {
+            if( commandsRegExp.test(ele) && !(ele.startsWith('//')))
+                stepCount++;
+        });
+
+        return stepCount;
     };
 
     $scope.testcase.getComplexity = function (stepCount) {
@@ -304,8 +430,26 @@ function reporterCtrl ($scope, $restService) {
             return 'H';
         else if(stepCount > 20)
             return 'M';
-        else
+        else if(stepCount > 0)
             return 'L';
+        else
+            return 'None';
+    };
+
+    $scope.testcase.getComponentUsageInTCs = function (id) {
+        let count = 0;
+
+        for(let i = 0; i < $scope.testcase.list.length; i++){
+
+            let calledCmp = $scope.matrix.getCalledComponents($scope.testcase.list[i].content).components
+
+            for(let j = 0; j < calledCmp.length; j++){
+                if(calledCmp[j] === id)
+                    count++;
+            }
+        }
+
+        return count;
     };
 
 
@@ -314,6 +458,57 @@ function reporterCtrl ($scope, $restService) {
      */
     $scope.matrix = {};
     $scope.matrix.tcMatrix;
+
+    /**
+     * Common Properties
+     */
+    $scope.matrix.getTotComponentUsage = function (id) {
+        let count = 0;
+
+        count += $scope.testcase.getComponentUsageInTCs(id);
+        count += $scope.component.getComponentUsageInBCs(id);
+
+        return count;
+    };
+
+    $scope.matrix.getCalledComponents = function (content) {
+            if(content) {
+                let contentArr = content.split('\n').filter(element => element.match(/\S/));
+
+                let components = [];
+                let statements = [];
+                for(let i = 0; i < contentArr.length; i++) {
+                    let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
+
+                    if(val){
+                        components.push(val[0]);
+                    }
+                    else {
+                        statements.push(contentArr[i]);
+                    }
+                }
+                return {
+                    components: components,
+                    statements: statements
+                };
+
+                /*return contentArr.map(function (element) {
+                    let val = element.match(/\bbc\S+/);
+                    return val[0];
+                });*/
+            }
+            else
+                return {
+                    components: [],
+                    statements: []
+                }
+        };
+
+
+
+    /**
+     * Properties to create matrix map
+     */
     $scope.matrix.commonEmptySpace = new Array(5);
 
     $scope.matrix.getNameList = function () {

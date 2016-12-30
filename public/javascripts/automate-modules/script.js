@@ -252,32 +252,6 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     $scope.component.getObj = $componentService.getObj;
 
     $scope.component.getLinkList = $componentService.getLinkList;
-    
-    $scope.component.updateEditor = function (data) {
-        let doc = $scope.editor.codeMirrorObj.getDoc()
-        let cur = doc.getCursor();
- 
-        console.log('\n');
-        console.log('Updating Editor');
-
-        $scope.editor.setEditorContent({
-            name: data._id,
-            type: data.type,
-            user: $scope.username,
-            isChanged: false,
-            text: data.content
-        });
-
-        $scope.editor.codeMirrorObj.setCursor(cur);
-
-
-//         $scope.editor.setEditorContent(data.content);
-
-//         console.log($scope.editor.codeMirrorObj)
-//         let doc = $scope.editor.codeMirrorObj.getDoc();
-//         let lineCount = doc.lineCount();
-        
-    }
 
     $scope.component.dbRetrieve = $componentService.dbRetrieve;
 
@@ -347,7 +321,9 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             this._list.push(map);
         }
     }
-    $scope.testsuiteTree.removeNode = $testsuiteTreeService.removeNode;
+    $scope.testsuiteTree.removeNode = function (id) {
+        this._list = this._list.filter(ele => ele.testsuite !== id);
+    }
 
     $scope.testsuiteTree.tsOnClick = function () {
         if($scope.editor.content.isChanged) {
@@ -483,6 +459,32 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     $scope.editor.content = new Object();
     $scope.editor.textArea = document.getElementById('textArea');
 
+    $scope.editor.updateEditor = function (data) {
+            let doc = $scope.editor.codeMirrorObj.getDoc()
+            let cur = doc.getCursor();
+
+            console.log('\n');
+            console.log('Updating Editor');
+
+            $scope.editor.setEditorContent({
+                name: data._id,
+                type: data.type,
+                user: $scope.username,
+                isChanged: false,
+                text: data.content
+            });
+
+            $scope.editor.codeMirrorObj.setCursor(cur);
+
+
+    //         $scope.editor.setEditorContent(data.content);
+
+    //         console.log($scope.editor.codeMirrorObj)
+    //         let doc = $scope.editor.codeMirrorObj.getDoc();
+    //         let lineCount = doc.lineCount();
+
+        }
+
     /*CodeMirror.commands.autocomplete = function(cm) {
         cm.showHint({hint: CodeMirror.hint.anyword});
     }*/
@@ -504,30 +506,64 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
         "Click", "EditVariable", "CheckElementPresent", "GoBack", "Select", "Retrieve", "EndLoop", "MouseMoveAndClick", "SetVarProperty",
         "ElseIf", "DoubleClickAt", "CheckTextPresent", "SelectFrame", "WriteToReport", "HandlePopup", "EndIf", "SelectWindow", "FireEvent",
         "CheckTable", "CreateUser", "SetVariable", "Store", "StartComment", "Pause", "CheckObjectProperty", "MouseOver", "Open", "EndComment",
-         "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick"
+         "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
     ];
+
+    let getRegExpOfCmds = function () {
+        let result = '';
+        commandList.forEach((ele, index) => {
+            result = result + ele;
+
+            if( commandList.length > (1 + index) )
+                result = result + '|'
+        });
+
+        return result;
+    }
+
+    let commandsRegExp = new RegExp(getRegExpOfCmds(), 'i');
+        let startWithCallRegExp = new RegExp('^call', 'i');
+
 
 
     CodeMirror.hint.sanitizorAautocomplete = function (editor) {
-        var list = commandList;
+        let list = commandList;
 
-        var cursor = editor.getCursor();
-        var currentLine = editor.getLine(cursor.line);
-        var start = cursor.ch;
-        var end = start;
+        let cursor = editor.getCursor();
+        let currentLine = editor.getLine(cursor.line);
+        let start = cursor.ch;
+        let end = start;
+        let elementHint = false;
 
-        if(~(currentLine.toLowerCase().indexOf('call'))) {
+        if(startWithCallRegExp.test(currentLine)){
             list = $scope.component.nameList;
+            elementHint = true;
         }
+        else if(commandsRegExp.test(currentLine)){
+            list = [];
+        }
+
 
         while (end < currentLine.length && /[\w$]+/.test(currentLine.charAt(end))) ++end;
         while (start && /[\w$]+/.test(currentLine.charAt(start - 1))) --start;
 
         var curWord = start != end && currentLine.slice(start, end);
         var regex = new RegExp('^' + curWord, 'i');
+        /*var result = {
+            list: (!curWord ? list : list.filter(function (item) {
+                if(curWord.toLowerCase() === item)
+                    return false;
+                return item.match(regex);
+            })).sort(),
+            from: CodeMirror.Pos(cursor.line, start),
+            to: CodeMirror.Pos(cursor.line, end)
+        };*/
+
         var result = {
             list: (!curWord ? list : list.filter(function (item) {
-                return item.match(regex);
+                let regexp = new RegExp(curWord, 'i')
+
+                return regexp.test(item);
             })).sort(),
             from: CodeMirror.Pos(cursor.line, start),
             to: CodeMirror.Pos(cursor.line, end)
@@ -605,6 +641,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                             console.log('Saving Component - Successful!');
                             console.log(res.data.val);
                             $scope.editor.content.isChanged = false;
+
+                            if(componentCopy.status === 'Pending')
+                                $scope.dialog.openWarningPromptDialog({
+                                    warning: 'Component Status is Pending',
+                                    message: 'Please change the status'
+                                });
+
                             if (callback)
                                 callback();
                         }
@@ -639,6 +682,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                             console.log('Saving Testcase - Successful!');
                             console.log(res.data.val);
                             $scope.editor.content.isChanged = false;
+
+                            if(testcaseCopy.status === 'Pending')
+                                $scope.dialog.openWarningPromptDialog({
+                                    warning: 'Testcase Status is Pending',
+                                    message: 'Please change the status'
+                                });
+
                             if(callback)
                                 callback();
                         }
@@ -680,7 +730,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
         let config = {
             controller: CreatePromptDialogCtrl,
             controllerAs: 'ctrl',
-            templateUrl: 'create-dialog-template',
+            templateUrl: 'templates/create-dialog.html',
             parent: angular.element(document.body),
             targetEvent: ev,
             clickOutsideToClose: true,
@@ -805,7 +855,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                                 val: {
                                     _id: self.searchText,
                                     type: itemType,
-                                    status: 'pending',
+                                    status: 'Pending',
                                     owner: self.owner
                                 }
                             });
@@ -935,13 +985,14 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             }
         };
     };
+
     $scope.dialog.openDeleteConfirmDialog = function (ev, itemType, name) {
         let self = this;
 
         let config = {
             controller: DeleteConfirmDialogCtrl,
             controllerAs: 'ctrl',
-            templateUrl: 'delete-dialog-template',
+            templateUrl: 'templates/delete-dialog.html',
             parent: angular.element(document.body),
             targetEvent: ev,
             clickOutsideToClose: true,
@@ -1032,6 +1083,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                         val: val
                     });
                 }
+                else if(itemType === 'testsuite') {
+                    val = lscope.testsuite.getObj(name);
+                    resPromise = $restService.deleteItemAndChildren({
+                        projectName: project,
+                        val: val
+                    });
+                }
 
                 resPromise
                     .then(
@@ -1052,12 +1110,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             };
         };
     };
+
     $scope.dialog.openAddPromptDialog = function (ev, itemType, name) {
         "use strict";
         let config = {
             controller: AddPromptDialogCtrl,
             controllerAs: 'ctrl',
-            templateUrl: 'add-dialog-template',
+            templateUrl: 'templates/add-dialog.html',
             parent: angular.element(document.body),
             targetEvent: ev,
             clickOutsideToClose: true,
@@ -1153,12 +1212,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
 
         }
     };
+
     $scope.dialog.openChangeOwnerConfirmDialog = function (ev, itemType, name) {
         "use strict";
         let config = {
             controller: SetOwnerPromptDialogCtrl,
             controllerAs: 'ctrl',
-            templateUrl: 'set-owner-template',
+            templateUrl: 'templates/owner-dialog.html',
             parent: angular.element(document.body),
             targetEvent: ev,
             clickOutsideToClose: true,
@@ -1253,12 +1313,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             };
         };
     };
+
     $scope.dialog.openChangeStatusConfirmDialog = function (ev, itemType, name) {
             "use strict";
             let config = {
                 controller: ChangeStatusPromptDialogCtrl,
                 controllerAs: 'ctrl',
-                templateUrl: 'change-status-dialog-template',
+                templateUrl: 'templates/status-dialog.html',
                 parent: angular.element(document.body),
                 targetEvent: ev,
                 clickOutsideToClose: true,
@@ -1284,79 +1345,96 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
 
                 $scope.itemType = itemType;
                 $scope.name = name;
+
                 let resPromise;
                 let project = lscope.project.selected;
+                let itemObj =
+                    itemType === 'testcase' ? angular.copy(lscope.testcase.getObj(name)) :
+                    itemType === 'component' && angular.copy(lscope.component.getObj(name))
+
+                let enabledCommandRegexp = new RegExp('Completed|Automatable|In Progress', 'i', 'y');
+
+
 
                 $scope.list = ['Pending', 'Completed', 'Automatable', 'Pending Clarification', 'In Progress',
                     'Out of Scope', 'Not Automatable', 'Application Issue', 'Blocked'];
 
+                $scope.statusMap = getStatusMap();
+
+                console.log(getStatusMap());
+
+                function getStatusMap() {
+                    return $scope.list.map((ele) => {
+                        let obj = {};
+                        obj.view = ele;
+
+                        if((!itemObj.content || itemObj.content === '') && enabledCommandRegexp.test(ele)) {
+                            obj.enabled = false;
+                        }
+                        else
+                            obj.enabled = true;
+
+                        return obj;
+                    });
+                }
+
                 $scope.statusSelectText = function () {
+                    let obj;
+
                     if($scope.selectedStatus !== undefined)
                         return 'Status : '+ $scope.selectedStatus;
                     else {
-                        let obj = lscope.component.getObj(name);
-                        if(!obj)
-                            obj = lscope.component.getObj(name);
+                        switch(itemType) {
+                            case 'component': obj = lscope.component.getObj(name); break;
 
-                        return 'Current Status : '+obj.status;
+                            case 'testcase': obj = lscope.testcase.getObj(name);; break;
+                        }
+                        return 'Status : '+ obj.status;
                     }
-                    return
                 };
 
                 self.ok = function ($event) {
                     if($scope.selectedStatus !== undefined) {
-                       if(itemType === 'testcase') {
-                            let val = angular.copy(lscope.testcase.getObj(name));
+                        itemObj.status = $scope.selectedStatus;
 
-                            val.status = $scope.selectedStatus;
-
-                            resPromise = $restService.setTestcase({
-                                projectName: project,
-                                val: val
-                            });
-                        }
-                        else if(itemType === 'component') {
-                            let val = angular.copy(lscope.component.getObj(name));
-
-                            val.status = $scope.selectedStatus;
-
-                            resPromise = $restService.setComponent({
-                                projectName: project,
-                                val: val
-                            });
-                        }
-
-                        resPromise.then(function (res) {
-                            $mdDialog.hide(res.data);
-                        },
-                        function (error) {
-                            $mdDialog.hide({
-                                status: false,
-                                val: null,
-                                error: error
-                            })
+                        resPromise = $restService.setTestcase({
+                            projectName: project,
+                            val: itemObj
                         });
                     }
                     else {
+                         $mdDialog.hide({
+                             status: false,
+                             error: {
+                                 error: 'Status is not selected!',
+                                 message: 'Select a status of the '+itemType
+                             }
+                         })
+                     }
+
+                    resPromise.then(function (res) {
+                        $mdDialog.hide(res.data);
+                    },
+                    function (error) {
                         $mdDialog.hide({
                             status: false,
-                            error: {
-                                error: 'Status is not selected!',
-                                message: 'Select a status of the '+itemType
-                            }
+                            val: null,
+                            error: error
                         })
-                    }
+                    });
                 }
+
                 self.cancel = function($event) {
                     $mdDialog.cancel();
                 };
             }
         };
+
     $scope.dialog.openErrorPromptDialog = function (error) {
         let config = {
             controller: ErrorPromptDialogCtrl,
             controllerAs: 'ctrl',
-            templateUrl: 'error-dialog-template',
+            templateUrl: 'templates/error-dialog.html',
             parent: angular.element(document.body),
             clickOutsideToClose: true,
             locals: {
@@ -1404,9 +1482,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             let self = this;
             let parentNode;
             let project = lscope.project.selected;
+            $scope.name = currentName;
 
             if(parentName)
-                parentNode = angular.copy(lscope.library.getObj(parentName));
+                if(itemType === 'component')
+                    parentNode = angular.copy(lscope.library.getObj(parentName));
+                else if(itemType === 'testcase')
+                    parentNode = angular.copy(lscope.testsuite.getObj(parentName));
 
             let renameComponent = function () {
                 parentNode.links = parentNode.links.map((element) => {
@@ -1425,8 +1507,36 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             }
 
             let renameTestcase = function () {
-                //return $restService.renameTestcase();
-            }
+                parentNode.links = parentNode.links.map((element) => {
+                    if(element === currentName)
+                        return self.searchText;
+                    else
+                        return element;
+                });
+
+                return $restService.renameTestcase({
+                    projectName: project,
+                    _id: currentName,
+                    _newid: self.searchText,
+                    parentNode: parentNode,
+                });
+            };
+
+            let renameLibrary = function () {
+                return $restService.renameLibrary({
+                    projectName: project,
+                    _id: currentName,
+                    _newid: self.searchText,
+                });
+            };
+
+            let renameTestsuite = function () {
+                return $restService.renameTestsuite({
+                    projectName: project,
+                    _id: currentName,
+                    _newid: self.searchText,
+                });
+            };
 
 
             self.ok = function ($event) {
@@ -1436,6 +1546,8 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                     switch(itemType) {
                         case 'component': promise = renameComponent(); break;
                         case 'testcase': promise = renameTestcase(); break;
+                        case 'library': promise = renameLibrary(); break;
+                        case 'testsuite': promise = renameTestsuite(); break;
                     }
 
                     promise.then(
@@ -1463,7 +1575,38 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             };
         }
 
-    }
+    };
+
+    $scope.dialog.openWarningPromptDialog = function (warning) {
+            let config = {
+                controller: RenamePromptDialogCtrl,
+                controllerAs: 'ctrl',
+                templateUrl: 'templates/warning-dialog.html',
+                parent: angular.element(document.body),
+                clickOutsideToClose: true,
+                locals: {
+                     lscope: $scope,
+                     warning: warning
+                }
+            };
+
+            $mdDialog.show(config);
+
+            function RenamePromptDialogCtrl ($scope, lscope, warning) {
+                let self = this;
+                $scope.warning = warning.warning;
+                $scope.message = warning.message;
+
+                self.ok = function ($event) {
+                    $mdDialog.cancel();
+                }
+
+                self.cancel = function($event) {
+                    $mdDialog.cancel();
+                };
+            }
+
+        };
 
 
 
@@ -1505,11 +1648,21 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             console.log('\n');
             console.error('Root socket connection error');
             console.log(error);
+
+            $scope.dialog.openErrorPromptDialog({
+                error: 'Connection has lost with the server',
+                message: 'Please Reload the page!'
+            });
         });
 
         $scope.socket.projectsocket.on('disconnect', function () {
             console.log('\n');
             console.error('Root socket is disconnected');
+
+            $scope.dialog.openErrorPromptDialog({
+                error: 'Connection has lost with the server',
+                message: 'Please Reload the page!'
+            });
         });
 
         $scope.socket.projectsocket.on('ServerMessage', function (data) {
@@ -1539,6 +1692,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                     $scope.library.remove(data.val._id);
 
                     $scope.libraryTree.removeLib(data.val._id);
+                    $scope.testsuiteTree.removeNode(data.val._id);
                 }
             }
         }
@@ -1554,6 +1708,9 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     let onTCChange = function (data) {
         if(data.change === 'add') {
             $scope.testcase.add(data.val);
+            if($scope.editor.content.name === data.val._id
+                && $scope.editor.content.type === data.val.type)
+                $scope.editor.updateEditor(data.val);
         }
     };
 
@@ -1562,7 +1719,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             $scope.component.add(data.val);
             if($scope.editor.content.name === data.val._id
                 && $scope.editor.content.type === data.val.type)
-                $scope.component.updateEditor(data.val);
+                $scope.editor.updateEditor(data.val);
         }
     };
 
@@ -1599,7 +1756,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                 ng-click="dialog.openCreatePromptDialog($event, 'create', 'testcase', node.testsuite)">Create Testcase</div>
 
             <div class='contextmenu-item'
-                ng-click="">Rename</div>
+                ng-click="dialog.openRenamePromptDialog($event, 'testsuite', node.testsuite)">Rename</div>
 
             <div class='contextmenu-item'
                 ng-click="dialog.openDeleteConfirmDialog($event, 'testsuite', node.testsuite)">Delete Test Auite</div>
@@ -1612,7 +1769,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                 ng-click="dialog.openCreatePromptDialog($event, 'create', 'component', node.library)">Create Component</div>
 
             <div class='contextmenu-item'
-                ng-click="">Rename</div>
+                ng-click="dialog.openRenamePromptDialog($event, 'library', node.library)">Rename</div>
 
             <div class='contextmenu-item'
                 ng-click="dialog.openDeleteConfirmDialog($event, 'library', node.library)">Delete Library</div>
@@ -1641,7 +1798,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             `
             <div id='contextmenu-node'>
                 <div class='contextmenu-item'
-                    ng-click="">Rename Testcase</div>
+                    ng-click="dialog.openRenamePromptDialog($event, 'testcase', testcase, node.testsuite)">Rename Testcase</div>
 
                 <div class='contextmenu-item'
                     ng-click="dialog.openDeleteConfirmDialog($event, 'testcase', testcase)">Delete Testcase</div>
@@ -1690,18 +1847,7 @@ app.directive( "contextMenu", function($compile, $interpolate){
             if($("#contextmenu-node"))
                 $("#contextmenu-node").remove();
 
-            console.log(lElem);
-            //console.log(e);
-
-            //var myEl = angular.element( document.getElementsByTagName('body')[0]);
-           // let ele = document.getElementsByTagName('body')[0];
-            //myEl.appendChild( $compile(template)(lScope) );
-
-            //myEl.append( $compile(template)(lScope) );
             lElem.append( $compile(template)(lScope) );
-
-            console.log(e.clientX);
-            console.log(e.clientY);
 
             $("#contextmenu-node").css("position", 'absolute');
             $("#contextmenu-node").css("z-index", '1000');

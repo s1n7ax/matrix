@@ -1,0 +1,43 @@
+<md-dialog aria-label="Create New Item">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+                        <span
+                                style="font-size: 30px; font-family: Cantarell;">
+                                Would you like to delete {{itemType}}?
+                        </span>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <md-dialog-content ng-cloak>
+        <div class="md-dialog-content">
+            <form ng-submit="$event.preventDefault()">
+                <p style="font-size: 18px;">
+                    Are you sure you want to delete <code>{{name}} {{itemType}}</code>?
+                </p>
+                <p style="font-size: 14px; font-family: Aldrich;
+                                color: red;">This action can not be undone!
+                </p>
+            </form>
+        </div>
+    </md-dialog-content>
+
+    <md-dialog-actions>
+        <md-button
+                class="md-raised md-warn"
+                aria-label="Okay"
+                ng-click="ctrl.ok($event)">
+            Delete
+        </md-button>
+        <div flex=""></div>
+        <md-button
+                class="md-raised"
+                aria-label="cancel"
+                ng-click="ctrl.cancel()">
+            Cancel
+        </md-button>
+    </md-dialog-actions>
+</md-dialog>

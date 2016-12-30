@@ -20,6 +20,7 @@
 
         <!-- Bootstrap css-->
         <link rel="stylesheet" href="stylesheets/bootstrap.min.css">
+        <link rel="stylesheet" href="stylesheets/dataTables.bootstrap.min.css">
 
         <!-- Custom css -->
         <link rel="stylesheet" href="stylesheets/style.css">
@@ -118,30 +119,34 @@
 
 
             <div flex layout="row" class="table-container" ng-show="project.selected && showTable" ng-cloak>
-                <table id="metrix" flex class="table">
-                    <tr class="text-nowrap">
-                        <td ng-repeat="column in matrix.getNameList() track by $index">{{column}}</td>
-                    </tr>
-                    <tr class="text-nowrap">
-                        <td ng-repeat="column in matrix.getStatus() track by $index">{{column}}</td>
-                    </tr>
-                    <tr class="text-nowrap">
-                        <td class="{{getComponentStepCountBGColorClass(column)}}"
-                            ng-repeat="column in matrix.getStepCount() track by $index">{{column}}</td>
-                    </tr>
-                    <tr class="text-nowrap">
-                        <td ng-repeat="column in matrix.getOwner() track by $index">{{column}}</td>
-                    </tr>
-                    <tr class="text-nowrap">
-                        <td class={{getComponentPriorityBGColorClass(column)}}
-                            ng-repeat="column in matrix.getUsage() track by $index">{{column}}</td>
-                    </tr>
-                    <tr class="text-nowrap">
-                        <th ng-repeat="column in matrix.getTCHeader() track by $index">{{column}}</th>
-                    </tr>
-                    <tr ng-repeat="column in matrix.tcMatrix track by $index">
-                        <td ng-repeat="row in column track by $index">{{row}}</td>
-                    </tr>
+                <table id="metrix" flex class="table table-striped table-bordered">
+                    <thead>
+                        <tr class="text-nowrap">
+                            <td ng-repeat="column in matrix.getNameList() track by $index">{{column}}</td>
+                        </tr>
+                        <tr class="text-nowrap">
+                            <td ng-repeat="column in matrix.getStatus() track by $index">{{column}}</td>
+                        </tr>
+                        <tr class="text-nowrap">
+                            <td class="{{getComponentStepCountBGColorClass(column)}}"
+                                ng-repeat="column in matrix.getStepCount() track by $index">{{column}}</td>
+                        </tr>
+                        <tr class="text-nowrap">
+                            <td ng-repeat="column in matrix.getOwner() track by $index">{{column}}</td>
+                        </tr>
+                        <tr class="text-nowrap">
+                            <td class={{getComponentPriorityBGColorClass(column)}}
+                                ng-repeat="column in matrix.getUsage() track by $index">{{column}}</td>
+                        </tr>
+                        <tr class="text-nowrap">
+                            <th ng-repeat="column in matrix.getTCHeader() track by $index">{{column}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="column in matrix.tcMatrix track by $index">
+                            <td ng-repeat="row in column track by $index">{{row}}</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -172,6 +177,8 @@
 
         <!-- Bootstrap Modules -->
         <script src="javascripts/bootstrap.min.js"></script>
+        <!-- <script src="javascripts/bootrstrap-modules/dataTables.bootstrap.min.js"></script> -->
+        <script src="javascripts/bootrstrap-modules/jquery.dataTables.js"></script>
 
 
         <!--  Angular Material js  -->
@@ -184,5 +191,12 @@
         <script>let reporter = angular.module('reporter', ['ngMaterial', 'ngMessages'])</script>
         <script src="javascripts/automate-modules/services/rest-service.js"></script>
         <script src="javascripts/reporter-modules/script.js"></script>
+
+        <script>
+
+
+
+
+        </script>
     </body>
 </html>

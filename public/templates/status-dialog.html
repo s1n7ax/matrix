@@ -1,0 +1,44 @@
+<md-dialog aria-label="Add New Item" style="width: 600px;">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+                            <span
+                                    style="font-size: 30px; font-family: Cantarell;">
+                                    Would you like to change status?
+                            </span>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <md-dialog-content ng-cloak>
+        <div class="md-dialog-content">
+            <form ng-submit="$event.preventDefault()">
+                <p style="font-size: 18px;">
+                    Are you sure you want to change status of {{name}}?
+                </p>
+
+                <md-select
+                        aria-label="StatusSelectMenu"
+                        ng-model="selectedStatus"
+                        md-selected-text="statusSelectText()"
+                        ng-change="onStatusChange()"
+                        style="width: 500px; margin: 20px auto 20px auto;">
+                    <md-optgroup label="Status">
+                        <md-option ng-value="stat.view" ng-repeat="stat in statusMap" ng-disabled="!stat.enabled">{{stat.view}}</md-option>
+                    </md-optgroup>
+                </md-select>
+            </form>
+        </div>
+    </md-dialog-content>
+
+    <md-dialog-actions>
+        <md-button
+                class="md-raised"
+                aria-label="Okay"
+                ng-click="ctrl.ok($event)">
+            Okay
+        </md-button>
+    </md-dialog-actions>
+</md-dialog>

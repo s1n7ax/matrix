@@ -47,7 +47,7 @@
                     "Click", "EditVariable", "CheckElementPresent", "GoBack", "Select", "Retrieve", "EndLoop", "MouseMoveAndClick", "SetVarProperty",
                     "ElseIf", "DoubleClickAt", "CheckTextPresent", "SelectFrame", "WriteToReport", "HandlePopup", "EndIf", "SelectWindow", "FireEvent",
                     "CheckTable", "CreateUser", "SetVariable", "Store", "StartComment", "Pause", "CheckObjectProperty", "MouseOver", "Open", "EndComment",
-                    "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick"
+                    "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
             ];
 
             var jsKeywords = {

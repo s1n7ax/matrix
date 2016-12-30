@@ -1,0 +1,38 @@
+<md-dialog aria-label="Error Message" style="width: 600px;">
+    <md-toolbar style="background-color: #f96b6b">
+        <div class="md-toolbar-tools">
+                            <span
+                                    style="font-size: 30px; font-family: Cantarell;">
+                                Warning!
+                            </span>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <md-dialog-content ng-cloak>
+        <div class="md-dialog-content">
+            <form ng-submit="$event.preventDefault()">
+                <p style="font-size: 18px;">
+                    Warning : {{warning}}
+                </p>
+
+                <p>
+                    {{message}}
+                </p>
+            </form>
+        </div>
+    </md-dialog-content>
+
+    <md-dialog-actions>
+        <md-button
+                class="md-raised"
+                aria-label="Okay"
+                style="background-color: #f96b6b; color: white;"
+                ng-click="ctrl.ok($event)">
+            Okay
+        </md-button>
+    </md-dialog-actions>
+</md-dialog>

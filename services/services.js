@@ -33,14 +33,29 @@ class Service {
         this.dbName = dbName;
         this.database = this.server.use(dbName);
 
+
         if((dbName !== undefined) && startSocket){
-            console.log('ok it\'s true '+this.dbName);
             this.feed = this.database.follow({since: "now"});
             this.socket = io.of('/'+dbName);
 
             this.startSocket();
             this.followDB();
+            this.compaction();
         }
+    }
+
+    compaction() {
+        let self = this;
+        self.server.db.compact(self.dbName, function (error, body) {
+            if(error)
+                console.error(error);
+            else
+                console.log('Compaction of db '+ self.dbName +' - Successful!');
+        });
+
+        setTimeout(function () {
+            self.compaction();
+        }, 60*1000*30);
     }
 
     /* 
@@ -197,7 +212,7 @@ class Service {
 
 
     followDB () {
-        console.log('following DB');
+        console.log('following DB '+ this.dbName);
         let self = this;
 
         this.feed.on('change', function(change) {
@@ -241,7 +256,7 @@ class Service {
 
     startSocket () {
         let self = this;
-        console.log('********** Starting socket - Successful! **********')
+        console.log('\n********** Starting socket - Successful! **********')
 
         this.socket.on('connection', function (socket) {
             socket.emit('ServerMessage', `Server : Connecting to project "${self.dbName}" socket server - Successful!`);

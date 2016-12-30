@@ -1,9 +1,34 @@
 const Locator = require('../locator');
 const http = require('http');
 const express = require('express');
+const Nano = require('nano');
+const JsonFile = require('jsonfile');
+
 const router = express.Router();
+
 const Service =  require(Locator.servicesPath.services);
 
+let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
+let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
+
+/*let server = Nano(connectionQuery);
+let dbListIterator;*/
+
+/*server.db.list(function (error, body) {
+    if(error) {
+        console.error('Error while replication is happening')
+        console.error(error);
+    }
+    else {
+        console.log('Getting db list - Successful!\n');
+        body = body.filter((ele) => ele !== '_replicator' && ele !== '_users');
+        dbListIterator = makeIterator(body);
+
+        let newObj = dbListIterator.next();
+        if(!newObj.done)
+            startReplication(newObj.value);
+    }
+});*/
 
 /**
  * PROPERTIES
@@ -27,13 +52,13 @@ let serviceProvider = function () {
 				}
 			});
 
-        console.log('*********** These are the projects ***********');
+        console.log('\n*********** These are the projects ***********');
 		console.log(body);
 		body.forEach(function (val) {
 			services[val] = new Service(val, true);
 		});
 
-		console.log('*********** Service Providers : Ready! ***********')
+		console.log('\n*********** Service Providers : Ready! ***********')
 	});
 };
 
@@ -53,8 +78,69 @@ let addLinkToItem = function (item, val) {
     return item;
 };
 
-serviceProvider();
+let makeIterator = function (array){
+    var nextIndex = 0;
 
+    return {
+       next: function(){
+           return nextIndex < array.length ?
+               {value: array[nextIndex++], done: false} :
+               {done: true};
+       }
+    }
+};
+
+/*let startReplication = function (name) {
+    console.log(`\n********* Replication of ${name} - Starting! *********`);
+    let self = this;
+
+    server.db.replicate(name, connectionQuery+'/'+name+'_rep', { create_target:true }, function(error, body) {
+        if(error){
+            console.log('465465219219648');
+            console.log(error);
+            throw error;
+        }
+        else{
+            console.log(`Creating ${name}_rep - Successful!`);
+
+            server.db.destroy(name, function (error, body) {
+                if(error){
+                    console.log('85744645654');
+                    console.log(error);
+                }
+                else {
+                    console.log(`Deleting original ${name} db - Successful!`);
+
+                    server.db.replicate(name+'_rep', connectionQuery+'/'+name, { create_target:true }, function(error, body) {
+                        if(error){
+                            console.log('643191965161');
+                            console.error(error);
+                        }
+                        else {
+                            console.log(`Replicating ${name}_rep to ${name} - Successful!`);
+                            server.db.destroy(name+'_rep', function (error, body) {
+                                if(error){
+                                    console.log(error);
+                                }
+                                else{
+                                    console.log(name+' replication is - successful!');
+                                    let nextObj = dbListIterator.next();
+                                        if(!nextObj.done)
+                                            startReplication(nextObj.value);
+                                        else
+                                            serviceProvider();
+                                }
+                            });
+                        }
+                    })
+                }
+
+            })
+        }
+    });
+};*/
+
+serviceProvider();
 
 /**
  * Root
@@ -380,6 +466,42 @@ router.post('/deleteTestcase', function (req, res, next) {
     })
 });
 
+router.post('/renameTestcase', function (req, res, next) {
+    let projectService = services[req.body.projectName];
+    debugger;
+    projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
+        if(error) {
+            debugger;
+            console.error(error);
+            res.send(getResMap(false, null, error));
+        }
+        else {
+            debugger;
+            projectService.deleteDocById(req.body._id, function (error, body2) {
+                if(error){
+                    debugger;
+                    console.error(error);
+                    res.send(getResMap(false, null, error));
+                }
+                else{
+                    debugger;
+                    projectService.insertOrUpdateDoc(req.body.parentNode, function (error, body) {
+                        if(error) {
+                            debugger;
+                            console.error(error);
+                            res.send(getResMap(false, null, error));
+                        }
+                        else {
+                            debugger;
+                            res.send(getResMap(true, body, null))
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
 
 
 /**
@@ -587,6 +709,51 @@ router.post('/deleteItemAndChildren', function (req, res, next) {
             else {
                 res.send(getResMap(true, body, null));
             }
+        }
+    });
+});
+
+router.post('/renameLibrary', function (req, res, next) {
+    let projectService = services[req.body.projectName];
+
+    projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
+        if(error) {
+            console.error(error)
+            res.send(getResMap(false, null, error));
+        }
+        else {
+            projectService.deleteDocById(req.body._id, function (error, body) {
+                if(error) {
+                        console.error(error);
+                        res.send(getResMap(false, null, error));
+                }
+                else{
+                    res.send(getResMap(true, body, null));
+                }
+            })
+        }
+    });
+});
+
+
+router.post('/renameTestsuite', function (req, res, next) {
+    let projectService = services[req.body.projectName];
+
+    projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
+        if(error) {
+            console.error(error)
+            res.send(getResMap(false, null, error));
+        }
+        else {
+            projectService.deleteDocById(req.body._id, function (error, body) {
+                if(error) {
+                        console.error(error);
+                        res.send(getResMap(false, null, error));
+                }
+                else{
+                    res.send(getResMap(true, body, null));
+                }
+            })
         }
     });
 });
