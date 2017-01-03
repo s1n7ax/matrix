@@ -11,7 +11,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     /**
      * Following should be changed
      */
-    let serverHostname = 'cmdsnmuhandiram';
+    let serverHostname = 'cmdswickramarat';
 
 
     /**
@@ -642,11 +642,13 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                             console.log(res.data.val);
                             $scope.editor.content.isChanged = false;
 
+							/*
                             if(componentCopy.status === 'Pending')
                                 $scope.dialog.openWarningPromptDialog({
                                     warning: 'Component Status is Pending',
                                     message: 'Please change the status'
                                 });
+							*/
 
                             if (callback)
                                 callback();
@@ -682,13 +684,15 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                             console.log('Saving Testcase - Successful!');
                             console.log(res.data.val);
                             $scope.editor.content.isChanged = false;
-
+							
+							
+							/*
                             if(testcaseCopy.status === 'Pending')
                                 $scope.dialog.openWarningPromptDialog({
                                     warning: 'Testcase Status is Pending',
                                     message: 'Please change the status'
                                 });
-
+							*/
                             if(callback)
                                 callback();
                         }
@@ -891,14 +895,25 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                             });
                         });
                 }
-                else if(self.searchText === '' || self.searchText === null)
-                    $mdDialog.hide({
+                else if(self.searchText === '' || self.searchText === null){
+					$mdDialog.hide({
                         status: false,
                         error: {
                             error: 'Name of the '+itemType+'is empty',
                             message: 'Name is mandatory for creating a '+itemType
                         }
-                    })
+                    });
+				}
+				else if(self.searchText.match(/\s+/)){
+					$mdDialog.hide({
+                        status: false,
+                        error: {
+                            error: 'Name of the '+itemType+' has empty spaces',
+                            message: 'Please remove white spaces and add '+itemType+ 'again'
+                        }
+                    });
+				}
+                    
             };
 
             self.cancel = function($event) {
@@ -1430,33 +1445,39 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             }
         };
 
-    $scope.dialog.openErrorPromptDialog = function (error) {
+    $scope.dialog.openErrorPromptDialog = function (error, enableClose) {
+		if(enableClose === undefined)
+			enableClose = true;
+		
         let config = {
             controller: ErrorPromptDialogCtrl,
             controllerAs: 'ctrl',
-            templateUrl: 'templates/error-dialog.html',
+            templateUrl: 'dialog1.tmpl',
             parent: angular.element(document.body),
-            clickOutsideToClose: true,
+            clickOutsideToClose: enableClose,
             locals: {
                  lscope: $scope,
-                 error: error
+                 error: error,
+				 enableClose: enableClose
             }
         };
 
         $mdDialog.show(config);
 
 
-        function ErrorPromptDialogCtrl ($scope, lscope, error) {
+        function ErrorPromptDialogCtrl ($scope, lscope, error, enableClose) {
             let self = this;
 
             $scope.error = error.error;
             $scope.message = error.message;
 
             self.ok = function ($event) {
-                $mdDialog.hide();
+				if(enableClose)
+					$mdDialog.hide();
             }
             self.cancel = function($event) {
-                $mdDialog.cancel();
+				if(enableClose)
+					$mdDialog.cancel();
             };
         }
     };
@@ -1652,7 +1673,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             $scope.dialog.openErrorPromptDialog({
                 error: 'Connection has lost with the server',
                 message: 'Please Reload the page!'
-            });
+            }, false);
         });
 
         $scope.socket.projectsocket.on('disconnect', function () {
@@ -1662,7 +1683,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             $scope.dialog.openErrorPromptDialog({
                 error: 'Connection has lost with the server',
                 message: 'Please Reload the page!'
-            });
+            }, false);
         });
 
         $scope.socket.projectsocket.on('ServerMessage', function (data) {
