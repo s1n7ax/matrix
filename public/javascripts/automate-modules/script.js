@@ -491,7 +491,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
 
     $scope.editor.codeMirrorObj = CodeMirror.fromTextArea(document.getElementById("code"), {
         lineNumbers: true,
-        //extraKeys: {"Ctrl": "autocomplete"},
+        extraKeys: {"Ctrl-Space": "autocomplete"},
         //mode: "anyword"
     });
     
@@ -616,12 +616,12 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     $scope.editor.codeMirrorObj.on('blur', function (cm) {
         $scope.editor.saveContent(cm);
     });
-
+/*
     $scope.editor.codeMirrorObj.on('keyup', function (cm) {
         console.log('*********');
         cm.showHint();
     });
-
+*/
     $scope.editor.saveContent = function(cm, callback) {
         if ($scope.editor.content.name !== null && $scope.editor.content.name !== '') {
             if($scope.editor.content.type === 'component') {
