@@ -1,4 +1,5 @@
 const Locator = require('../locator');
+const os = require('os');
 const http = require('http');
 const express = require('express');
 const Nano = require('nano');
@@ -146,7 +147,10 @@ serviceProvider();
  * Root
  */
 router.get('/', function(req, res, next) {
-    res.sendFile(Locator.viewsPath.index);
+    //res.sendFile(Locator.viewsPath.index);
+    res.render(Locator.viewsPath.indexEJS, {
+        sockethost: 'http://'+os.hostname()+':3001'
+    });
 });
 
 router.get('/reporter', function (req, res, next) {

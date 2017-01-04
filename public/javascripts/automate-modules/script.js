@@ -11,7 +11,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     /**
      * Following should be changed
      */
-    let serverHostname = 'cmdswickramarat';
+    let serverHostname = window.location.hostname;
 
 
     /**

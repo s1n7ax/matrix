@@ -1,11 +1,316 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+
+<head>
+    <title>Automate</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Angular Material css -->
+    <link rel="stylesheet" href="stylesheets/angular-material.css">
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
+
+    <!-- Google fonts -->
+    <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Poiret+One'>
+    <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Ubuntu:300'>
+
+    <!-- Custom Fonts-->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Cantarell" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Bitter" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Aldrich" />
+
+    <!-- Google icon -->
+
+
+    <!-- CodeMirror css -->
+    <link rel="stylesheet" type="text/css" href="stylesheets/codemirror.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/show-hint.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/docs.css">
+
+    <!-- Custom css -->
+    <link rel="stylesheet" href="stylesheets/style.css">
+
+</head>
+
+<body ng-app="automate" ng-controller="automate_ctrl">
+
+
+    <div layout="column" style="height:100%">
+
+        <!-- TOOLBAR -->
+        <md-toolbar flex class="toolbar" ng-cloak>
+            <div class="md-toolbar-tools toolbar">
+
+                <!-- SHOW SIDE NAVOGATOR BUTTON -->
+                <md-button class="md-icon-button md-button md-ink-ripple"
+                ng-click="toggleNav()" hide-gt-sm>
+                    <md-icon md-font-icon="material-icons" style="color:white;">reorder</md-icon>
+                </md-button>
+
+                <!-- TOOLBAR HEADER -->
+                <span class="no-select header-text clickable-mouse-point">{{applicationName}}</span>
+
+                <!-- SPACER -->
+                <div flex=""></div>
+
+                <!-- PROJECT SELECTOR -->
+                <md-select ng-model="project.selected"
+                md-selected-text="project.selectMenuString"
+                ng-change="project.onSelect()"
+                ng-click="project.onClick()"
+                aria-label="Project" class="toolbar-project-selector">
+                    <md-optgroup label="Projects">
+                        <md-option ng-value="project" ng-repeat="project in project.nameList">{{project}}</md-option>
+                    </md-optgroup>
+                </md-select>
+
+                <!-- SPACER -->
+                <div flex=""></div>
+
+                <!-- MATRIX -->
+                <md-button class="md-icon-button">
+                    <a target="_blank" aria-label="matrixLink" href="/reporter">
+                        <md-icon md-svg-src="img/icons/ic_assignment_white_24px.svg" aria-label="matrix" class="toolbar-icon"></md-icon>
+                    </a>
+                </md-button>
+
+                <!-- OPTION MENU BUTTON-->
+                <md-menu>
+
+                    <md-button class="md-icon-button" 
+                    ng-click="optionMenu.openOptionMenu($mdOpenMenu, $event)">
+                        <md-icon md-svg-src="img/icons/ic_list_white_24px.svg" class="toolbar-icon">list</md-icon>
+                    </md-button>
+
+                    <md-menu-content width="4">
+
+                        <md-menu-item>
+                            <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'project' )">
+                                Create Project
+                            </md-button>
+                        </md-menu-item>
+
+                        <md-menu-item>
+                            <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'testsuite' )">
+                                Create Test Suite
+                            </md-button>
+                        </md-menu-item>
+
+                        <md-menu-item>
+                            <md-button ng-click="dialog.openCreatePromptDialog($event, 'create', 'library')">
+                                Create Library
+                            </md-button>
+                        </md-menu-item>
+
+                        <md-menu-divider></md-menu-divider>
+
+                    </md-menu-content>
+                </md-menu>
+            </div>
+        </md-toolbar>
+
+        <!-- CONTENT -->
+        <div flex layout="row">
+
+            <!-- SIDE NAVIGATOR -->
+            <md-sidenav flex="initial" md-is-locked-open="$mdMedia('gt-sm')"
+            md-component-id="side-nav"
+            md-is-locked-open="$mdMedia('gt-sm')"
+            class="md-primary md-hue-2"
+            style="overflow-x: hidden; height: 92%;" ng-cloak>
+
+                <md-nav-bar md-selected-nav-item="sideNav.selectedViewType"
+                aria-label="Navigator">
+                    <md-nav-item md-nav-click="goto('module-browser')"
+                    name="module-browser">Test Suite</md-nav-item>
+                    <md-nav-item md-nav-click="goto('tree-view')"
+                    name="tree-view">Libraries</md-nav-item>
+                </md-nav-bar>
+
+
+                <div class="view-content-common">
+
+                    
+                    <!-- SIDE NAVIGATOR TEST SUITE VIEW CONTAINER -->
+                    <div ng-if=" sideNav.selectedViewType === 'module-browser'">
+                        <md-content style="height: 92%; overflow-x: hidden;">
+                            <div layout="column" ng-repeat="node in testsuiteTree.list" style="position: relative;">
+                                <context-menu contextmenu-template="onTestSuite">
+                                    <md-button 
+                                        class="file-tree-main square-buttons"
+                                        style="text-transform: none;"
+                                        ng-click="node.isExpanded = !node.isExpanded; testsuiteTree.tsOnClick();">
+                                            {{node.testsuite}}
+                                    </md-button>
+                                </context-menu>
+                                <div ng-show="node.isExpanded" ng-repeat="testcase in node.testcase">
+                                    <context-menu contextmenu-template="onTestcase">
+                                        <md-button
+                                            class="file-tree-sub square-buttons"
+                                            style="text-transform: none;"
+                                            ng-class="fileTree.cssMainFileTreeButtonClass(testcase)"
+                                            ng-click="testsuiteTree.tcOnClick(testcase); fileTree.setFocus(testcase);">
+                                            {{testcase}}
+                                        </md-button>
+                                    </context-menu>
+                                </div>
+                            </div>
+                        </md-content>
+                    </div>
+
+                    <!-- SIDE NAVIGATOR LIBRARY VIEW CONTAINER -->
+                    <div class="tree-view" ng-if=" sideNav.selectedViewType === 'tree-view' ">
+                        <md-content style="height: 92%; overflow-x: hidden;">
+                            <div layout="column" ng-repeat="node in libraryTree.list" style="position: relative;" >
+                                <context-menu contextmenu-template="onLibrary">
+                                    <md-button 
+                                        class="file-tree-main square-buttons"
+                                        style="text-transform: none;"
+                                        ng-click="node.isExpanded = !node.isExpanded;">
+                                            {{node.library}}
+                                    </md-button>
+                                </context-menu>
+                                <div
+                                    ng-show="node.isExpanded"
+                                    ng-repeat="component in node.components">
+                                    <context-menu contextmenu-template="onComponent">
+                                        <md-button
+                                            class="file-tree-sub square-buttons"
+                                            style="text-transform: none;"
+                                            ng-class="fileTree.cssMainFileTreeButtonClass(component)"
+                                            ng-click="libraryTree.cOnClick(component, 'component'); fileTree.setFocus(component);">
+                                            {{component}}
+                                        </md-button>
+                                    </context-menu>
+                                </div>
+                            </div>
+                        </md-content>
+                    </div>
+
+                </div>
+            </md-sidenav>
+
+            <!-- EDITOR -->
+            <md-content flex style="display: flex; flex-flow: column;">
+                <div
+                    style="
+                        background-color: #545454;
+                        height: 50px;
+                        color: white;" ng-cloak>
+                    <div
+                        style="
+                            padding: 0 10px 0 30px;
+                            font-size: 30px;
+                            margin: 0;
+                            height: 50px;
+                            ">
+                        {{editor.content.name ? editor.content.name : ''}}
+                    </div>
+                </div>
+                <textarea id="code" style="flex:1"></textarea>
+            </md-content>
+        </div>
+		
+		<!-- Templates -->
+		<script type="text/ng-template" id="dialog1.tmpl">
+		<md-dialog aria-label="Error Message" style="width: 600px;">
+			<md-toolbar style="background-color: #f96b6b">
+				<div class="md-toolbar-tools">
+								<span
+										style="font-size: 30px; font-family: Cantarell;">
+									An Error Occurred!
+								</span>
+					<span flex></span>
+					<md-button class="md-icon-button" ng-click="ctrl.cancel()">
+						<md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+					</md-button>
+				</div>
+			</md-toolbar>
+
+			<md-dialog-content ng-cloak>
+				<div class="md-dialog-content">
+					<form ng-submit="$event.preventDefault()">
+						<p style="font-size: 18px;">
+							Error : {{error}}
+						</p>
+
+						<p>
+							{{message}}
+						</p>
+					</form>
+				</div>
+			</md-dialog-content>
+
+			<md-dialog-actions>
+				<md-button
+						class="md-raised"
+						aria-label="Okay"
+						style="background-color: #f96b6b; color: white;"
+						ng-click="ctrl.ok($event)">
+					Okay
+				</md-button>
+			</md-dialog-actions>
+		</md-dialog>
+		</script>
+		
+		
+    </div>
+
+
+    <!-- Angular js -->
+    <script src="javascripts/angular-modules/angular.js"></script>
+
+    <script src="javascripts/angular-modules/angular-animate.js"></script>
+    <script src="javascripts/angular-modules/angular-aria.js"></script>
+    <script src="javascripts/angular-modules/angular-messages.js"></script>
+    <script src="javascripts/angular-modules/angular-cookies.js"></script>
+    <script src="javascripts/angular-modules/angular-loader.js"></script>
+    <script src="javascripts/angular-modules/angular-message-format.js"></script>
+    <script src="javascripts/angular-modules/angular-mocks.js"></script>
+    <script src="javascripts/angular-modules/angular-parse-ext.js"></script>
+    <script src="javascripts/angular-modules/angular-resource.js"></script>
+    <script src="javascripts/angular-modules/angular-route.js"></script>
+    <script src="javascripts/angular-modules/angular-sanitize.js"></script>
+    <script src="javascripts/angular-modules/angular-scenario.js"></script>
+    <script src="javascripts/angular-modules/angular-touch.js"></script>
+
+
+    <!--  Angular Material js  -->
+    <script src="javascripts/angular-modules/angular-material.js"></script>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+    <!-- CodeMirror js -->
+    <script src="javascripts/codemirror-modules/codemirror.js"></script>
+    <script src="javascripts/codemirror-modules/show-hint.js"></script>
+    <!--<script src="javascripts/codemirror-modules/javascript-hint.js"></script>-->
+    <script src="javascripts/codemirror-modules/javascript.js"></script>
+    <!--<script src="javascripts/codemirror-modules/markdown.js"></script>-->
+    <!--<script src="javascripts/codemirror-modules/anyword-hint.js"></script>-->
+
+
+    <!-- XLSX Module -->
+    <!--<script lang="javascript" src="dist/xlsx.core.min.js"></script>-->
+    <script lang="javascript" src="javascripts/excellentexport.js"></script>
+
+    <!-- Socket.IO -->
+    <script src="<%= sockethost %>/socket.io/socket.io.js"></script>
+
+    <script> let app = angular.module('automate', ['ngMaterial']) </script>
+    <script src="javascripts/automate-modules/services/super-service.js"></script>
+    <script src="javascripts/automate-modules/services/project-service.js"></script>
+    <script src="javascripts/automate-modules/services/testsuite-service.js"></script>
+    <script src="javascripts/automate-modules/services/testcase-service.js"></script>
+    <script src="javascripts/automate-modules/services/component-service.js"></script>
+    <script src="javascripts/automate-modules/services/library-service.js"></script>
+    <script src="javascripts/automate-modules/services/rest-service.js"></script>
+    <script src="javascripts/automate-modules/services/editor-service.js"></script>
+
+    <script src="javascripts/automate-modules/services/test-suite-tree-service.js"></script>
+    <script src="javascripts/automate-modules/services/complex-scope-updater-service.js"></script>
+    <script src="javascripts/automate-modules/script.js"></script>
+
+
+</body>
+
 </html>

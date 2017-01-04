@@ -27,6 +27,7 @@ class Locator {
         this.viewsPath = {
             index: Path.join(__dirname, 'views', 'index.html'),
             reporter: Path.join(__dirname, 'views', 'reporter.html'),
+            indexEJS: Path.join(__dirname, 'views', 'index')
         }
 		
 		this.commonPath = {
