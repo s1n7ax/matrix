@@ -41,4 +41,4 @@ class Backup {
 
 }
 
-module.exports = new Backup(12);
+module.exports = new Backup(3);

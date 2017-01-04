@@ -55,7 +55,7 @@ class Service {
 
         setTimeout(function () {
             self.compaction();
-        }, 60*1000*30);
+        }, 60*1000*5);
     }
 
     /* 
