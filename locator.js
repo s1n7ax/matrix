@@ -16,7 +16,9 @@ class Locator {
         this.servicesPath = {
             services: Path.join(__dirname, 'services', 'services'),
             newService: Path.join(__dirname, 'services', 'newService'),
-            backup: Path.join(__dirname, 'services', 'backup')
+            backup: Path.join(__dirname, 'services', 'backup'),
+            writeExcel: Path.join(__dirname, 'services', 'write_excel'),
+            readExcel: Path.join(__dirname, 'services', 'read_excel')
         }
 
         this.routesPath = {
@@ -27,7 +29,8 @@ class Locator {
         this.viewsPath = {
             index: Path.join(__dirname, 'views', 'index.html'),
             reporter: Path.join(__dirname, 'views', 'reporter.html'),
-            indexEJS: Path.join(__dirname, 'views', 'index')
+            indexEJS: Path.join(__dirname, 'views', 'index'),
+            upload: Path.join(__dirname, 'views', 'upload.html')
         }
 		
 		this.commonPath = {
@@ -38,6 +41,10 @@ class Locator {
 		    dbSource: Path.join('C:\\Program Files (x86)\\Apache Software Foundation\\CouchDB\\var\\lib\\couchdb'),
 		    dbCopyTo: Path.join(__dirname, 'backup')
 		}
+
+        this.temp = {
+            temp: Path.join(__dirname, 'temp')
+        }
     }
 }
 
