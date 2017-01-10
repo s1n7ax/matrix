@@ -44,24 +44,4 @@ class WriteExcel extends ReadExcel {
 	}
 }
 
-
-let a = new WriteExcel();
-a.readAsFile('sample.xlsx');
-let sheet = a.getSheet(0);
-let mergesArr = a.getSheetMerges(sheet);
-let locArr = a.getCellLocationArr(mergesArr);
-
-a.writeMerges(sheet);
-
-locArr.forEach(function (ele) {
-	let val = a.getCellVal(sheet, ele.tc);
-
-	if(val){
-		let cellObj = a.getCellMapObj('s', val);
-		a.writeToCell(sheet, ele.bc, cellObj);
-	}
-});
-console.log(sheet);
-
-
-a.writeFile('sample.xlsx');
+module.exports = WriteExcel;

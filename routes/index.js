@@ -6,32 +6,16 @@ const http = require('http');
 const express = require('express');
 const Nano = require('nano');
 const JsonFile = require('jsonfile');
-
+const multer  = require('multer');
+const WriteExcel = require(Locator.servicesPath.writeExcel);
 const router = express.Router();
-
 const Service =  require(Locator.servicesPath.services);
+
+
 
 let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
 let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
 
-/*let server = Nano(connectionQuery);
-let dbListIterator;*/
-
-/*server.db.list(function (error, body) {
-    if(error) {
-        console.error('Error while replication is happening')
-        console.error(error);
-    }
-    else {
-        console.log('Getting db list - Successful!\n');
-        body = body.filter((ele) => ele !== '_replicator' && ele !== '_users');
-        dbListIterator = makeIterator(body);
-
-        let newObj = dbListIterator.next();
-        if(!newObj.done)
-            startReplication(newObj.value);
-    }
-});*/
 
 /**
  * PROPERTIES
@@ -93,92 +77,130 @@ let makeIterator = function (array){
     }
 };
 
-/*let startReplication = function (name) {
-    console.log(`\n********* Replication of ${name} - Starting! *********`);
-    let self = this;
+let getCalledComponents = function (content) {
+    if(content) {
+        let contentArr = content.split('\n').filter(element => element.match(/\S/));
+        let components = [];
+        
+        for(let i = 0; i < contentArr.length; i++) {
+            let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
 
-    server.db.replicate(name, connectionQuery+'/'+name+'_rep', { create_target:true }, function(error, body) {
-        if(error){
-            console.log('465465219219648');
-            console.log(error);
-            throw error;
+            if(val){
+            components.push(val[0]);
+            }
+            else {
+            statements.push(contentArr[i]);
+            }
         }
-        else{
-            console.log(`Creating ${name}_rep - Successful!`);
-
-            server.db.destroy(name, function (error, body) {
-                if(error){
-                    console.log('85744645654');
-                    console.log(error);
-                }
-                else {
-                    console.log(`Deleting original ${name} db - Successful!`);
-
-                    server.db.replicate(name+'_rep', connectionQuery+'/'+name, { create_target:true }, function(error, body) {
-                        if(error){
-                            console.log('643191965161');
-                            console.error(error);
-                        }
-                        else {
-                            console.log(`Replicating ${name}_rep to ${name} - Successful!`);
-                            server.db.destroy(name+'_rep', function (error, body) {
-                                if(error){
-                                    console.log(error);
-                                }
-                                else{
-                                    console.log(name+' replication is - successful!');
-                                    let nextObj = dbListIterator.next();
-                                        if(!nextObj.done)
-                                            startReplication(nextObj.value);
-                                        else
-                                            serviceProvider();
-                                }
-                            });
-                        }
-                    })
-                }
-
-            })
-        }
-    });
-};*/
+        return components;
+    }
+    else{
+        return components;
+    }
+}
 
 serviceProvider();
 
-router.get('/upload', function (req, res, next) {
-    res.sendFile(Locator.viewsPath.upload);
+router.post('/getSanitizationStepsByTemplate', function(req, res, next){
+    let uploadedFilePath = null;
+    
+    var upload = multer({ dest: Locator.temp.temp });
+    
+    var storage = multer.diskStorage({
+        destination: function (req, file, callback) {
+            callback(null, Locator.temp.temp);
+        },
+        filename: function (req, file, callback) {
+            uploadedFilePath = file.fieldname + '-' + Date.now() + '.xlsx';
+            callback(null, uploadedFilePath);
+        }
+    });
+    
+    var upload = multer({ storage : storage}).single('file');
+
+    upload(req, res, function(err) {
+
+        if(err) {
+            return res.end("Error uploading file");
+        }
+        
+        // let projectService = services[req.body.projectName];
+        let projectService = services['newprg'];
+        
+        try{
+            projectService.getAllTCsAndBCs(function(tc, bc) {
+                let notMatched = [];
+                
+                let ws = new WriteExcel();
+                ws.readAsFile(Path.join(Locator.temp.temp, uploadedFilePath));
+                let sheet = ws.getSheet(0);
+                let mergesArr = ws.getSheetMerges(sheet);
+                let locArr = ws.getCellLocationArr(mergesArr);
+
+                ws.writeMerges(sheet);
+
+                locArr.forEach(function (loc) {
+                    let val = ws.getCellVal(sheet, loc.tc);
+
+                    if(val){
+
+                        let tcobj = tc.find(function (ele) {
+                            return val == ele._id;
+                        });
+
+                        if(tcobj){
+                            if(tcobj.content){
+                                let calledCMP = getCalledComponents(tcobj.content);
+
+                                container = '';
+                                calledCMP.forEach(function(ele) {
+                                    let cmp = bc.find(function (ele2) {
+                                        return ele2._id === ele;
+                                    });
+
+                                    if(!cmp){
+                                        cmp = {};
+                                        cmp.content = 'Error: component not found';
+                                    }
+                                    if(!cmp.content){
+                                        cmp.content = '';
+                                    }
+                                    
+                                    //adding empty spaces
+                                    let splitedContent = cmp.content.split('\n');
+                                    let spacedContent = '';
+                                    splitedContent.forEach((statement) => {
+                                        spacedContent += '    ' + statement + '\r\n';
+                                    });
+
+                                    container += `************* ${ele} *************\n${spacedContent}\n\n`                                
+                                });
+
+                                let cellObj = ws.getCellMapObj('s', container);
+                                ws.writeToCell(sheet, loc.bc, cellObj);
+                            }
+                        }else{
+                            notMatched.push(val);
+                        }    
+                    }
+                });
+
+                ws.writeFile(Path.join(Locator.temp.temp, uploadedFilePath));
+                res.download(Path.join(Locator.temp.temp, uploadedFilePath));
+                setTimeout(function () {
+                    fs.unlinkSync(Path.join(Locator.temp.temp, uploadedFilePath));
+                }, 1000)
+            });
+        }catch(error){
+            dbErrorLogger('error', error);
+        }
+
+        //res.end("File is uploaded");
+    });
 })
 
-router.post('/uploadFile', function(req, res){
-
-    // create an incoming form object
-    var form = new formidable.IncomingForm();
-
-    // specify that we want to allow the user to upload multiple files in a single request
-    form.multiples = true;
-
-    // store all uploads in the /uploads directory
-    form.uploadDir = path.join(__dirname, '/uploads');
-
-    // every time a file has been uploaded successfully,
-    // rename it to it's orignal name
-    form.on('file', function(field, file) {
-        fs.rename(file.path, path.join(form.uploadDir, file.name));
-    });
-
-    // log any errors that occur
-    form.on('error', function(err) {
-        console.log('An error has occured: \n' + err);
-    });
-
-    // once all the files have been uploaded, send a response to the client
-    form.on('end', function() {
-        res.end('success');
-    });
-
-    // parse the incoming request containing the form data
-    form.parse(req);
-
+router.get('/upload', function(req, res){
+    res.sendFile(Locator.viewsPath.upload);
 });
 
 
@@ -231,8 +253,6 @@ router.post('/deleteItem', function (req, res, next) {
     })
 });
 router.post('/createItem', function (req, res, next) {
-    console.log(req.body);
-
     let projectService = services[req.body.projectName];
 
     projectService.insertOrUpdateDoc(req.body.val, function (error, body) {
@@ -423,7 +443,6 @@ router.post('/getAllTestsuites', function (req, res, next) {
  * TESTCASE
  */
 router.post('/createTestCase', function(req, res, next) {
-    console.log(req.body);
 	let projectService = services[req.body.projectName];
 
 	projectService.insertOrUpdateDoc(req.body.val, function (error, body) {

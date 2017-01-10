@@ -129,7 +129,7 @@ class Service {
             keysObject !== undefined ?
             this.database.view('Automate', 'getAllLibraries', keysObject, callback)
             : this.database.view('Automate', 'getAllLibraries', callback)
-        }
+    }
 
     getAllDocs (keysObject, callback) {
         keysObject !== undefined ?
@@ -142,6 +142,34 @@ class Service {
         keysObject !== undefined ?
         this.database.view('Automate', 'getAllUsers', keysObject, callback)
         : this.database.view('Automate', 'getAllUsers', callback)
+    }
+
+    getAllTCsAndBCs (callback) {
+        let self = this;
+        let tc = [];
+        let bc = [];
+
+        self.getAllTestCaseDocs(undefined, function (error, body) {
+            if(error){
+                throw 'Getting Testcase Failed';
+            }else{
+                body.rows.forEach(function (data) {
+                    tc.push(data.value);
+                });
+
+                
+                self.getAllComponentDocs(undefined, function (error, body) {
+                    if(error){
+                        throw 'Getting Components Failed';
+                    }else{
+                        body.rows.forEach(function (data) {
+                            bc.push(data.value);
+                        });
+                        callback(tc, bc);
+                    }
+                });
+            }
+        })
     }
 
     deepSelectById (self, id, callback) {

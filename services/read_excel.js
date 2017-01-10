@@ -69,7 +69,7 @@ function ReadExcel() {
 
 	this.getCellVal = function (sheet, locationObj) {
 		if(sheet[locationObj.c + (locationObj.r + 1)]){
-			return sheet[locationObj.c + (locationObj.r + 1)].w;
+			return sheet[locationObj.c + (locationObj.r + 1)].w.replace(/\r?\n|\r/g, '');
 		}
 		return false;
 	}

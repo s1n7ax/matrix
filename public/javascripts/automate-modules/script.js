@@ -246,13 +246,9 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     });
 
     $scope.component.add = $componentService.add;
-
     $scope.component.remove = $componentService.remove;
-
     $scope.component.getObj = $componentService.getObj;
-
     $scope.component.getLinkList = $componentService.getLinkList;
-
     $scope.component.dbRetrieve = $componentService.dbRetrieve;
 
 
@@ -723,6 +719,14 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     };
 
 
+    /**
+     * Browse Button
+     */
+    $scope.upload = new Object();
+    $scope.upload.browseTemplate = function () {
+
+    }
+
 
     /**
      * Dialog Menu
@@ -806,7 +810,21 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                 let resPromise;
                 let selectedProjectName = lscope.project.selected;
 
-                if(self.searchText !== '' && self.searchText !== null && !(self.searchText.match(/\s+/))) {
+                if(
+                    self.searchText !== '' && 
+                    self.searchText !== null && 
+                    ( (self.searchText.match(/\s+/) && itemType === 'testcase') || !self.searchText.match(/\s+/) )
+
+                    ) {
+
+/*                    if(self.searchText.match(/\s+/) && itemType === 'testcase'){
+                    }
+                    else{
+
+                    }
+*/
+
+
                     if(itemType === 'project') {
                         let users = {
                             _id: 'users',
@@ -820,7 +838,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                         });
                     }
 
-                    else if(itemType === 'testsuite')
+                    else if(itemType === 'testsuite'){
                         resPromise = $restService.createTestsuite({
                             projectName: selectedProjectName,
                             val: {
@@ -828,6 +846,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                                 type: itemType
                             }
                         });
+                    }
 
                     else if(itemType === 'testcase') {
                         if(self.owner !== '' && !(self.owner.match(/\s+/))) {
@@ -867,9 +886,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                         else {
                             alert('Owner Name Is Mandatory');
                         }
-
                     }
-
 
                     else if(itemType === 'library')
                         resPromise = $restService.createItem({

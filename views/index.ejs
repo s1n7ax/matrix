@@ -66,6 +66,10 @@
                 <!-- SPACER -->
                 <div flex=""></div>
 
+                <md-button class="md-icon-button" ng-click="browseTemplate()">
+                        <md-icon md-svg-src="img/icons/ic_receipt_white_24px.svg" aria-label="matrix" class="toolbar-icon"></md-icon>
+                </md-button>
+
                 <!-- MATRIX -->
                 <md-button class="md-icon-button">
                     <a target="_blank" aria-label="matrixLink" href="/reporter">
@@ -75,7 +79,6 @@
 
                 <!-- OPTION MENU BUTTON-->
                 <md-menu>
-
                     <md-button class="md-icon-button" 
                     ng-click="optionMenu.openOptionMenu($mdOpenMenu, $event)">
                         <md-icon md-svg-src="img/icons/ic_list_white_24px.svg" class="toolbar-icon">list</md-icon>
