@@ -41,8 +41,7 @@
             <div class="md-toolbar-tools toolbar">
 
                 <!-- SHOW SIDE NAVOGATOR BUTTON -->
-                <md-button class="md-icon-button md-button md-ink-ripple"
-                ng-click="toggleNav()" hide-gt-sm>
+                <md-button class="md-icon-button md-button md-ink-ripple" ng-click="toggleNav()" hide-gt-sm>
                     <md-icon md-font-icon="material-icons" style="color:white;">reorder</md-icon>
                 </md-button>
 
@@ -53,11 +52,7 @@
                 <div flex=""></div>
 
                 <!-- PROJECT SELECTOR -->
-                <md-select ng-model="project.selected"
-                md-selected-text="project.selectMenuString"
-                ng-change="project.onSelect()"
-                ng-click="project.onClick()"
-                aria-label="Project" class="toolbar-project-selector">
+                <md-select ng-model="project.selected" md-selected-text="project.selectMenuString" ng-change="project.onSelect()" ng-click="project.onClick()" aria-label="Project" class="toolbar-project-selector">
                     <md-optgroup label="Projects">
                         <md-option ng-value="project" ng-repeat="project in project.nameList">{{project}}</md-option>
                     </md-optgroup>
@@ -66,9 +61,19 @@
                 <!-- SPACER -->
                 <div flex=""></div>
 
-                <md-button class="md-icon-button" ng-click="browseTemplate()">
+
+                <!-- File Uploader -->
+                <md-button class="md-icon-button" for="uploadFile" aria-label="file uploader button">
+                    <label for="fileBrowser" class="btn btn-default">
                         <md-icon md-svg-src="img/icons/ic_receipt_white_24px.svg" aria-label="matrix" class="toolbar-icon"></md-icon>
+                    </label>
+
                 </md-button>
+
+                
+                <input type="file" id="fileBrowser" style="display: none" onchange="fileChoosed()" />
+                
+
 
                 <!-- MATRIX -->
                 <md-button class="md-icon-button">
@@ -79,8 +84,7 @@
 
                 <!-- OPTION MENU BUTTON-->
                 <md-menu>
-                    <md-button class="md-icon-button" 
-                    ng-click="optionMenu.openOptionMenu($mdOpenMenu, $event)">
+                    <md-button class="md-icon-button" ng-click="optionMenu.openOptionMenu($mdOpenMenu, $event)">
                         <md-icon md-svg-src="img/icons/ic_list_white_24px.svg" class="toolbar-icon">list</md-icon>
                     </md-button>
 
@@ -115,43 +119,29 @@
         <div flex layout="row">
 
             <!-- SIDE NAVIGATOR -->
-            <md-sidenav flex="initial" md-is-locked-open="$mdMedia('gt-sm')"
-            md-component-id="side-nav"
-            md-is-locked-open="$mdMedia('gt-sm')"
-            class="md-primary md-hue-2"
-            style="overflow-x: hidden; height: 92%;" ng-cloak>
+            <md-sidenav flex="initial" md-is-locked-open="$mdMedia('gt-sm')" md-component-id="side-nav" md-is-locked-open="$mdMedia('gt-sm')" class="md-primary md-hue-2" style="overflow-x: hidden; height: 92%;" ng-cloak>
 
-                <md-nav-bar md-selected-nav-item="sideNav.selectedViewType"
-                aria-label="Navigator">
-                    <md-nav-item md-nav-click="goto('module-browser')"
-                    name="module-browser">Test Suite</md-nav-item>
-                    <md-nav-item md-nav-click="goto('tree-view')"
-                    name="tree-view">Libraries</md-nav-item>
+                <md-nav-bar md-selected-nav-item="sideNav.selectedViewType" aria-label="Navigator">
+                    <md-nav-item md-nav-click="goto('module-browser')" name="module-browser">Test Suite</md-nav-item>
+                    <md-nav-item md-nav-click="goto('tree-view')" name="tree-view">Libraries</md-nav-item>
                 </md-nav-bar>
 
 
                 <div class="view-content-common">
 
-                    
+
                     <!-- SIDE NAVIGATOR TEST SUITE VIEW CONTAINER -->
                     <div ng-if=" sideNav.selectedViewType === 'module-browser'">
                         <md-content style="height: 92%; overflow-x: hidden;">
                             <div layout="column" ng-repeat="node in testsuiteTree.list" style="position: relative;">
                                 <context-menu contextmenu-template="onTestSuite">
-                                    <md-button 
-                                        class="file-tree-main square-buttons"
-                                        style="text-transform: none;"
-                                        ng-click="node.isExpanded = !node.isExpanded; testsuiteTree.tsOnClick();">
-                                            {{node.testsuite}}
+                                    <md-button class="file-tree-main square-buttons" style="text-transform: none;" ng-click="node.isExpanded = !node.isExpanded; testsuiteTree.tsOnClick();">
+                                        {{node.testsuite}}
                                     </md-button>
                                 </context-menu>
                                 <div ng-show="node.isExpanded" ng-repeat="testcase in node.testcase">
                                     <context-menu contextmenu-template="onTestcase">
-                                        <md-button
-                                            class="file-tree-sub square-buttons"
-                                            style="text-transform: none;"
-                                            ng-class="fileTree.cssMainFileTreeButtonClass(testcase)"
-                                            ng-click="testsuiteTree.tcOnClick(testcase); fileTree.setFocus(testcase);">
+                                        <md-button class="file-tree-sub square-buttons" style="text-transform: none;" ng-class="fileTree.cssMainFileTreeButtonClass(testcase)" ng-click="testsuiteTree.tcOnClick(testcase); fileTree.setFocus(testcase);">
                                             {{testcase}}
                                         </md-button>
                                     </context-menu>
@@ -163,24 +153,15 @@
                     <!-- SIDE NAVIGATOR LIBRARY VIEW CONTAINER -->
                     <div class="tree-view" ng-if=" sideNav.selectedViewType === 'tree-view' ">
                         <md-content style="height: 92%; overflow-x: hidden;">
-                            <div layout="column" ng-repeat="node in libraryTree.list" style="position: relative;" >
+                            <div layout="column" ng-repeat="node in libraryTree.list" style="position: relative;">
                                 <context-menu contextmenu-template="onLibrary">
-                                    <md-button 
-                                        class="file-tree-main square-buttons"
-                                        style="text-transform: none;"
-                                        ng-click="node.isExpanded = !node.isExpanded;">
-                                            {{node.library}}
+                                    <md-button class="file-tree-main square-buttons" style="text-transform: none;" ng-click="node.isExpanded = !node.isExpanded;">
+                                        {{node.library}}
                                     </md-button>
                                 </context-menu>
-                                <div
-                                    ng-show="node.isExpanded"
-                                    ng-repeat="component in node.components">
+                                <div ng-show="node.isExpanded" ng-repeat="component in node.components">
                                     <context-menu contextmenu-template="onComponent">
-                                        <md-button
-                                            class="file-tree-sub square-buttons"
-                                            style="text-transform: none;"
-                                            ng-class="fileTree.cssMainFileTreeButtonClass(component)"
-                                            ng-click="libraryTree.cOnClick(component, 'component'); fileTree.setFocus(component);">
+                                        <md-button class="file-tree-sub square-buttons" style="text-transform: none;" ng-class="fileTree.cssMainFileTreeButtonClass(component)" ng-click="libraryTree.cOnClick(component, 'component'); fileTree.setFocus(component);">
                                             {{component}}
                                         </md-button>
                                     </context-menu>
@@ -194,13 +175,11 @@
 
             <!-- EDITOR -->
             <md-content flex style="display: flex; flex-flow: column;">
-                <div
-                    style="
+                <div style="
                         background-color: #545454;
                         height: 50px;
                         color: white;" ng-cloak>
-                    <div
-                        style="
+                    <div style="
                             padding: 0 10px 0 30px;
                             font-size: 30px;
                             margin: 0;
@@ -212,50 +191,45 @@
                 <textarea id="code" style="flex:1"></textarea>
             </md-content>
         </div>
-		
-		<!-- Templates -->
-		<script type="text/ng-template" id="dialog1.tmpl">
-		<md-dialog aria-label="Error Message" style="width: 600px;">
-			<md-toolbar style="background-color: #f96b6b">
-				<div class="md-toolbar-tools">
-								<span
-										style="font-size: 30px; font-family: Cantarell;">
-									An Error Occurred!
-								</span>
-					<span flex></span>
-					<md-button class="md-icon-button" ng-click="ctrl.cancel()">
-						<md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
-					</md-button>
-				</div>
-			</md-toolbar>
 
-			<md-dialog-content ng-cloak>
-				<div class="md-dialog-content">
-					<form ng-submit="$event.preventDefault()">
-						<p style="font-size: 18px;">
-							Error : {{error}}
-						</p>
+        <!-- Templates -->
+        <script type="text/ng-template" id="dialog1.tmpl">
+            <md-dialog aria-label="Error Message" style="width: 600px;">
+                <md-toolbar style="background-color: #f96b6b">
+                    <div class="md-toolbar-tools">
+                        <span style="font-size: 30px; font-family: Cantarell;">
+                                    An Error Occurred!
+                                </span>
+                        <span flex></span>
+                        <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                            <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+                        </md-button>
+                    </div>
+                </md-toolbar>
 
-						<p>
-							{{message}}
-						</p>
-					</form>
-				</div>
-			</md-dialog-content>
+                <md-dialog-content ng-cloak>
+                    <div class="md-dialog-content">
+                        <form ng-submit="$event.preventDefault()">
+                            <p style="font-size: 18px;">
+                                Error : {{error}}
+                            </p>
 
-			<md-dialog-actions>
-				<md-button
-						class="md-raised"
-						aria-label="Okay"
-						style="background-color: #f96b6b; color: white;"
-						ng-click="ctrl.ok($event)">
-					Okay
-				</md-button>
-			</md-dialog-actions>
-		</md-dialog>
-		</script>
-		
-		
+                            <p>
+                                {{message}}
+                            </p>
+                        </form>
+                    </div>
+                </md-dialog-content>
+
+                <md-dialog-actions>
+                    <md-button class="md-raised" aria-label="Okay" style="background-color: #f96b6b; color: white;" ng-click="ctrl.ok($event)">
+                        Okay
+                    </md-button>
+                </md-dialog-actions>
+            </md-dialog>
+        </script>
+
+
     </div>
 
 
@@ -299,7 +273,11 @@
     <!-- Socket.IO -->
     <script src="<%= sockethost %>/socket.io/socket.io.js"></script>
 
-    <script> let app = angular.module('automate', ['ngMaterial']) </script>
+    <script src="javascripts/upload-modules/angular-upload.min.js"></script>
+
+    <script>
+        let app = angular.module('automate', ['ngMaterial'])
+    </script>
     <script src="javascripts/automate-modules/services/super-service.js"></script>
     <script src="javascripts/automate-modules/services/project-service.js"></script>
     <script src="javascripts/automate-modules/services/testsuite-service.js"></script>
@@ -312,6 +290,59 @@
     <script src="javascripts/automate-modules/services/test-suite-tree-service.js"></script>
     <script src="javascripts/automate-modules/services/complex-scope-updater-service.js"></script>
     <script src="javascripts/automate-modules/script.js"></script>
+
+
+    <script type="text/javascript">
+        function fileChoosed() {
+            /*let originalFileInput = document.getElementById('fileBrowser');
+
+
+            let downloadWindow  = window.open();
+            let form = document.createElement("form");
+
+            form.setAttribute("id", "uploadform");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "/getSanitizationStepsByTemplate");
+            form.setAttribute("enctype", "multipart/form-data");
+            form.setAttribute("target", "view");
+
+
+        
+            let dlWindowForm = downloadWindow.document.body.appendChild(form);
+            let dlWindowFileIn = dlWindowForm.appendChild(originalFileInput);
+
+            $(downloadWindow.document.body).append(`
+                <script>
+                    console.log(document.getElementById('uploadform'));
+                    console.log(document.getElementById('uploadform').submit());
+                <\/script>`);*/
+
+            let fileInput = document.getElementById('fileBrowser');
+            let file = fileInput.files[0];
+
+            
+            let form = new FormData();
+            form.append("file", file);
+
+
+            $.ajax({
+                url: "/getSanitizationStepsByTemplate",
+                type: "POST",
+                data: form,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    
+                },
+                error: function(jqXHR, textStatus, errorMessage) {
+                    alert('failed')
+                    console.log(errorMessage);
+                }
+            });
+        }
+
+
+    </script>
 
 
 </body>

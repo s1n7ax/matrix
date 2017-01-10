@@ -606,6 +606,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                 cm.doc.replaceRange('\n', pos);
 
                 $scope.editor.saveContent(cm);
+                //return CodeMirror.Pass
             }
     }, true);
 
@@ -722,11 +723,21 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     /**
      * Browse Button
      */
-    $scope.upload = new Object();
+/*    $scope.upload = new Object();
     $scope.upload.browseTemplate = function () {
+        alert('hello');
+    }*/
 
-    }
+/*    $scope.uploadFile = function(){
+        var file = $scope.myFile;
 
+        console.log('file is ' );
+        console.dir(file);
+
+        var uploadUrl = "/getSanitizationStepsByTemplate";
+        fileUpload.uploadFileToUrl(file, uploadUrl);
+    };
+*/
 
     /**
      * Dialog Menu
@@ -815,15 +826,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                     self.searchText !== null && 
                     ( (self.searchText.match(/\s+/) && itemType === 'testcase') || !self.searchText.match(/\s+/) )
 
-                    ) {
-
-/*                    if(self.searchText.match(/\s+/) && itemType === 'testcase'){
-                    }
-                    else{
-
-                    }
-*/
-
+                    ){
 
                     if(itemType === 'project') {
                         let users = {
@@ -849,7 +852,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                     }
 
                     else if(itemType === 'testcase') {
-                        if(self.owner !== '' && !(self.owner.match(/\s+/))) {
+                        if(self.owner !== '' && self.owner !== undefined) {
                             let parentNode = lscope.testsuite.getObj(onClickItemName);
 
                             resPromise = $restService.createTestcase({
@@ -869,7 +872,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                     }
 
                     else if(itemType === 'component'){
-                        if(self.owner !== '' && !(self.owner.match(/\s+/))) {
+                        if(self.owner !== '' && self.owner !== undefined) {
                             let parentNode = lscope.library.getObj(onClickItemName);
 
                             resPromise = $restService.createComponent({
@@ -1923,3 +1926,37 @@ app.directive( "contextMenu", function($compile, $interpolate){
     return contextMenu;
 });
 
+/*app.directive('fileModel', ['$parse', function ($parse) {
+    return {
+       restrict: 'A',
+       link: function(scope, element, attrs) {
+          var model = $parse(attrs.fileModel);
+          var modelSetter = model.assign;
+          
+          element.bind('change', function(){
+             scope.$apply(function(){
+                modelSetter(scope, element[0].files[0]);
+             });
+          });
+       }
+    };
+ }]);
+
+ app.service('fileUpload', ['$http', function ($http) {
+    this.uploadFileToUrl = function(file, uploadUrl){
+       var fd = new FormData();
+       fd.append('file', file);
+    
+       $http.post(uploadUrl, fd, {
+          transformRequest: angular.identity,
+          headers: {'Content-Type': "multipart/form-data"}
+       })
+       .success(function(){
+        console.log('success')
+       })
+    
+       .error(function(){
+        console.log('failed')
+       });
+    }
+ }]);*/

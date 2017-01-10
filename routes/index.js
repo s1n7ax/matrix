@@ -111,6 +111,9 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
             callback(null, Locator.temp.temp);
         },
         filename: function (req, file, callback) {
+            console.log('##########################')
+            console.log(file);
+            console.log('##########################')
             uploadedFilePath = file.fieldname + '-' + Date.now() + '.xlsx';
             callback(null, uploadedFilePath);
         }
@@ -189,7 +192,7 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
                 res.download(Path.join(Locator.temp.temp, uploadedFilePath));
                 setTimeout(function () {
                     fs.unlinkSync(Path.join(Locator.temp.temp, uploadedFilePath));
-                }, 1000)
+                }, 10000);
             });
         }catch(error){
             dbErrorLogger('error', error);
