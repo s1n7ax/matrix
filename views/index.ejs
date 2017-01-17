@@ -71,7 +71,9 @@
                 </md-button>
 
                 
-                <input type="file" id="fileBrowser" style="display: none" onchange="fileChoosed()" />
+                <!-- <input type="file" id="fileBrowser" style="display: none" onchange="fileChoosed()" /> -->
+                <input type="file" id="fileBrowser" style="display: none" custom-on-change="upload.fileChoosed">
+                
                 
 
 
@@ -273,8 +275,6 @@
     <!-- Socket.IO -->
     <script src="<%= sockethost %>/socket.io/socket.io.js"></script>
 
-    <script src="javascripts/upload-modules/angular-upload.min.js"></script>
-
     <script>
         let app = angular.module('automate', ['ngMaterial'])
     </script>
@@ -293,30 +293,7 @@
 
 
     <script type="text/javascript">
-        function fileChoosed() {
-            /*let originalFileInput = document.getElementById('fileBrowser');
-
-
-            let downloadWindow  = window.open();
-            let form = document.createElement("form");
-
-            form.setAttribute("id", "uploadform");
-            form.setAttribute("method", "post");
-            form.setAttribute("action", "/getSanitizationStepsByTemplate");
-            form.setAttribute("enctype", "multipart/form-data");
-            form.setAttribute("target", "view");
-
-
-        
-            let dlWindowForm = downloadWindow.document.body.appendChild(form);
-            let dlWindowFileIn = dlWindowForm.appendChild(originalFileInput);
-
-            $(downloadWindow.document.body).append(`
-                <script>
-                    console.log(document.getElementById('uploadform'));
-                    console.log(document.getElementById('uploadform').submit());
-                <\/script>`);*/
-
+        /*function fileChoosed() {
             let fileInput = document.getElementById('fileBrowser');
             let file = fileInput.files[0];
 
@@ -328,18 +305,20 @@
             $.ajax({
                 url: "/getSanitizationStepsByTemplate",
                 type: "POST",
+                body: {data: }
                 data: form,
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    
+                    let win = window.open(location.origin + '/temp/' + response);
+
                 },
                 error: function(jqXHR, textStatus, errorMessage) {
                     alert('failed')
                     console.log(errorMessage);
                 }
             });
-        }
+        }*/
 
 
     </script>

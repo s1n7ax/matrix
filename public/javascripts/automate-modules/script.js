@@ -723,21 +723,36 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     /**
      * Browse Button
      */
-/*    $scope.upload = new Object();
-    $scope.upload.browseTemplate = function () {
-        alert('hello');
-    }*/
+    $scope.upload = {};
+    $scope.upload.fileChoosed = function() {
+        if($scope.project.selected) {
+            let fileInput = document.getElementById('fileBrowser');
+            let file = fileInput.files[0];
 
-/*    $scope.uploadFile = function(){
-        var file = $scope.myFile;
+            
+            let form = new FormData();
+            form.append("file", file);
+            form.append('projectName', $scope.project.selected);
 
-        console.log('file is ' );
-        console.dir(file);
-
-        var uploadUrl = "/getSanitizationStepsByTemplate";
-        fileUpload.uploadFileToUrl(file, uploadUrl);
-    };
-*/
+            $.ajax({
+                url: "/getSanitizationStepsByTemplate",
+                type: "POST",
+                data: form,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    let win = window.open(location.origin + '/temp/' + response);
+                },
+                error: function(jqXHR, textStatus, errorMessage) {
+                    alert('failed')
+                    console.log(errorMessage);
+                }
+            });    
+        }else {
+            alert('select a project you idiot');
+        }
+        
+    }
 
     /**
      * Dialog Menu
@@ -1871,21 +1886,6 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                     ng-click="dialog.openChangeStatusConfirmDialog($event, 'testcase', testcase)">Change Status</div>
             </div>
             `
-
-
-    /**
-     * Reporter
-     */
-     /*var workbook = xlsx.readFile('a.xlsx');
-
-     console.log(workbook);
-
-     console.log(workbook.Sheets.Sheet1)
-     workbook.Sheets['Sheet1']['A1'].v = 'newText';
-
-     XLSX.writeFile(workbook, 'a.xlsx');*/
-
-
     constructor();
 };
 
@@ -1894,10 +1894,6 @@ app.directive( "contextMenu", function($compile, $interpolate){
 
     contextMenu = {};
     contextMenu.restrict = "AE";
-
-    /*contextMenu.controller = function ($scope) {
-        console.log($scope.onRightClick)
-    }*/
 
     contextMenu.link = function( lScope, lElem, lAttr){
 
@@ -1926,37 +1922,19 @@ app.directive( "contextMenu", function($compile, $interpolate){
     return contextMenu;
 });
 
-/*app.directive('fileModel', ['$parse', function ($parse) {
-    return {
-       restrict: 'A',
-       link: function(scope, element, attrs) {
-          var model = $parse(attrs.fileModel);
-          var modelSetter = model.assign;
-          
-          element.bind('change', function(){
-             scope.$apply(function(){
-                modelSetter(scope, element[0].files[0]);
-             });
-          });
-       }
-    };
- }]);
-
- app.service('fileUpload', ['$http', function ($http) {
-    this.uploadFileToUrl = function(file, uploadUrl){
-       var fd = new FormData();
-       fd.append('file', file);
-    
-       $http.post(uploadUrl, fd, {
-          transformRequest: angular.identity,
-          headers: {'Content-Type': "multipart/form-data"}
-       })
-       .success(function(){
-        console.log('success')
-       })
-    
-       .error(function(){
-        console.log('failed')
-       });
+app.directive('customOnChange', function() {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var onChangeFunc = scope.$eval(attrs.customOnChange);
+      element.bind('change', function(event){
+        var files = event.target.files;
+        onChangeFunc(files);
+      });
+        
+      element.bind('click', function(){
+        element.val('');
+      });
     }
- }]);*/
+  };
+});

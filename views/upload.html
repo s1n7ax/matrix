@@ -32,6 +32,30 @@
           a:link, a:visited, a:hover, a:active{
                color: white;
           }
+
+          .dropzone{
+            width: 100%;
+            height: 500px;
+            border: dotted;
+            opacity: 0.4;
+          }
+          .dropzone-icon{
+            width: 30%;
+            margin: 0 auto;
+            display: block;
+            height: 100%;
+            opacity: 0.4;
+            user-select: none;
+          }
+
+          .dropzone.dragover{
+            opacity: 1;
+          }
+
+          .dropzone-icon.dragover{
+            width: 35%;
+            opacity: 1; 
+          }
     </style>
 
 </head>
@@ -71,15 +95,23 @@
             </div>
         </md-toolbar>
 
-<form action="/getSanitizationStepsByTemplate" method="post" enctype="multipart/form-data">
-     <input id="upload-input" type="file" name="file">
-     <input type="submit" name="submit">
+        <h2>Drag and Drop template file to upload</h2>
 
-     
-     <input id="fileInput" name="file" type="file" class="ng-hide" multiple>
-     <md-button id="uploadButton" class="md-raised md-primary"> Choose Files </md-button>
-</form>
 
+
+        <form id="uploader" action="/getSanitizationStepsByTemplate" method="post">
+            <input type="file" name="file" id="file">
+            <input type="submit" name="submit" onclick="test(event)">
+        </form>
+
+
+        <div class="dropzone" id="dropzone">
+            <img class="dropzone-icon" src="img/icons/ic_open_in_browser_black_24px.svg" style="">
+                
+            </img>
+        </div>
+
+        <h2 id="error-message"></h2>
 
 
 
@@ -126,7 +158,7 @@
      <script src="../javascripts/automate-modules/services/project-service.js"></script>
      <script src="../javascripts/automate-modules/services/rest-service.js"></script>
 
-     <script src="javascripts/uploader-modules/script.js"></script>
+     <script src="javascripts/upload-modules/script.js"></script>
 
 
 </body>

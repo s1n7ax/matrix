@@ -43,7 +43,7 @@ class Locator {
 		}
 
         this.temp = {
-            temp: Path.join(__dirname, 'temp')
+            temp: Path.join(__dirname, 'public', 'temp')
         }
     }
 }

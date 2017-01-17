@@ -104,37 +104,37 @@ serviceProvider();
 router.post('/getSanitizationStepsByTemplate', function(req, res, next){
     let uploadedFilePath = null;
     
-    var upload = multer({ dest: Locator.temp.temp });
-    
     var storage = multer.diskStorage({
         destination: function (req, file, callback) {
+            console.log(req.body);
             callback(null, Locator.temp.temp);
         },
         filename: function (req, file, callback) {
-            console.log('##########################')
-            console.log(file);
-            console.log('##########################')
+            console.log(req.body);
             uploadedFilePath = file.fieldname + '-' + Date.now() + '.xlsx';
             callback(null, uploadedFilePath);
         }
     });
     
     var upload = multer({ storage : storage}).single('file');
+    debugger;
 
     upload(req, res, function(err) {
+
+        console.log(req.body.projectName);
 
         if(err) {
             return res.end("Error uploading file");
         }
         
         // let projectService = services[req.body.projectName];
-        let projectService = services['newprg'];
+        let projectService = services[req.body.projectName];
         
         try{
             projectService.getAllTCsAndBCs(function(tc, bc) {
                 let notMatched = [];
-                
                 let ws = new WriteExcel();
+
                 ws.readAsFile(Path.join(Locator.temp.temp, uploadedFilePath));
                 let sheet = ws.getSheet(0);
                 let mergesArr = ws.getSheetMerges(sheet);
@@ -189,23 +189,25 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
                 });
 
                 ws.writeFile(Path.join(Locator.temp.temp, uploadedFilePath));
-                res.download(Path.join(Locator.temp.temp, uploadedFilePath));
-                setTimeout(function () {
+                res.send(uploadedFilePath);
+
+                
+                 setTimeout(function () {
                     fs.unlinkSync(Path.join(Locator.temp.temp, uploadedFilePath));
                 }, 10000);
+
+
             });
         }catch(error){
             dbErrorLogger('error', error);
         }
-
-        //res.end("File is uploaded");
     });
-})
+});
+
 
 router.get('/upload', function(req, res){
     res.sendFile(Locator.viewsPath.upload);
 });
-
 
 /*
 router.get('/upload', function(req, res, next) {
@@ -216,6 +218,7 @@ router.post('/uploadFile', function(req, res, next) {
     console.log(req.body);
     res.send('hello');
 });
+
 */
 
 
