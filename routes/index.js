@@ -397,9 +397,11 @@ router.post('/getAllProjects', function (req, res, next) {
  * MODULE
  */
 router.post('/createTestsuite', function (req, res, next) {
+    debugger;
 	let projectService = services[req.body.projectName];
 
 	projectService.insertOrUpdateDoc(req.body.val, function (error, body) {
+        debugger;
 		if(error) {
 			res.send({
 				'status': false,
@@ -594,8 +596,9 @@ router.post('/renameTestcase', function (req, res, next) {
  */
 router.post('/createComponent', function (req, res, next) {
     let projectService = services[req.body.projectName];
-
+    debugger;
     projectService.insertOrUpdateDoc(req.body.val, function (error, body) {
+        debugger;
         let componentBody = body;
 
         if(error){
@@ -603,8 +606,10 @@ router.post('/createComponent', function (req, res, next) {
             res.send(getResMap(false, null, error));
         }
         else {
+                debugger;
                 req.body.parentNode = addLinkToItem(req.body.parentNode, componentBody.id);
                 projectService.insertOrUpdateDoc(req.body.parentNode, function (error, body) {
+                    debugger;
                     if(error) {
                         console.error(error);
                         projectService.deleteDocByIdAndRev(componentBody.id, componentBody.rev, function (error) {

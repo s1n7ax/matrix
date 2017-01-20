@@ -262,7 +262,9 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                     if(noSpaceRegExp.test(arr[i])) {
                         if(startWithCallRegExp.test(arr[i])) {
                             if(arr[i].indexOf(componentName)){
-                                count += $scope.component.getStepCountById(arr[i].split(/\s+/)[1]);
+                                //count += $scope.component.getStepCountById(arr[i].split(/\s+/)[1]);
+                                count += $scope.component.getStepCountById($scope.matrix.getCalledComponents(arr[i]).components[0]);
+                                
                             }
                             else{
                                 errorLog(componentName + ' is called inside ' + arr[i] + '\nInvalide implementation of components', obj);
@@ -478,10 +480,13 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                 let components = [];
                 let statements = [];
                 for(let i = 0; i < contentArr.length; i++) {
-                    let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
+                    //let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
+                    let val = contentArr[i].match(/^call/i);
 
                     if(val){
-                        components.push(val[0]);
+                        val = val.input.replace(/^call/i, '').replace(/\s+/g, '');
+                        val = val.split('.');
+                        components.push(val[1]);
                     }
                     else {
                         statements.push(contentArr[i]);

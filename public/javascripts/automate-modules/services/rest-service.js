@@ -122,4 +122,8 @@ function restService($http) {
         return $http.post('/partialUpdate', values)// : param {projectName, _id, val: {everything needs to be changed}}
     }
 
+    self.getCommands = function () {
+        return $http.get('/configuration/commands.json');
+    }
+
 };

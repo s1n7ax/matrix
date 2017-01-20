@@ -5,6 +5,9 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Bootstrap -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+
     <!-- Angular Material css -->
     <link rel="stylesheet" href="stylesheets/angular-material.css">
     <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
@@ -18,13 +21,13 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Bitter" />
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Aldrich" />
 
-    <!-- Google icon -->
-
-
     <!-- CodeMirror css -->
-    <link rel="stylesheet" type="text/css" href="stylesheets/codemirror.css">
+    <link rel=stylesheet href="stylesheets/docs.css">
+    <link rel="stylesheet" href="stylesheets/codemirror.css">
+    <link rel="stylesheet" href="stylesheets/show-hint.css">
+   <!--  <link rel="stylesheet" type="text/css" href="stylesheets/codemirror.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/show-hint.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/docs.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/docs.css"> -->
 
     <!-- Custom css -->
     <link rel="stylesheet" href="stylesheets/style.css">
@@ -143,7 +146,7 @@
                                 </context-menu>
                                 <div ng-show="node.isExpanded" ng-repeat="testcase in node.testcase">
                                     <context-menu contextmenu-template="onTestcase">
-                                        <md-button class="file-tree-sub square-buttons" style="text-transform: none;" ng-class="fileTree.cssMainFileTreeButtonClass(testcase)" ng-click="testsuiteTree.tcOnClick(testcase); fileTree.setFocus(testcase);">
+                                        <md-button class="file-tree-sub square-buttons" style="text-transform: none;" ng-class="fileTree.cssMainFileTreeButtonClass(testcase)" ng-dblclick="testsuiteTree.tcOnClick(testcase); fileTree.setFocus(testcase);">
                                             {{testcase}}
                                         </md-button>
                                     </context-menu>
@@ -163,7 +166,7 @@
                                 </context-menu>
                                 <div ng-show="node.isExpanded" ng-repeat="component in node.components">
                                     <context-menu contextmenu-template="onComponent">
-                                        <md-button class="file-tree-sub square-buttons" style="text-transform: none;" ng-class="fileTree.cssMainFileTreeButtonClass(component)" ng-click="libraryTree.cOnClick(component, 'component'); fileTree.setFocus(component);">
+                                        <md-button class="file-tree-sub square-buttons" style="text-transform: none;" ng-class="fileTree.cssMainFileTreeButtonClass(component)" ng-dblclick="libraryTree.cOnClick(component, 'component'); fileTree.setFocus(component);">
                                             {{component}}
                                         </md-button>
                                     </context-menu>
@@ -176,22 +179,22 @@
             </md-sidenav>
 
             <!-- EDITOR -->
-            <md-content flex style="display: flex; flex-flow: column;">
-                <div style="
-                        background-color: #545454;
-                        height: 50px;
-                        color: white;" ng-cloak>
-                    <div style="
-                            padding: 0 10px 0 30px;
-                            font-size: 30px;
-                            margin: 0;
-                            height: 50px;
-                            ">
-                        {{editor.content.name ? editor.content.name : ''}}
-                    </div>
+            <md-content class="md-padding" flex style="display: flex; flex-flow: column;">
+                <md-nav-bar id="tabs-container" md-selected-nav-item="editor.currentTab" nav-bar-aria-label="navigation links">
+                    <md-nav-item
+                        ng-repeat="tab in editor.tabs track by $index" 
+                        md-nav-click=""
+                        ng-click="editor.clickOnTab($event, tab)" 
+                        name="{{tab.title}}">
+                            {{tab.title + '-' + tab.type}}
+                            <span ng-click="editor.removeTab($event)" value="{{tab.title}}">close</span>
+                    </md-nav-item>
+                </md-nav-bar>
+                <div class="ext-content">
+                    <textarea id="code" style="flex:1"></textarea>
                 </div>
-                <textarea id="code" style="flex:1"></textarea>
             </md-content>
+            
         </div>
 
         <!-- Templates -->
@@ -234,6 +237,11 @@
 
     </div>
 
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+    <!-- Bootstrap -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 
     <!-- Angular js -->
     <script src="javascripts/angular-modules/angular.js"></script>
@@ -252,18 +260,18 @@
     <script src="javascripts/angular-modules/angular-scenario.js"></script>
     <script src="javascripts/angular-modules/angular-touch.js"></script>
 
-
     <!--  Angular Material js  -->
     <script src="javascripts/angular-modules/angular-material.js"></script>
-
-    <!-- JQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
     <!-- CodeMirror js -->
     <script src="javascripts/codemirror-modules/codemirror.js"></script>
     <script src="javascripts/codemirror-modules/show-hint.js"></script>
-    <!--<script src="javascripts/codemirror-modules/javascript-hint.js"></script>-->
+    <script src="javascripts/codemirror-modules/anyword-hint.js"></script>
     <script src="javascripts/codemirror-modules/javascript.js"></script>
+    <!-- <script src="javascripts/codemirror-modules/codemirror.js"></script> -->
+    <!-- <script src="javascripts/codemirror-modules/show-hint.js"></script> -->
+    <!--<script src="javascripts/codemirror-modules/javascript-hint.js"></script>-->
+    <!-- <script src="javascripts/codemirror-modules/javascript.js"></script> -->
     <!--<script src="javascripts/codemirror-modules/markdown.js"></script>-->
     <!--<script src="javascripts/codemirror-modules/anyword-hint.js"></script>-->
 

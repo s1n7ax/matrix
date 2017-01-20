@@ -24,6 +24,7 @@ class Service {
     }   
 
     constructor(dbName, startSocket) {
+        let self = this;
 
         let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
         let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
@@ -40,22 +41,33 @@ class Service {
 
             this.startSocket();
             this.followDB();
-            this.compaction();
+            this.compaction(function (error, body) {
+
+                if(error){
+                    console.log(error);
+                    console.log('##########Compaction of db '+ self.dbName +' - Failed!##########');
+                }
+                else{
+                    console.log('Compaction of db '+ self.dbName +' - Successful!');
+                }
+            });
         }
     }
 
-    compaction() {
+    compaction(callback) {
         let self = this;
-        self.server.db.compact(self.dbName, function (error, body) {
-            if(error)
-                console.error(error);
-            else
-                console.log('Compaction of db '+ self.dbName +' - Successful!');
-        });
-
+        //self.server.db.compact(self.dbName, callback);
+        callback(false);
+/*
         setTimeout(function () {
-            self.compaction();
-        }, 60*1000*5);
+            self.compaction(function (error, body) {
+                if(error)
+                    console.error(error);
+                else
+                    console.log('Compaction of db '+ self.dbName +' - Successful!');
+            });
+        }, 1000*2);
+        */
     }
 
     /* 
@@ -92,13 +104,40 @@ class Service {
                 self.dbErrorLogger('Error : 301', error);
             }
             else {
-                self.deleteDocByIdAndRev(body._id, body._rev, callback)
+                self.deleteDocByIdAndRev(body._id, body._rev, function (d_error, d_body) {
+                    if(d_error){
+                        callback(d_error, d_body);
+                    }else{
+                        self.compaction(function (error, body){
+                            if(error)
+                                console.error(error);
+                            else{
+                                console.log('Compaction of db '+ self.dbName +' - Successful!');
+                                callback(d_error, d_body);
+                            }
+                        });
+                    }
+                });
             }
         })
     }
 	
 	deleteDocByIdAndRev (id, rev, callback) {
-		this.database.destroy(id, rev, callback);
+        let self = this;
+
+		this.database.destroy(id, rev, function (d_error, d_body){
+            if(d_error){
+                callback(d_error, d_body);
+            }else{
+                self.compaction(function (error, body) {
+                    if(error)
+                        console.error(error);
+                    else
+                        console.log('Compaction of db '+ self.dbName +' - Successful!');
+                        callback(d_error, d_body);
+                    });
+            }
+        });
 	}
 	
 	copyDocById(srcID, destID, callback) {
@@ -244,6 +283,7 @@ class Service {
         let self = this;
 
         this.feed.on('change', function(change) {
+            debugger;
             let result;
 
             if(change.deleted) {

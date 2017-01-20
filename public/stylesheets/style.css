@@ -31,7 +31,6 @@ div {
 }
 
 
-
 /**
  * NO SELECT
  */
@@ -180,11 +179,6 @@ div {
   background-color: #ffd65e;
 }
 
-
-
-
-
-
 #contextmenu-node{
     z-index: 1;
     position: fixed;
@@ -213,3 +207,23 @@ div {
 .contextmenu-item:action{
 
 }
+
+
+#tab-header-container{
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+
+  background-color: #545454;
+  height: 50px;
+  color: white;
+}
+
+._md-nav-button-text{
+  text-transform: none;
+}
+
+.navBardemoBasicUsage md-content .ext-content {
+  padding: 50px;
+  margin: 20px;
+  background-color: #FFF2E0; }

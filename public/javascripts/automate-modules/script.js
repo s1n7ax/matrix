@@ -1,7 +1,7 @@
 app.controller('automate_ctrl', automate_ctrl);
 app.service('$restService',restService);
 
-function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $restService, $projectService, $testsuiteService, $testcaseService, $componentService, $libraryService, $testsuiteTreeService) {
+function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $timeout, $restService, $projectService, $testsuiteService, $testcaseService, $componentService, $libraryService, $testsuiteTreeService) {
 
     "use strict";
 
@@ -18,6 +18,8 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
      * Constructor
      */
     let constructor = function () {
+        $scope.editor.disableEditor();
+        window.scope = $scope;
     };
 
     $scope.sideNav = new Object();
@@ -28,7 +30,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
      */
     
 
-    $scope.applicationName = 'Sanitizor';
+    $scope.applicationName = 'Sanitizer';
 
 
     /**
@@ -62,12 +64,12 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     $scope.project.remove = $projectService.remove;
     $scope.project.dbRetrieve = $projectService.dbRetrieve;
     $scope.project.onSelect = function () {
-        $scope.editor.content.name = null;
+        /*$scope.editor.content.name = null;
         $scope.editor.content.type = null;
         $scope.editor.content.user = null;
-        $scope.editor.content.isChanged = false;
+        $scope.editor.content.isChanged = false;*/
 
-        $scope.editor.codeMirrorObj.setValue('');
+        //$scope.editor.$scope.editor.codeMirror.setValue('');
 
         $scope.socket.deactivateProjectSocket();
         $scope.socket.deleteProjectSocket();
@@ -322,21 +324,20 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     }
 
     $scope.testsuiteTree.tsOnClick = function () {
-        if($scope.editor.content.isChanged) {
-            alert('Save Current Changes');
-        }
+
     };
 
     $scope.testsuiteTree.tcOnClick = function (testcase) {
         let obj = $scope.testcase.getObj(testcase);
-
-        $scope.editor.setEditorContent({
-            name: obj._id,
-            type: obj.type,
-            user: $scope.username,
-            isChanged: false,
-            text: obj.content
-        });
+        
+        if(obj){
+            $scope.editor.addTab(testcase, 'testcase')
+            $scope.editor.setEditorContent(obj.content ? obj.content : '');
+            $scope.editor.enableEditor();
+            $scope.editor.focusTab(testcase);
+        }else {
+            alert('6+54626545612654980+946');
+        }
     };
 
 
@@ -393,7 +394,6 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
 
             this._list.push(newObj);
         }
-        $scope.$apply()
     };
 
     $scope.libraryTree.removeLib = function (id) {
@@ -421,80 +421,159 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     };
     
     $scope.libraryTree.cOnClick = function (comp) {
-        let obj = angular.copy($scope.component.getObj(comp));
-
-
-        $scope.editor.setEditorContent({
-            name: obj._id,
-            type: obj.type,
-            user: $scope.username,
-            isChanged: false,
-            text: obj.content
-        });
+        let obj = $scope.component.getObj(comp);
         
-//         $scope.editor.content.name = component;
-//         $scope.editor.content.type = 'component';
-
-
-//         $scope.component.selected = component;
-
-//         let obj = $scope.component.getObj(component);
-
-//         if(obj.content)
-//             $scope.editor.setEditorContent(obj.content);
-//         else
-//             $scope.editor.setEditorContent('');
+        if(obj){
+            $scope.editor.addTab(comp, 'component')
+            $scope.editor.setEditorContent(obj.content ? obj.content : '');
+            $scope.editor.enableEditor();
+            $scope.editor.focusTab(comp);
+        }else {
+            alert('652198125616565465');
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
     /**
      * CodeMirror 
      */
+
+    CodeMirror.commands.autocomplete = function(cm) {
+        cm.showHint({hint: CodeMirror.hint.anyword});
+    };
+    
     $scope.editor = new Object();
-    $scope.editor.content = new Object();
-    $scope.editor.textArea = document.getElementById('textArea');
+    $scope.editor.tabs = new Array();
+    $scope.editor.selected = new Object();
 
-    $scope.editor.updateEditor = function (data) {
-            let doc = $scope.editor.codeMirrorObj.getDoc()
-            let cur = doc.getCursor();
+    $scope.editor.codeMirror = CodeMirror.fromTextArea(document.getElementById("code"), {
+        lineNumbers: true,
+        extraKeys: {"Ctrl-Space": "autocomplete"}
+    });
 
-            console.log('\n');
-            console.log('Updating Editor');
+    window.CMirror = $scope.editor.codeMirror;
 
-            $scope.editor.setEditorContent({
-                name: data._id,
-                type: data.type,
-                user: $scope.username,
-                isChanged: false,
-                text: data.content
+    $scope.editor.addTab = function (title, type) {
+        if(!$scope.editor.tabs.find(ele => ele.title === title)){
+            $scope.editor.tabs.push({
+                title: title,
+                type: type
             });
+            return true;
+        }
+        else 
+            return false;
+    };
 
-            $scope.editor.codeMirrorObj.setCursor(cur);
+    $scope.editor.removeTab = function (event) {
+        $scope.editor.currentTab = undefined;
+        
+        let tabName = event.currentTarget.getAttribute('value');
+        $scope.editor.tabs = $scope.editor.tabs.filter(ele => ele.title !== tabName);
+        $scope.editor.disableEditor();
+    };
 
+    $scope.editor.focusTab = function (title) {
+        // event.stopPropagation();
+        $scope.editor.currentTab = title;
+    };
 
-    //         $scope.editor.setEditorContent(data.content);
+    $scope.editor.clickOnTab = function (ev, tab) {
+        /* 
+        let result = $scope.editor.tabs.find((ele) => {
+            return ele.title === $scope.editor.currentTab;
+        });
+        */
 
-    //         console.log($scope.editor.codeMirrorObj)
-    //         let doc = $scope.editor.codeMirrorObj.getDoc();
-    //         let lineCount = doc.lineCount();
+        if(tab.type === 'testcase'){
+            let obj = $scope.testcase.getObj(tab.title);
 
+            if(obj){
+                $scope.editor.setEditorContent(obj.content ? obj.content : '');
+            }
+            else {
+                alert('error 656546521+94654654984');
+                $scope.editor.dissableEditor();
+            }
+        }
+        else if(tab.type === 'component'){
+            let obj = $scope.component.getObj(tab.title);
+
+            if(obj){
+                $scope.editor.setEditorContent(obj.content ? obj.content : '');
+            }
+            else {
+                alert('error 656546521+94654654984');
+                $scope.editor.dissableEditor();
+            }
         }
 
-    /*CodeMirror.commands.autocomplete = function(cm) {
-        cm.showHint({hint: CodeMirror.hint.anyword});
-    }*/
+        $scope.editor.enableEditor();
+    }
 
-    $scope.editor.codeMirrorObj = CodeMirror.fromTextArea(document.getElementById("code"), {
-        lineNumbers: true,
-        extraKeys: {"Ctrl-Space": "autocomplete"},
-        //mode: "anyword"
-    });
-    
-    $scope.editor.content.isChanged = false;
-    $scope.editor.content.type = null;
-    $scope.editor.content.name = null;
-    $scope.editor.content.user = null;
+    $scope.editor.setEditorContent = function (val) {
+        $scope.editor.codeMirror.setValue(val);
+    };
+
+    $scope.editor.disableEditor = function () {
+        $scope.editor.setEditorContent('');
+        $scope.editor.codeMirror.doc.cantEdit = true;
+    };
+
+    $scope.editor.enableEditor = function () {
+        $scope.editor.codeMirror.doc.cantEdit = false;
+    };
+
+//     console.log(CodeMirror.hint.anyword);
+
+    CodeMirror.commands.autocomplete = function(cm) {
+        cm.showHint({hint: CodeMirror.hint.sanitizorAautocomplete});
+    }
 
     let commandList = [
         "Comment", "KeyPress", "GetObjectCount", "CheckDBResults", "SetDBResult", "CreateDBConnection", "Screenshot", "Fail", "Loop",
@@ -513,13 +592,12 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             if( commandList.length > (1 + index) )
                 result = result + '|'
         });
-
         return result;
     }
 
     let commandsRegExp = new RegExp(getRegExpOfCmds(), 'i');
-        let startWithCallRegExp = new RegExp('^call', 'i');
-
+    let startWithCallRegExp = new RegExp('^call', 'i');
+    let globalWhiteSpaceRegxp = new RegExp('\\s+', 'g');
 
 
     CodeMirror.hint.sanitizorAautocomplete = function (editor) {
@@ -532,9 +610,30 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
         let elementHint = false;
 
         if(startWithCallRegExp.test(currentLine)){
-            list = $scope.component.nameList;
-            elementHint = true;
+            let val = currentLine.replace(startWithCallRegExp, "").replace(globalWhiteSpaceRegxp, "");
+            
+            if(val !== ''){
+                let statement = val.split('.');
+
+                if(statement.length === 1){
+                    list = $scope.library.nameList;
+                }
+                else if(statement.length > 1){
+                    let libObj = $scope.library.getObj(statement[0]);
+
+                    if(libObj){
+                        list = libObj.links ? libObj.links : []
+                    }
+                }
+                    
+            }
+            else{
+                list = $scope.library.nameList;
+            }
+
+            //list = $scope.component.nameList;
         }
+
         else if(commandsRegExp.test(currentLine)){
             list = [];
         }
@@ -569,9 +668,229 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
     };
 
 
+    $scope.editor.codeMirror.addKeyMap({
+            'Ctrl-S': function (cm) {
+                $scope.editor.saveContent(cm)
+            },
+            'Enter': function (cm) {
+                let cur = cm.doc.getCursor();
+                let line = cm.doc.getLine(cur.line);
+                let pos = {
+                    line: cur.line,
+                    ch: line.length
+                }
+
+                cm.doc.replaceRange('\n', pos);
+
+                $scope.editor.saveContent(cm);
+                return CodeMirror.Pass
+            }
+    }, true);
+
+
+/*    $scope.editor.codeMirror.on('blur', function (cm) {
+        $scope.editor.saveContent(cm);
+    });*/
+
+    $scope.editor.saveContent = function(cm, callback) {
+        if ($scope.editor.currentTab) {
+            let obj = $scope.editor.tabs.find(ele => ele.title === $scope.editor.currentTab);
+
+            if(obj && obj.type){
+                if(obj.type === 'component') {
+                    let component = $scope.component.getObj($scope.editor.currentTab);
+                    let componentCopy = angular.copy(component);
+
+                    componentCopy.content = cm.doc.getValue();
+
+                    $restService.setComponent({
+                        projectName: $scope.project.selected,
+                        val: componentCopy
+                    })
+                        .then(
+                        function successCallback(res) {
+                            if(res.data.status) {
+                                console.log('\n');
+                                console.log('Saving Component - Successful!');
+                                console.log(res.data.val);
+                                //$scope.editor.content.isChanged = false;
+
+                                if (callback)
+                                    callback();
+                            }
+                            else {
+                                console.log('\n');
+                                console.error('Saving Component - Failed!');
+                                console.log(res.data.error);
+                                //$scope.editor.content.isChanged = true;
+                            }
+                        }, function errorCallback(error) {
+                            console.log('\n');
+                            console.log('Saving Component - Failed!')
+                            console.error(error);
+                            //$scope.editor.content.isChanged = true;
+                        });
+                }
+                else if(obj.type === 'testcase') {
+                    let testcase = $scope.testcase.getObj($scope.editor.currentTab);
+                    let testcaseCopy = angular.copy(testcase);
+
+                    testcaseCopy.content = cm.doc.getValue();
+
+                    $restService.setTestcase({
+                        projectName: $scope.project.selected,
+                        val: testcaseCopy
+                    })
+                        .then(
+                        function successCallback (res) {
+                            if(res.data.status) {
+                                console.log('\n');
+                                console.log('Saving Testcase - Successful!');
+                                console.log(res.data.val);
+                                //$scope.editor.content.isChanged = false;
+                                
+                                if(callback)
+                                    callback();
+                            }
+                            else {
+                                console.log('\n');
+                                console.error('Saving Testcase - Failed!');
+                                console.log(res.data.error);
+                                //$scope.editor.content.isChanged = true;
+                            }
+                        },
+                        function errorCallback (error) {
+                            console.log('\n');
+                            console.log('Saving Testcase - Failed!')
+                            console.error(error);
+                            //$scope.editor.content.isChanged = true;
+                        });
+                }
+            }
+        }
+    };
+
+
+    
+/*
+    $scope.editor.updateEditor = function (data) {
+        let doc = $scope.editor.$scope.editor.codeMirror.getDoc()
+        let cur = doc.getCursor();
+
+        console.log('\n');
+        console.log('Updating Editor');
+
+        $scope.editor.setEditorContent({
+            name: data._id,
+            type: data.type,
+            user: $scope.username,
+            isChanged: false,
+            text: data.content
+        });
+
+        $scope.editor.$scope.editor.codeMirror.setCursor(cur);
+    }
+*/
+    
+/*
+    console.log('****************');
+    console.log(CodeMirror.hint.anyword);
+    console.log('****************');
+
+    CodeMirror.commands.autocomplete = function(cm) {
+        cm.showHint({hint: CodeMirror.hint.anyword});
+    }
+
+    var editor = CodeMirror.fromTextArea($scope.editor.textArea, {
+        lineNumbers: true,
+        extraKeys: {"Ctrl-Space": "autocomplete"}
+    });
+*/
+    /*
+    
+    $scope.editor.content.isChanged = false;
+    $scope.editor.content.type = null;
+    $scope.editor.content.name = null;
+    $scope.editor.content.user = null;
+
+    let commandList = [
+        "Comment", "KeyPress", "GetObjectCount", "CheckDBResults", "SetDBResult", "CreateDBConnection", "Screenshot", "Fail", "Loop",
+        "Else", "CheckChartContent", "If", "CheckPattern", "NavigateToURL", "Type", "DoubleClick", "Call", "SwitchUser", "ClickAt",
+        "Click", "EditVariable", "CheckElementPresent", "GoBack", "Select", "Retrieve", "EndLoop", "MouseMoveAndClick", "SetVarProperty",
+        "ElseIf", "DoubleClickAt", "CheckTextPresent", "SelectFrame", "WriteToReport", "HandlePopup", "EndIf", "SelectWindow", "FireEvent",
+        "CheckTable", "CreateUser", "SetVariable", "Store", "StartComment", "Pause", "CheckObjectProperty", "MouseOver", "Open", "EndComment",
+         "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
+    ];
+
+    let getRegExpOfCmds = function () {
+        let result = '';
+        commandList.forEach((ele, index) => {
+            result = result + ele;
+
+            if( commandList.length > (1 + index) )
+                result = result + '|'
+        });
+
+        return result;
+    }
+
+    let commandsRegExp = new RegExp(getRegExpOfCmds(), 'i');
+    let startWithCallRegExp = new RegExp('^call', 'i');
+
+
+    CodeMirror.hint.sanitizorAautocomplete = function (editor) {
+        let list = commandList;
+
+        let cursor = editor.getCursor();
+        let currentLine = editor.getLine(cursor.line);
+        let start = cursor.ch;
+        let end = start;
+        let elementHint = false;
+
+        if(startWithCallRegExp.test(currentLine)){
+            list = $scope.component.nameList;
+            //elementHint = true;
+        }
+        else if(commandsRegExp.test(currentLine)){
+            list = [];
+        }
+
+
+        while (end < currentLine.length && /[\w$]+/.test(currentLine.charAt(end))) ++end;
+        while (start && /[\w$]+/.test(currentLine.charAt(start - 1))) --start;
+
+        var curWord = start != end && currentLine.slice(start, end);
+        var regex = new RegExp('^' + curWord, 'i');
+        /*var result = {
+            list: (!curWord ? list : list.filter(function (item) {
+                if(curWord.toLowerCase() === item)
+                    return false;
+                return item.match(regex);
+            })).sort(),
+            from: CodeMirror.Pos(cursor.line, start),
+            to: CodeMirror.Pos(cursor.line, end)
+        };*/
+
+/*
+        var result = {
+            list: (!curWord ? list : list.filter(function (item) {
+                let regexp = new RegExp(curWord, 'i')
+
+                return regexp.test(item);
+            })).sort(),
+            from: CodeMirror.Pos(cursor.line, start),
+            to: CodeMirror.Pos(cursor.line, end)
+        };
+
+        return result;
+    };
+
+
     /**
      * :param {name, type, user, isChanged}
      */
+
+     /*
     $scope.editor.setEditorContent = function (content) {
         if(content && content.name && content.type && content.user && !content.isChanged) {
             $scope.editor.content.name = content.name;
@@ -581,7 +900,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             
             let text = content.text ? content.text : '';
             
-            $scope.editor.codeMirrorObj.doc.setValue(text);
+            $scope.editor.$scope.editor.codeMirror.doc.setValue(text);
         }
         else {
             $scope.dialog.openErrorPromptDialog({
@@ -591,7 +910,7 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
         }
     };
 
-    $scope.editor.codeMirrorObj.addKeyMap({
+    $scope.editor.$scope.editor.codeMirror.addKeyMap({
             'Ctrl-S': function (cm) {
                 $scope.editor.saveContent(cm)
             },
@@ -610,15 +929,11 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             }
     }, true);
 
-    $scope.editor.codeMirrorObj.on('blur', function (cm) {
+
+    $scope.editor.$scope.editor.codeMirror.on('blur', function (cm) {
         $scope.editor.saveContent(cm);
     });
-/*
-    $scope.editor.codeMirrorObj.on('keyup', function (cm) {
-        console.log('*********');
-        cm.showHint();
-    });
-*/
+
     $scope.editor.saveContent = function(cm, callback) {
         if ($scope.editor.content.name !== null && $scope.editor.content.name !== '') {
             if($scope.editor.content.type === 'component') {
@@ -638,14 +953,6 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                             console.log('Saving Component - Successful!');
                             console.log(res.data.val);
                             $scope.editor.content.isChanged = false;
-
-							/*
-                            if(componentCopy.status === 'Pending')
-                                $scope.dialog.openWarningPromptDialog({
-                                    warning: 'Component Status is Pending',
-                                    message: 'Please change the status'
-                                });
-							*/
 
                             if (callback)
                                 callback();
@@ -682,14 +989,6 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                             console.log(res.data.val);
                             $scope.editor.content.isChanged = false;
 							
-							
-							/*
-                            if(testcaseCopy.status === 'Pending')
-                                $scope.dialog.openWarningPromptDialog({
-                                    warning: 'Testcase Status is Pending',
-                                    message: 'Please change the status'
-                                });
-							*/
                             if(callback)
                                 callback();
                         }
@@ -709,6 +1008,46 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
             }
         }
     };
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -870,6 +1209,8 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                         if(self.owner !== '' && self.owner !== undefined) {
                             let parentNode = lscope.testsuite.getObj(onClickItemName);
 
+                            //parentNode._deleted = false;
+
                             resPromise = $restService.createTestcase({
                                 projectName: selectedProjectName,
                                 parentNode: parentNode,
@@ -889,6 +1230,8 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
                     else if(itemType === 'component'){
                         if(self.owner !== '' && self.owner !== undefined) {
                             let parentNode = lscope.library.getObj(onClickItemName);
+
+                            //parentNode._deleted = false;
 
                             resPromise = $restService.createComponent({
                                 projectName: selectedProjectName,
@@ -1781,21 +2124,25 @@ function automate_ctrl ($scope, $mdSidenav, $http, $mdDialog, $q, $timeout, $res
         }
     };
 
+    /*
+    should be changed
+    */
     let onTCChange = function (data) {
         if(data.change === 'add') {
             $scope.testcase.add(data.val);
-            if($scope.editor.content.name === data.val._id
-                && $scope.editor.content.type === data.val.type)
-                $scope.editor.updateEditor(data.val);
+            if($scope.editor.currentTab === data.val._id)
+                $scope.editor.setEditorContent(data.val.content ? data.val.content : '');
         }
     };
-
+    
+    /*
+    should be changed
+    */
     let onComponentChange = function (data) {
         if(data.change === 'add') {
             $scope.component.add(data.val);
-            if($scope.editor.content.name === data.val._id
-                && $scope.editor.content.type === data.val.type)
-                $scope.editor.updateEditor(data.val);
+            if($scope.editor.currentTab === data.val._id)
+                $scope.editor.setEditorContent(data.val.content ? data.val.content : '');
         }
     };
 
