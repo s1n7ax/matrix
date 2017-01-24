@@ -73,6 +73,10 @@ function restService($http) {
         return $http.post('/setComponent', values);
     };
 
+    self.setResources = function (values) {
+        return $http.post('/setResources', values)
+    } 
+
 
     /**
      * DELETE ITEM

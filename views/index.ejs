@@ -113,6 +113,12 @@
                             </md-button>
                         </md-menu-item>
 
+                        <md-menu-item>
+                            <md-button ng-click="dialog.openResourceEditorDialog($event, 'create', 'resource')">
+                                Update Resources
+                            </md-button>
+                        </md-menu-item>
+
                         <md-menu-divider></md-menu-divider>
 
                     </md-menu-content>
@@ -180,7 +186,7 @@
 
             <!-- EDITOR -->
             <md-content class="md-padding" flex style="display: flex; flex-flow: column;">
-                <md-nav-bar id="tabs-container" md-selected-nav-item="editor.currentTab" nav-bar-aria-label="navigation links">
+                <md-nav-bar id="tabs-container" md-selected-nav-item="editor.currentTab" nav-bar-aria-label="navigation links" ng-cloak>
                     <md-nav-item
                         ng-repeat="tab in editor.tabs track by $index" 
                         md-nav-click=""
@@ -191,7 +197,7 @@
                     </md-nav-item>
                 </md-nav-bar>
                 <div class="ext-content">
-                    <textarea id="code" style="flex:1"></textarea>
+                    <textarea id="code" style="flex:1" style="visibility: hidden;"></textarea>
                 </div>
             </md-content>
             

@@ -4,8 +4,6 @@ app.service('$restService',restService);
 function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $timeout, $restService, $projectService, $testsuiteService, $testcaseService, $componentService, $libraryService, $testsuiteTreeService) {
 
     "use strict";
-
-    $scope.username = 'Nisala';
     
     
     /**
@@ -30,7 +28,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
      */
     
 
-    $scope.applicationName = 'Sanitizer';
+    $scope.applicationName = 'Testcase Sanitizer';
 
 
     /**
@@ -100,6 +98,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
      */
     $scope.users = new Object();
     $scope.users.list = new Array();
+    $scope.users._list = new Array();
     $scope.users.dbRetrieve = function () {
         $restService.getAllUsers({
             projectName: $scope.project.selected
@@ -109,7 +108,8 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                 if(res.data.status) {
                     console.log('Getting all Users - Successful!');
                     console.log(res.data.val);
-                    $scope.users.list = res.data.val;
+                    $scope.users._doc = res.data.val;
+                    $scope.users.list = res.data.val.userNames;
                     console.log($scope.users.list);
                 }
                 else {
@@ -428,6 +428,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             $scope.editor.setEditorContent(obj.content ? obj.content : '');
             $scope.editor.enableEditor();
             $scope.editor.focusTab(comp);
+            $scope.$apply();
         }else {
             alert('652198125616565465');
         }
@@ -490,8 +491,12 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     $scope.editor = new Object();
     $scope.editor.tabs = new Array();
     $scope.editor.selected = new Object();
-
-    $scope.editor.codeMirror = CodeMirror.fromTextArea(document.getElementById("code"), {
+    $scope.editor.cur = 0;
+    
+    let textArea = document.getElementById("code");
+    textArea.visibility = 'hidden';
+    
+    $scope.editor.codeMirror = CodeMirror.fromTextArea(textArea, {
         lineNumbers: true,
         extraKeys: {"Ctrl-Space": "autocomplete"}
     });
@@ -568,8 +573,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     $scope.editor.enableEditor = function () {
         $scope.editor.codeMirror.doc.cantEdit = false;
     };
-
-//     console.log(CodeMirror.hint.anyword);
 
     CodeMirror.commands.autocomplete = function(cm) {
         cm.showHint({hint: CodeMirror.hint.sanitizorAautocomplete});
@@ -670,22 +673,44 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
     $scope.editor.codeMirror.addKeyMap({
             'Ctrl-S': function (cm) {
+                $scope.editor.cur = $scope.editor.codeMirror.doc.getCursor();
                 $scope.editor.saveContent(cm)
             },
             'Enter': function (cm) {
-                let cur = cm.doc.getCursor();
+                $scope.editor.cur = $scope.editor.codeMirror.doc.getCursor();
+                /*let cur = cm.doc.getCursor();
                 let line = cm.doc.getLine(cur.line);
                 let pos = {
                     line: cur.line,
                     ch: line.length
-                }
+                }*/
 
-                cm.doc.replaceRange('\n', pos);
+                cm.doc.replaceRange('\n', $scope.editor.cur);
+                $scope.editor.cur.line += 1;
+                $scope.editor.cur.ch = 0;
 
                 $scope.editor.saveContent(cm);
-                return CodeMirror.Pass
+                //return CodeMirror.Pass
+            },
+            'Ctrl-Click': function (cm) {
+                console.log(cm);
             }
     }, true);
+
+
+    $scope.editor.codeMirror.on('mousedown', function (cm, e) {
+        if(e.ctrlKey && e.srcElement.innerHTML !== ''){
+            e.preventDefault();
+            let cpm = $scope.component.getObj(e.srcElement.innerHTML);
+            let tc =  $scope.testcase.getObj(e.srcElement.innerHTML);
+            if(cpm){
+                $scope.libraryTree.cOnClick(cpm._id);
+            }
+            else if(tc){
+                $scope.testsuiteTree.tcOnClick(tc._id);
+            }
+        }
+    })
 
 
 /*    $scope.editor.codeMirror.on('blur', function (cm) {
@@ -770,27 +795,11 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         }
     };
 
-
-    
-/*
     $scope.editor.updateEditor = function (data) {
-        let doc = $scope.editor.$scope.editor.codeMirror.getDoc()
-        let cur = doc.getCursor();
-
-        console.log('\n');
-        console.log('Updating Editor');
-
-        $scope.editor.setEditorContent({
-            name: data._id,
-            type: data.type,
-            user: $scope.username,
-            isChanged: false,
-            text: data.content
-        });
-
-        $scope.editor.$scope.editor.codeMirror.setCursor(cur);
+        $scope.editor.setEditorContent(data);
+        $scope.editor.codeMirror.doc.setCursor($scope.editor.cur);
     }
-*/
+
     
 /*
     console.log('****************');
@@ -1123,7 +1132,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                     console.error(data.error);
                     $scope.dialog.openErrorPromptDialog(data.error);
                 }
-            })
+            });
 
         function CreatePromptDialogCtrl($timeout, $q, $log, $mdDialog, $scope, $restService, lscope, action, itemType, onClickItemName) {
             "use strict";
@@ -1378,6 +1387,68 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             }
         };
     };
+
+    $scope.dialog.openResourceEditorDialog = function (ev, action, itemType) {
+        let self = this;
+        let config = {
+            controller: AddResourcePromptDialogCtrl,
+            controllerAs: 'ctrl',
+            templateUrl: 'templates/resource-edit-dialog.html',
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose: true,
+            locals: {
+                lscope: $scope,
+                action: action,
+                itemType: itemType
+            }
+        };
+
+        $mdDialog.show(config)
+            .then(function (data) {
+                if(data.status)
+                    console.log(data)
+                else{
+                    console.error(data.error);
+                    $scope.dialog.openErrorPromptDialog(data.error);
+                }
+            });
+
+        function AddResourcePromptDialogCtrl($timeout, $q, $log, $mdDialog, $scope, $restService, lscope, action, itemType) {
+            var self = this;
+
+            self.readonly = false;
+            self.removable = true;
+            self.resources = angular.copy(lscope.users.list);
+
+            self.ok = function () {
+                let userDoc = angular.copy(lscope.users._doc);
+                userDoc.userNames = self.resources;
+
+                $restService.setResources({
+                    projectName: lscope.project.selected,
+                    userDoc: userDoc
+                })
+                    .then(
+                        function successCallback(data) {
+                            $mdDialog.hide(data);
+                        }, 
+                        function errorCallback(error) {
+                            $mdDialog.hide({
+                                status: false,
+                                error: error,
+                                body: null
+                            })
+                        });
+            }
+
+            self.cancel = function () {
+                $mdDialog.cancel();
+            };
+
+            
+        }
+    };    
 
     $scope.dialog.openDeleteConfirmDialog = function (ev, itemType, name) {
         let self = this;
@@ -1821,7 +1892,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                     $mdDialog.cancel();
                 };
             }
-        };
+    };
 
     $scope.dialog.openErrorPromptDialog = function (error, enableClose) {
 		if(enableClose === undefined)
@@ -1993,7 +2064,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                 $mdDialog.cancel();
             };
         }
-
     };
 
     $scope.dialog.openWarningPromptDialog = function (warning) {
@@ -2024,8 +2094,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                     $mdDialog.cancel();
                 };
             }
-
-        };
+    };
 
 
 
@@ -2103,6 +2172,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             case 'testcase': onTCChange(data); break;
             case 'component': onComponentChange(data); break;
             case 'library': onLibraryChange(data); break;
+            case 'users': onUsersUpdate(data); break;
             default : {
                 if(data.change === 'delete') {
                     $scope.testsuite.remove(data.val._id);
@@ -2131,7 +2201,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         if(data.change === 'add') {
             $scope.testcase.add(data.val);
             if($scope.editor.currentTab === data.val._id)
-                $scope.editor.setEditorContent(data.val.content ? data.val.content : '');
+                $scope.editor.updateEditor(data.val.content ? data.val.content : '');
         }
     };
     
@@ -2142,7 +2212,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         if(data.change === 'add') {
             $scope.component.add(data.val);
             if($scope.editor.currentTab === data.val._id)
-                $scope.editor.setEditorContent(data.val.content ? data.val.content : '');
+                $scope.editor.updateEditor(data.val.content ? data.val.content : '');
         }
     };
 
@@ -2153,6 +2223,13 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         }
     };
     
+
+    let onUsersUpdate = function (data)  {
+        if(data.change === 'add') {
+            $scope.users._doc = data.val;
+            $scope.users.list = data.val.userNames;
+        }
+    }
     /**
      * :param {name, type, user, isChanged}
      */

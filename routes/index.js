@@ -28,20 +28,32 @@ let services = new Object();
  * Interface
  */
 let serviceProvider = function () {
-	let removeValues = ['_replicator', '_users'];
+	let removeValues = new RegExp('^_','g');
+    remList = [];
 	
 	service.getAllProjects(function (error, body) {
-		error ?
-			console.error(error) :
-			removeValues.forEach(function (val) {
-				if((index = body.indexOf(val)) > -1) {
-					body.splice(index, 1);
-				}
-			});
+		if(error){
+            console.error(error);
+        }else{
+            body.forEach(function (val, index) {
+                if(/^_/.test(val)) {
+                    remList.push(index);
+                }
+            });
+
+            for(x = remList.length - 1; x >= 0; x--){
+                body.splice(remList[x], 1);
+            }
+
+            /*remList.forEach(function (ele) {
+                body.splice(ele, 1);
+            });*/
+        }
 
         console.log('\n*********** These are the projects ***********');
 		console.log(body);
-		body.forEach(function (val) {
+		
+        body.forEach(function (val) {
 			services[val] = new Service(val, true);
 		});
 
@@ -289,9 +301,19 @@ router.post('/getAllUsers', function (req, res, next) {
             res.send(getResMap(false, null, error));
         else{
             if(body.rows.length > 0)
-                res.send(getResMap(true, body.rows[0].value.userNames, null));
+                res.send(getResMap(true, body.rows[0].value, null));
             else
                 res.send(getResMap(true, [], null));
+        }
+    });
+});
+
+router.post('/setResources', function (req, res, next) {
+    services[req.body.projectName].insertOrUpdateDoc(req.body.userDoc, function (error, body) {
+        if(error){
+            res.send(getResMap(false, null, error));
+        }else{
+            res.send(getResMap(true, body, null));
         }
     });
 });
@@ -367,7 +389,8 @@ router.post('/deleteProject', function (req, res, next) {
 });
 
 router.post('/getAllProjects', function (req, res, next) {
-	let removeValues = ['_replicator', '_users'];
+    let removeValues = new RegExp('^_');
+    let remList = [];
 
 	service.getAllProjects(function (error, body) {
 		if(error) {
@@ -378,11 +401,16 @@ router.post('/getAllProjects', function (req, res, next) {
 			});
 		}
 		else {
-			removeValues.forEach(function (val) {
-				if((index = body.indexOf(val)) > -1) {
-					body.splice(index, 1);
+			body.forEach(function (val, index) {
+				if(/^_/.test(val)) {
+                    remList.push(index);
 				}
 			});
+
+            for(x = remList.length - 1; x >= 0; x--){
+                body.splice(remList[x], 1);
+            }
+
 			res.send({
 				'status': true,
 				'val': body,

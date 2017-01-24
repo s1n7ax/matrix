@@ -1,0 +1,37 @@
+<md-dialog aria-label="Create New Item">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+                      <span style="font-size: 30px; font-family: Cantarell;">
+                                Would you like to rdit resources?
+                        </span>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="ctrl.cancel()">
+                <md-icon md-svg-src="img/icons/ic_close_24px.svg" aria-label="Close dialog"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <md-dialog-content ng-cloak>
+        <div class="md-dialog-content">
+            <form ng-submit="$event.preventDefault()" style="padding: 0; margin: 0;">
+                <p style="font-size: 18px;">
+                    Enter the resource name and press enter.
+                </p>
+
+                <md-chips 
+                    placeholder="Enter resource name"
+                    ng-model="ctrl.resources" 
+                    readonly="ctrl.readonly" 
+                    md-removable="ctrl.removable" 
+                    md-enable-chip-edit="true">
+                        
+                </md-chips>
+
+            </form>
+        </div>
+    </md-dialog-content>
+
+    <md-dialog-actions>
+        <md-button aria-label="Okay" ng-click="ctrl.ok($event)">Okay</md-button>
+    </md-dialog-actions>
+</md-dialog>
