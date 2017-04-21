@@ -1,7 +1,7 @@
 const Locator = require('../locator');
 const Nano = require('nano');
 const JsonFile = require('jsonfile');
-const io = require('socket.io')(3001);
+const io = require('socket.io')(444);
 const Path = require('path');
 
 
@@ -21,14 +21,14 @@ class Service {
         console.log('Date & Time:');
         console.log(error.headers.date);
         console.log('****************************');
-    }   
+    }
 
     constructor(dbName, startSocket) {
         let self = this;
 
         let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
         let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
-        
+
         this.server = Nano(connectionQuery);
 
         this.dbName = dbName;
@@ -70,7 +70,7 @@ class Service {
         */
     }
 
-    /* 
+    /*
      * PROJECT
      */
     createProject (dbName, callback) {
@@ -121,7 +121,7 @@ class Service {
             }
         })
     }
-	
+
 	deleteDocByIdAndRev (id, rev, callback) {
         let self = this;
 
@@ -139,7 +139,7 @@ class Service {
             }
         });
 	}
-	
+
 	copyDocById(srcID, destID, callback) {
         this.database.copy(srcID , destID, callback)
 	}
@@ -147,19 +147,19 @@ class Service {
 
 
     getAllTestsuiteDocs (keysObject, callback) {
-        keysObject !== undefined ? 
+        keysObject !== undefined ?
         this.database.view('Automate', 'getAllTestsuites', keysObject, callback)
         : this.database.view('Automate', 'getAllTestsuites', callback)
     }
 
     getAllTestCaseDocs (keysObject, callback) {
-        keysObject !== undefined ? 
+        keysObject !== undefined ?
         this.database.view('Automate', 'getAllTestCases', keysObject, callback)
         : this.database.view('Automate', 'getAllTestCases', callback)
     }
 
     getAllComponentDocs (keysObject, callback) {
-        keysObject !== undefined ? 
+        keysObject !== undefined ?
         this.database.view('Automate', 'getAllComponents', keysObject, callback)
         : this.database.view('Automate', 'getAllComponents', callback)
     }
@@ -196,7 +196,7 @@ class Service {
                     tc.push(data.value);
                 });
 
-                
+
                 self.getAllComponentDocs(undefined, function (error, body) {
                     if(error){
                         throw 'Getting Components Failed';
@@ -230,7 +230,7 @@ class Service {
                             body.rows.forEach(function (data) {
                                 testcaseArray.push(data.value);
                             });
-                            
+
                             callback(false, testcaseArray);
                         }
                     })
@@ -241,7 +241,7 @@ class Service {
             }
         });
     }
-	
+
 	createAndLinkDoc (self, mainDocID, valuesObject, callback) {
 		self.insertOrUpdateDoc(valuesObject, function (error, body) {
 			if(error) {
@@ -335,10 +335,8 @@ class Service {
         });
 
 
-    } 
+    }
 }
 
 
 module.exports = Service;
-
-

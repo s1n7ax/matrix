@@ -28,7 +28,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
      */
     
 
-    $scope.applicationName = 'Testcase Sanitizer';
+    $scope.applicationName = 'BC Creator';
 
 
     /**
@@ -2109,7 +2109,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
     /* Project socket functions */
     $scope.socket.setProjectSocket = function (projectName) {
-        let conString = `http://${serverHostname}:3001/${projectName}`;
+        let conString = `http://${serverHostname}:444/${projectName}`;
 
         $scope.socket.projectsocket = io(conString, {
             reconnection: true

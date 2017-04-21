@@ -129,7 +129,7 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
     });
     
     var upload = multer({ storage : storage}).single('file');
-    debugger;
+    
 
     upload(req, res, function(err) {
 
@@ -240,7 +240,7 @@ router.post('/uploadFile', function(req, res, next) {
 router.get('/', function(req, res, next) {
     //res.sendFile(Locator.viewsPath.index);
     res.render(Locator.viewsPath.indexEJS, {
-        sockethost: 'http://'+os.hostname()+':3001'
+        sockethost: 'http://'+os.hostname()+':444'
     });
 });
 
@@ -425,11 +425,10 @@ router.post('/getAllProjects', function (req, res, next) {
  * MODULE
  */
 router.post('/createTestsuite', function (req, res, next) {
-    debugger;
 	let projectService = services[req.body.projectName];
 
 	projectService.insertOrUpdateDoc(req.body.val, function (error, body) {
-        debugger;
+
 		if(error) {
 			res.send({
 				'status': false,
@@ -556,18 +555,15 @@ router.post('/updateTestcase', function (req, res, next) {
 });
 
 router.post('/deleteTestcase', function (req, res, next) {
-    debugger;
     let data = req.body;
     let projectService = services[data.projectName];
 
     projectService.deleteDocByIdAndRev(data.val._id, data.val._rev, function (error, body) {
-        debugger;
         if(error) {
             console.error(error);
             res.send(getResMap(false, null, error));
         }
         else {
-            debugger;
             projectService.insertOrUpdateDoc(data.parentNode, function (error, body) {
                 if(error) {
                     console.error(error);
@@ -583,31 +579,25 @@ router.post('/deleteTestcase', function (req, res, next) {
 
 router.post('/renameTestcase', function (req, res, next) {
     let projectService = services[req.body.projectName];
-    debugger;
+	
     projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
         if(error) {
-            debugger;
             console.error(error);
             res.send(getResMap(false, null, error));
         }
         else {
-            debugger;
             projectService.deleteDocById(req.body._id, function (error, body2) {
                 if(error){
-                    debugger;
                     console.error(error);
                     res.send(getResMap(false, null, error));
                 }
                 else{
-                    debugger;
                     projectService.insertOrUpdateDoc(req.body.parentNode, function (error, body) {
                         if(error) {
-                            debugger;
                             console.error(error);
                             res.send(getResMap(false, null, error));
                         }
                         else {
-                            debugger;
                             res.send(getResMap(true, body, null))
                         }
                     });
@@ -624,9 +614,7 @@ router.post('/renameTestcase', function (req, res, next) {
  */
 router.post('/createComponent', function (req, res, next) {
     let projectService = services[req.body.projectName];
-    debugger;
     projectService.insertOrUpdateDoc(req.body.val, function (error, body) {
-        debugger;
         let componentBody = body;
 
         if(error){
@@ -634,10 +622,8 @@ router.post('/createComponent', function (req, res, next) {
             res.send(getResMap(false, null, error));
         }
         else {
-                debugger;
                 req.body.parentNode = addLinkToItem(req.body.parentNode, componentBody.id);
                 projectService.insertOrUpdateDoc(req.body.parentNode, function (error, body) {
-                    debugger;
                     if(error) {
                         console.error(error);
                         projectService.deleteDocByIdAndRev(componentBody.id, componentBody.rev, function (error) {
@@ -665,6 +651,7 @@ router.post('/createComponent', function (req, res, next) {
 });
 
 router.post('/getAllComponents', function (req, res, next) {
+	debugger;
 	let projectService = services[req.body.projectName];
 	let result = new Array;
 
@@ -737,7 +724,7 @@ router.post('/deleteComponent', function (req, res, next) {
 
 router.post('/renameComponent', function (req, res, next) {
     let projectService = services[req.body.projectName];
-    debugger;
+  
     projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
         if(error) {
             debugger;

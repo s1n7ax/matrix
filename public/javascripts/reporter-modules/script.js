@@ -2,10 +2,14 @@ reporter.controller('reporter_ctrl', reporterCtrl);
 reporter.service('$restService',restService);
 
 function reporterCtrl ($scope, $restService, $mdDialog) {
+
+
+
+
     /**
      * Common Properties
      */
-    $scope.applicationName = 'Sanitize Reporter';
+    $scope.applicationName = 'BC Creator Reporter';
 
     $scope.maxStepCount;
     $scope.minStepCount;
@@ -13,51 +17,8 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
     $scope.maxUsage;
     $scope.minUsage;
 
-    /**
-     * RegExp
-     */
-    let noSpaceRegExp = new RegExp(/\S/);
-    let startWithCallRegExp = new RegExp(/^call/, 'i');
 
-    let commandList = [
-        "Comment", "KeyPress", "GetObjectCount", "CheckDBResults", "SetDBResult", "CreateDBConnection", "Screenshot", "Fail", "Loop",
-        "Else", "CheckChartContent", "If", "CheckPattern", "NavigateToURL", "Type", "DoubleClick", "Call", "SwitchUser", "ClickAt",
-        "Click", "EditVariable", "CheckElementPresent", "GoBack", "Select", "Retrieve", "EndLoop", "MouseMoveAndClick", "SetVarProperty",
-        "ElseIf", "DoubleClickAt", "CheckTextPresent", "SelectFrame", "WriteToReport", "HandlePopup", "EndIf", "SelectWindow", "FireEvent",
-        "CheckTable", "CreateUser", "SetVariable", "Store", "StartComment", "Pause", "CheckObjectProperty", "MouseOver", "Open", "EndComment",
-        "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
-    ];
 
-    let getRegExpOfCmds = function () {
-        let result = '';
-        commandList.forEach((ele, index) => {
-            result = result + ele;
-
-            if( commandList.length > (1 + index) )
-                result = result + '|'
-        });
-
-        return result;
-    };
-
-    let commandsRegExp = new RegExp(getRegExpOfCmds(), 'i');
-
-    /**
-     * Common
-     */
-    let errorLog = function (message, error) {
-        console.log('\n***************************');
-        console.log(message);
-        console.error(error);
-        console.log('***************************');
-    };
-
-    let successLog = function (message, data) {
-        console.log('\n***************************');
-        console.log(message);
-        data && console.log(data);
-        console.log('***************************');
-    };
 
     /**
      * Dialog
@@ -93,6 +54,12 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                 };
             }
         };
+    $scope.dialog.openErrorPromptDialog_callback = function (){
+
+    }
+
+
+
 
     /**
      * Project
@@ -103,10 +70,7 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
     $scope.project.selected;
 
     $scope.project.getSelectMenuString = function () {
-        if($scope.project.selected)
-            return 'Project : '+$scope.project.selected;
-        else
-            return 'Select A Project';
+        return $scope.project.selected ? 'Project : '+$scope.project.selected : 'Select A Project';
     };
 
     $scope.project.dbRetrieve = function () {
@@ -114,11 +78,11 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
         .then(
         function successCallback(res) {
             if(res.data.status) {
-                successLog('Getting All Project - Successful!', res.data);
+                logger('success', 'Getting All Project - Successful!', res.data);
                 $scope.project.list = res.data.val;
             }
             else{
-                errorLog('Getting All Project - Failed!', res.data.error);
+                logger('error', 'Getting All Project - Failed!', res.data.error);
                 $scope.dialog.openErrorPromptDialog({
                     error: res.data.error.error,
                     message: res.data.error.message,
@@ -127,7 +91,7 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
 
         },
         function errorCallback(error) {
-            errorLog('Getting All Project - Failed!', error);
+            logger('error', 'Getting All Project - Failed!', error);
             $scope.dialog.openErrorPromptDialog({
                 error: error.error,
                 message: error.message,
@@ -137,47 +101,60 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
 
     $scope.project.onChange = function () {
         if($scope.project.selected) {
+
+            /**
+             * Getting all components
+             */
             $restService.getAllComponents({
                 projectName: $scope.project.selected
             })
-
             .then(function successCallback(res) {
                 if(res.data.status){
-                    successLog('Getting All Components - Successful!', res.data);
+                    logger('success', 'Getting All Components - Successful!', res.data);
                     $scope.component.list = res.data.val;
                 }
                 else {
-                    errorLog('Getting All Components - Failed!', res.data.error);
+                    logger('error', 'Getting All Components - Failed!', res.data.error);
                     $scope.dialog.openErrorPromptDialog({
                         error: res.data.error.error,
                         message: res.data.error.message,
                     });
                 }
-            },
-            function errorCallback (error) {
-                errorLog('Getting All Components - Failed!', res.data.error);
+            }, function errorCallback (error) {
+                logger('error', 'Getting All Components - Failed!', error);
                 $scope.dialog.openErrorPromptDialog({
                     error: error.error,
                     message: error.message,
                 });
             })
 
+
+            /**
+             * Getting all testcases
+             */
             .then(function () {
                 return $restService.getAllTestcases({
                     projectName: $scope.project.selected
                 });
             })
-
             .then(function (res) {
                 if(res.data.status){
-                    successLog('Getting All Testcases - Successful!', res.data);
+                    logger('success', 'Getting All Testcases - Successful!', res.data);
                     $scope.testcase.list = res.data.val;
                 }
                 else {
-                    errorLog('Getting All Testcases - Failed!', res.data.error);
+                    logger('error', 'Getting All Testcases - Failed!', res.data.error);
+                    $scope.dialog.openErrorPromptDialog({
+                        error: res.data.error.error,
+                        message: res.data.error.message,
+                    });
                 }
             })
 
+
+            /**
+             * Setting all Maps
+             */
             .then(function () {
                 $scope.component.setCommonMap();
                 $scope.testcase.setCommonMap();
@@ -185,17 +162,20 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                 $scope.component.setUsageMaxAndMin();
                 $scope.showTable = true;
                 $scope.matrix.setTCMatrix();
-            }).then(function (){
-                setTimeout(function () {
-                    var table = $('#metrix').DataTable();
-                    let searchInput = document.evaluate('//div[@id=\'metrix_filter\']/label', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                    console.log(searchInput);
-                    searchInput.style.float = "left";
-                }, 5000);
 
+            }).then(function (){
+                // setTimeout(function () {
+                //     var table = $('#metrix').DataTable();
+                //     let searchInput = document.evaluate('//div[@id=\'metrix_filter\']/label', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                //     console.log(searchInput);
+                //     searchInput.style.float = "left";
+                // }, 5000);
             })
         }
     };
+
+
+
 
     /**
      * Component
@@ -206,141 +186,231 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
         return $scope.component.list.find(e => e._id === id);
     };
 
-    let currentMappingBCName = '*****';
-
     $scope.component.setCommonMap = function () {
-        successLog('Setting component map - Starting!');
+        logger('logHeader', 'Setting Component map - Starting!');
         let obj = {};
 
-        $scope.component.list.forEach((element) => {
-            currentMappingBCName = element._id;
-            successLog('Setting component map of '+element._id+' - Starting!', element);
+        for(let i=0, list=$scope.component.list, len=list.length; i < len; i++){
+            let ele = list[i];
 
-            obj[element._id] = {};
-            obj[element._id]['status'] = element.status;
-            obj[element._id]['stepCount'] = $scope.component.getStepCountById(element._id);
-            obj[element._id]['calledComponents'] = ($scope.matrix.getCalledComponents(element.content).components);
-            obj[element._id]['owner'] = element.owner;
-            obj[element._id]['usage']  = $scope.matrix.getTotComponentUsage(element._id);
-        });
+            logger('logSub', 'Setting component map of ' + ele._id + ' - Starting!', ele);
 
-        $scope.component.commonMap = obj;
-        successLog('Setting component map - Finished!');
+            obj[ele._id] = {};
+            obj[ele._id]['status'] = ele.status;
+            let calledCmpAndStepCount = $scope.component.getStepCountAndCalledCmpByContent(ele._id, ele.content, obj);
+            obj[ele._id]['stepCount'] = calledCmpAndStepCount.stepCount;
+            obj[ele._id]['calledComponents'] = calledCmpAndStepCount.calledComponents;
+            obj[ele._id]['owner'] = list[i].owner;
+
+            logger('logSub2', ele._id + ' status: ' + obj[ele._id]['status']);
+            logger('logSub2', ele._id + ' step count: ' + obj[ele._id]['stepCount']);
+            logger('logSub2', ele._id + ' called components: ' + obj[ele._id]['calledComponents']);
+            logger('logSub2', ele._id + ' owner: ' + obj[ele._id]['owner']);
+        }
+
+        $scope.component.commonMap = $scope.component.getUsageFromCommonMap(obj);
+        logger('success', 'Setting Component map - Finished!');
     };
 
-    $scope.component.getStepCountById = function (id) {
+    $scope.component.getStepCountById = function (id, tempMap) {
         let obj = $scope.component.getObj(id);
-        let componentName;
 
+        //No component named "id" in the list
         if(!obj){
-            let currentBC = id ? id : currentMappingBCName;
-            let errMsg;
-
-            if(!id){
-                errMsg = 'An error occurred while getting step count of '
-                    + currentMappingBCName + ' component\nNot found a component name after call command';
-            }
-            else{
-                errMsg = 'An error occurred while getting step count of '
-                    + currentMappingBCName + ' component\nFound nothing called '
-                    + id +' in original component list';
-            }
+            let errorHeader = 'Invalid component name';
+            let errorMsg = 'Error while getting step count of' + id + '.\n Unable to find component in the component list';
+            logger('error',
+                errorHeader,
+                errorMsg,
+                $scope.component.list);
 
             $scope.dialog.openErrorPromptDialog({
-                error: errMsg,
-                message: 'Please enter component name after call command'
+                error: errorHeader,
+                message: errorMsg
             });
         }
+
+        //Fond component named "id"
+        else
+            return obj.content ? $scope.component.getStepCountAndCalledCmpByContent(id, obj.content, tempMap).stepCount : 0;
+    };
+
+    currentComponent = [];
+    $scope.component.getStepCountAndCalledCmpByContent = function (id, content, tempMap) {
+
+        //Verify there is no recursion in the call chain. if there is "id" in the "currentComponent"
+        //means currently we are counting the steps of the id.
+        if(~currentComponent.indexOf(id)){
+            let errorHeader = 'Component Call Recursion';
+
+            path = "";
+            for(let i = 0, len = currentComponent.length; i < len; i++){
+                path += currentComponent + "->";
+            }
+            path += id;
+
+            let errorMsg = 'Component ' + id + 'call itself.\nRemove the recursion to get the step count.' +
+                '\nconsider the below path to find the component call\n' + path;
+            logger('error',
+                errorHeader,
+                errorMsg,
+                currentComponent);
+
+            $scope.dialog.openErrorPromptDialog({
+                error: errorHeader,
+                message: errorMsg
+            });
+        }
+
+        //No recursive components
         else{
-            componentName = obj._id;
+            currentComponent.push(id);
+            let stepCount = 0;
+            let calledComponents = [];
 
-            if(obj.content) {
-                let arr = obj.content.split('\n');
-                let count = 0;
+            //Reading statements line by line
+            for(let i = 0, list = content.split('\n'), len = list.length;
+                i < len; i++){
 
-                for(let i = 0; i < arr.length; i++) {
-                    if(noSpaceRegExp.test(arr[i])) {
-                        if(startWithCallRegExp.test(arr[i])) {
-                            if(arr[i].indexOf(componentName)){
-                                //count += $scope.component.getStepCountById(arr[i].split(/\s+/)[1]);
-                                count += $scope.component.getStepCountById($scope.matrix.getCalledComponents(arr[i]).components[0]);
-                                
+                //Removing spaces in the line start and line end
+                list[i].replace(/^\s+|\s+$/g, '');
+
+                //Ignore lines with spaces
+                if(NO_SPACE_REGEX.test(list[i])){
+
+                    //Consider lines starts with a call command
+                    if(STARTS_WITH_CALL_REGEX.test(list[i])){
+                        try{
+                            let comp_id = $scope.component.getIdFromCallStatement(list[i]);
+
+                            //If step count already found in the tempMap, it will be used.
+                            try{
+                                assertNotEqual(tempMap[comp_id], undefined);
+                                assertNotEqual(tempMap[comp_id].stepCount, undefined);
+                                stepCount += tempMap[comp_id].stepCount;
                             }
-                            else{
-                                errorLog(componentName + ' is called inside ' + arr[i] + '\nInvalide implementation of components', obj);
-                                $scope.dialog.openErrorPromptDialog({
-                                    error: '',
-                                    message: 'Please contact system admin'
-                                });
+                            catch(err){
+                                stepCount += $scope.component.getStepCountById(comp_id, tempMap);
                             }
-                        }
-                        else {
-                            if( commandsRegExp.test(arr[i]) && !(arr[i].startsWith('//')))
-                                count++;
+                            finally{
+                                calledComponents.push(comp_id);
+                            }
+                        }catch(err){
+                            console.error(err);
+                            err.name += ' - Error occurred while getting step count of ' + id + ' in line ' + i;
+
+                            logger('error', err.name, err.message);
+
+                            $scope.dialog.openErrorPromptDialog({
+                                error: err.name,
+                                message: err.message
+                            });
                         }
                     }
-                }
-                return count;
-            }
-            else
-                return 0;
-        }
-    };
 
+                    //Consider lines don't start with a call command
+                    else if(STARTS_WITH_COMMAND_REGEX.test(list[i])){
+                        stepCount += 1;
+                    }
+
+                    //all the other steps will be ignored
+                }
+            }
+            //Remove last element of the array
+            currentComponent.pop();
+            return {stepCount: stepCount, calledComponents: calledComponents};
+        }
+    }
+
+    //Uses component common map to get the max and min steps count
+    /**************************************************************************/
     $scope.component.setStepCountMaxAndMin = function () {
+
+        //Get the keys array
         let keys = Object.keys($scope.component.commonMap);
 
-        if(~keys.length) {
-            $scope.maxStepCount = $scope.component.commonMap[keys[0]].stepCount;
-            $scope.minStepCount = $scope.maxStepCount;
+        $scope.maxStepCount = $scope.component.commonMap[keys[0]].stepCount;
+        $scope.minStepCount = $scope.maxStepCount;
 
-            for(let i = 0; i < keys.length; i++) {
-                let stepC = $scope.component.commonMap[keys[i]].stepCount;
+        for(let i = 0, list = keys, len = list.length; i < len; i++) {
+            let stepC = $scope.component.commonMap[list[i]].stepCount;
 
-                if(stepC > $scope.maxStepCount)
-                    $scope.maxStepCount = stepC;
-                if(stepC < $scope.minStepCount)
-                    $scope.minStepCount = stepC;
-            }
-        }
-        else{
-            $scope.maxStepCount = 0;
-            $scope.minStepCount = 0;
+            if(stepC > $scope.maxStepCount)
+                $scope.maxStepCount = stepC;
+            if(stepC < $scope.minStepCount)
+                $scope.minStepCount = stepC;
         }
     };
 
+    //Uses component common map to get the max and min usage
+    /**************************************************************************/
     $scope.component.setUsageMaxAndMin = function () {
         let keys = Object.keys($scope.component.commonMap);
 
-        if(~keys.length){
-            $scope.maxUsage = $scope.component.commonMap[keys[0]].usage;
-            $scope.minUsage = $scope.maxUsage;
+        $scope.maxUsage = $scope.component.commonMap[keys[0]].usage;
+        $scope.minUsage = $scope.maxUsage;
 
-            for(let i = 0; i < keys.length; i++) {
-                let usageC = $scope.component.commonMap[keys[i]].usage;
+        for(let i = 0, list = keys, len = list.length; i < keys.length; i++) {
+            let usageC = $scope.component.commonMap[keys[i]].usage;
 
-                if(usageC > $scope.maxUsage)
-                    $scope.maxUsage = usageC;
-                if(usageC < $scope.minUsage)
-                    $scope.minUsage = usageC;
-            }
+            if(usageC > $scope.maxUsage)
+                $scope.maxUsage = usageC;
+            if(usageC < $scope.minUsage)
+                $scope.minUsage = usageC;
         }
     };
 
-    $scope.component.getComponentUsageInBCs = function (id) {
-        let count = 0;
-
-        for(let i = 0; i < $scope.component.list.length; i++){
-            let calledCmp = $scope.matrix.getCalledComponents($scope.component.list[i].content).components;
-
-            for(let j = 0; j < calledCmp.length; j++){
-                if(calledCmp[j] === id)
-                    count++
+    $scope.component.getUsageFromCommonMap = function (map) {
+        let keys = Object.keys(map);
+        for(let i=0, list=keys, len=list.length; i<len; i++){
+            map[list[i]]['usage'] = 0;
+            for(let j=0; i<len; i++){
+                if(~map[list[j]]['calledComponents'].indexOf(map[list[i]]))
+                    map[list[i]]['usage'] += 1;
             }
         }
+        return map;
+    }
 
-        return count;
-    };
+    $scope.component.getIdFromCallStatement = function(statement){
+        let arr = statement.split(/\s/g);
+
+        if(arr.length < 2){
+            let error = new Error();
+            error.name = 'NoSpaceAfterCall';
+            error.message = 'Please follow the standard syntax to call a component. Use a space to seperate <command> and <library.component>';
+            throw error;
+        }
+
+        if(!NO_SPACE_REGEX.test(arr[1])){
+            let error = new Error();
+            error.name = 'NoValueAfterCall';
+            error.message = 'Please use library and component name to specify the component should be called after Call command. Use a dot(.) to seperate library and component. call <library.component>';
+            throw error;
+        }
+
+        let path = arr[1].split('.');
+
+        if(path.length < 2){
+            let error = new Error();
+            error.name = 'NoComponentAfterCall';
+            error.message = 'Please use library and component name to specify the component should be called after Call command. Use a dot(.) to seperate library and component. call <library.component>';
+            throw error;
+        }
+
+        if(path.length > 2){
+            let error = new Error();
+            error.name = 'InvalideNumberOfArgumentsAfterCall';
+            error.message = 'Please use only library and component name to specify the component should be called after Call command. Use a dot(.) to seperate library and component. call <library.component>';
+            throw error;
+        }
+
+        return path[1];
+    }
+
+
+
+
 
 
     /**
@@ -350,24 +420,100 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
     $scope.testcase.list;
     $scope.testcase.commonMap;
 
+
     $scope.testcase.setCommonMap = function () {
         let obj = {};
+        logger('logHeader', 'Setting Testcase map - Starting!');
+        for(let i=0, list=$scope.testcase.list, len=list.length; i<len; i++){
+            let ele = list[i];
+            logger('logSub', 'Setting testcase map of ' + ele._id + ' - Starting!', ele);
 
-        $scope.testcase.list.forEach((element) => {
-            obj[element._id] = {};
-            obj[element._id]['owner'] = element.owner;
-            obj[element._id]['calledComponents'] = $scope.matrix.getCalledComponents(element.content).components;
-            obj[element._id]['calledStatements'] = $scope.matrix.getCalledComponents(element.content).statements;
-            obj[element._id]['calledComponentCount'] =  obj[element._id]['calledComponents'].length;
-            obj[element._id]['status'] =
-                $scope.testcase.getStatus($scope.project.selected, element._id, element.status, obj[element._id]['calledComponents']);
-            obj[element._id]['stepCount'] = $scope.testcase.getStepCount(obj[element._id]['calledComponents'], obj[element._id]['calledStatements']);
-            obj[element._id]['complexity'] = $scope.testcase.getComplexity(obj[element._id]['stepCount']);
-       });
+            obj[ele._id] = {};
+            obj[ele._id]['owner'] = ele.owner;
+            let stepCountCalledCmpAndStatementMap = $scope.testcase.getSCCalledCmpAndStatements(ele._id, ele.content);
+            obj[ele._id]['stepCount'] = stepCountCalledCmpAndStatementMap.stepCount;
+            obj[ele._id]['calledComponents'] = stepCountCalledCmpAndStatementMap.calledComponents;
+            obj[ele._id]['calledStatements'] = stepCountCalledCmpAndStatementMap.calledStatements;
+            obj[ele._id]['status'] = $scope.testcase.getStatus($scope.project.selected, ele._id, ele.status, obj[ele._id]['calledComponents']);
+            obj[ele._id]['complexity'] = $scope.testcase.getComplexityByStepCount(obj[ele._id]['stepCount']);
 
-       $scope.testcase.commonMap = obj;
+            logger('logSub2', ele._id + ' owner: ' + obj[ele._id]['owner']);
+            logger('logSub2', ele._id + ' step count: ' + obj[ele._id]['stepCount']);
+            logger('logSub2', ele._id + ' called components: ' + obj[ele._id]['calledComponents']);
+            logger('logSub2', ele._id + ' called statements: ' + obj[ele._id]['calledStatements']);
+            logger('logSub2', ele._id + ' status: ' + obj[ele._id]['status']);
+            logger('logSub2', ele._id + ' complexity: ' + obj[ele._id]['complexity']);
+        }
+
+        $scope.testcase.commonMap = obj;
+        logger('success', 'Setting Testcase map - Finished!');
     };
 
+    $scope.testcase.getSCCalledCmpAndStatements = function (id, content) {
+        let steps = content.split('\n');
+        let stepCount = 0;
+        let calledComponents = [];
+        let calledStatements = [];
+
+
+        for(let i=0, list=steps, len=list.length; i<len; i++){
+            let ele = list[i];
+
+            ele.replace(/^\s+|\s+$/g, '');
+
+            if(NO_SPACE_REGEX.test(ele)){
+
+                //Consider lines starts with a call command
+                if(STARTS_WITH_CALL_REGEX.test(ele)){
+                    try{
+                        let comp_id = $scope.component.getIdFromCallStatement(ele);
+                        assertNotEqual($scope.component.commonMap[comp_id], undefined);
+                        assertNotEqual($scope.component.commonMap[comp_id].stepCount, undefined);
+
+                        stepCount += $scope.component.commonMap[comp_id].stepCount;
+                        calledComponents.push(comp_id);
+                    }
+                    catch(err){
+                        if(err.name === 'ActualIsExpected'){
+                            err.name = 'Error while getting step count of Testcase ' + id + '\nLine number : ' + i;
+                            err.message = 'Unable to find the component ' + comp_id + ' of call command ' + ele + ' in the component list';
+
+                            logger('error', err.name, err.message, $scope.component.commonMap);
+
+                            $scope.dialog.openErrorPromptDialog({
+                                error: err.name,
+                                message: err.message
+                            });
+                        }
+                        else {
+                            logger('error', err.name, err.message);
+
+                            $scope.dialog.openErrorPromptDialog({
+                                error: err.name,
+                                message: err.message
+                            });
+                        }
+                    }
+                }
+
+                //Consider lines don't start with a call command
+                else if(STARTS_WITH_COMMAND_REGEX.test(ele)){
+                    stepCount += 1;
+                    calledStatements.push(ele);
+                }
+            }
+        }
+
+        return {
+            stepCount: stepCount,
+            calledComponents: calledComponents,
+            calledStatements: calledStatements
+        }
+
+        $scope.component.getIdFromCallStatement();
+    }
+
+    /**************************************************************************/
     $scope.testcase.getStatus = function (project, id, actualStatus, calledComponents) {
         if(actualStatus !== 'Ready to automate' && calledComponents) {
             let status = false;
@@ -408,24 +554,8 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
         return actualStatus;
     };
 
-    $scope.testcase.getStepCount = function (calledComponents, calledStatements) {
-        let stepCount = 0;
-
-        calledComponents.forEach((element) => {
-            stepCount += $scope.component.commonMap[element]['stepCount'];
-        });
-
-        //return stepCount + calledStatements.length;
-
-        calledStatements.forEach((ele) => {
-            if( commandsRegExp.test(ele) && !(ele.startsWith('//')))
-                stepCount++;
-        });
-
-        return stepCount;
-    };
-
-    $scope.testcase.getComplexity = function (stepCount) {
+    /**************************************************************************/
+    $scope.testcase.getComplexityByStepCount = function (stepCount) {
         if(stepCount > 80)
             return 'H+';
         else if(stepCount > 40)
@@ -438,21 +568,8 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
             return 'None';
     };
 
-    $scope.testcase.getComponentUsageInTCs = function (id) {
-        let count = 0;
 
-        for(let i = 0; i < $scope.testcase.list.length; i++){
 
-            let calledCmp = $scope.matrix.getCalledComponents($scope.testcase.list[i].content).components
-
-            for(let j = 0; j < calledCmp.length; j++){
-                if(calledCmp[j] === id)
-                    count++;
-            }
-        }
-
-        return count;
-    };
 
 
     /**
@@ -460,6 +577,10 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
      */
     $scope.matrix = {};
     $scope.matrix.tcMatrix;
+
+
+
+
 
     /**
      * Common Properties
@@ -508,6 +629,7 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                     statements: []
                 }
         };
+
 
 
 
@@ -624,6 +746,9 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
 
         return basic;
     };
+
+
+
 
 
     /**
