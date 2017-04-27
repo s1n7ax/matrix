@@ -263,6 +263,12 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
         }
 
         //No recursive components
+        else if(!content){
+            let stepCount = 0;
+            let calledComponents = [];
+
+            return {stepCount: stepCount, calledComponents: calledComponents};
+        }
         else{
             currentComponent.push(id);
             let stepCount = 0;
@@ -360,11 +366,12 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
         }
     };
 
+    //Uses component common map to get the usage of a method
     $scope.component.getUsageFromCommonMap = function (map) {
         let keys = Object.keys(map);
         for(let i=0, list=keys, len=list.length; i<len; i++){
             map[list[i]]['usage'] = 0;
-            for(let j=0; i<len; i++){
+            for(let j=0; j<len; j++){
                 if(~map[list[j]]['calledComponents'].indexOf(map[list[i]]))
                     map[list[i]]['usage'] += 1;
             }
@@ -445,6 +452,7 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
             logger('logSub2', ele._id + ' complexity: ' + obj[ele._id]['complexity']);
         }
 
+        $scope.testcase.updateComponentMapUsageForUsageInTC(obj);
         $scope.testcase.commonMap = obj;
         logger('success', 'Setting Testcase map - Finished!');
     };
@@ -486,6 +494,9 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                             });
                         }
                         else {
+                            err.message += '\nTestcase: ' + id;
+                            err.message += '\nLine Number: ' + (i + 1);
+
                             logger('error', err.name, err.message);
 
                             $scope.dialog.openErrorPromptDialog({
@@ -568,6 +579,22 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
             return 'None';
     };
 
+    //uses $scope.component.commonMap and tcCommonMap
+    $scope.testcase.updateComponentMapUsageForUsageInTC = function (tcMap) {
+        tcKeys = Object.keys(tcMap);
+        bcKeys = Object.keys($scope.component.commonMap);
+
+        for(let i=0, list1=bcKeys, len1=bcKeys.length; i<len1; i++){
+            let cmp = $scope.component.commonMap[list1[i]];
+
+            for(let j=0,list2=tcKeys, len2=tcKeys.length; j<len2; j++){
+                let tc = tcMap[list2[j]];
+
+                if(~tc['calledComponents'].indexOf(list1[i]))
+                    $scope.component.commonMap[list1[i]]['usage'] += 1;
+            }
+        }
+    }
 
 
 
@@ -578,64 +605,6 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
     $scope.matrix = {};
     $scope.matrix.tcMatrix;
 
-
-
-
-
-    /**
-     * Common Properties
-     */
-    $scope.matrix.getTotComponentUsage = function (id) {
-        let count = 0;
-
-        count += $scope.testcase.getComponentUsageInTCs(id);
-        count += $scope.component.getComponentUsageInBCs(id);
-
-        return count;
-    };
-
-    $scope.matrix.getCalledComponents = function (content) {
-            if(content) {
-                let contentArr = content.split('\n').filter(element => element.match(/\S/));
-
-                let components = [];
-                let statements = [];
-                for(let i = 0; i < contentArr.length; i++) {
-                    //let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
-                    let val = contentArr[i].match(/^call/i);
-
-                    if(val){
-                        val = val.input.replace(/^call/i, '').replace(/\s+/g, '');
-                        val = val.split('.');
-                        components.push(val[1]);
-                    }
-                    else {
-                        statements.push(contentArr[i]);
-                    }
-                }
-                return {
-                    components: components,
-                    statements: statements
-                };
-
-                /*return contentArr.map(function (element) {
-                    let val = element.match(/\bbc\S+/);
-                    return val[0];
-                });*/
-            }
-            else
-                return {
-                    components: [],
-                    statements: []
-                }
-        };
-
-
-
-
-    /**
-     * Properties to create matrix map
-     */
     $scope.matrix.commonEmptySpace = new Array(5);
 
     $scope.matrix.getNameList = function () {
@@ -648,7 +617,6 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
 
             return list1.concat(list2);
         }
-
     };
 
     $scope.matrix.getStatus = function () {
@@ -661,7 +629,6 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
 
             return list1.concat(list2);
         }
-
     };
 
     $scope.matrix.getStepCount = function () {
@@ -718,7 +685,6 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                 return $scope.matrix.getTCRow(element._id);
             });
 
-            console.log(obj);
             $scope.matrix.tcMatrix = obj;
         }
     };
@@ -730,10 +696,10 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
             $scope.testcase.commonMap[id].status,
             $scope.testcase.commonMap[id].stepCount,
             $scope.testcase.commonMap[id].complexity,
-            $scope.testcase.commonMap[id].calledComponentCount,
+            $scope.testcase.commonMap[id].calledComponents.length
         ];
 
-        let bcUsedCountList = $scope.component.list.forEach((element1) => {
+        $scope.component.list.forEach((element1) => {
             let count = 0;
 
             $scope.testcase.commonMap[id].calledComponents.forEach((element2) => {

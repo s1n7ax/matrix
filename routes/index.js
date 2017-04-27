@@ -30,7 +30,7 @@ let services = new Object();
 let serviceProvider = function () {
 	let removeValues = new RegExp('^_','g');
     remList = [];
-	
+
 	service.getAllProjects(function (error, body) {
 		if(error){
             console.error(error);
@@ -44,15 +44,11 @@ let serviceProvider = function () {
             for(x = remList.length - 1; x >= 0; x--){
                 body.splice(remList[x], 1);
             }
-
-            /*remList.forEach(function (ele) {
-                body.splice(ele, 1);
-            });*/
         }
 
         console.log('\n*********** These are the projects ***********');
 		console.log(body);
-		
+
         body.forEach(function (val) {
 			services[val] = new Service(val, true);
 		});
@@ -93,7 +89,7 @@ let getCalledComponents = function (content) {
     if(content) {
         let contentArr = content.split('\n').filter(element => element.match(/\S/));
         let components = [];
-        
+
         for(let i = 0; i < contentArr.length; i++) {
             let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
 
@@ -115,7 +111,7 @@ serviceProvider();
 
 router.post('/getSanitizationStepsByTemplate', function(req, res, next){
     let uploadedFilePath = null;
-    
+
     var storage = multer.diskStorage({
         destination: function (req, file, callback) {
             console.log(req.body);
@@ -127,9 +123,9 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
             callback(null, uploadedFilePath);
         }
     });
-    
+
     var upload = multer({ storage : storage}).single('file');
-    
+
 
     upload(req, res, function(err) {
 
@@ -138,10 +134,10 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
         if(err) {
             return res.end("Error uploading file");
         }
-        
+
         // let projectService = services[req.body.projectName];
         let projectService = services[req.body.projectName];
-        
+
         try{
             projectService.getAllTCsAndBCs(function(tc, bc) {
                 let notMatched = [];
@@ -180,7 +176,7 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
                                     if(!cmp.content){
                                         cmp.content = '';
                                     }
-                                    
+
                                     //adding empty spaces
                                     let splitedContent = cmp.content.split('\n');
                                     let spacedContent = '';
@@ -188,7 +184,7 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
                                         spacedContent += '    ' + statement + '\r\n';
                                     });
 
-                                    container += `************* ${ele} *************\n${spacedContent}\n\n`                                
+                                    container += `************* ${ele} *************\n${spacedContent}\n\n`
                                 });
 
                                 let cellObj = ws.getCellMapObj('s', container);
@@ -196,14 +192,14 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
                             }
                         }else{
                             notMatched.push(val);
-                        }    
+                        }
                     }
                 });
 
                 ws.writeFile(Path.join(Locator.temp.temp, uploadedFilePath));
                 res.send(uploadedFilePath);
 
-                
+
                  setTimeout(function () {
                     fs.unlinkSync(Path.join(Locator.temp.temp, uploadedFilePath));
                 }, 10000);
@@ -250,7 +246,7 @@ router.get('/reporter', function (req, res, next) {
 });
 
 router.get('/getCurrentSanitizeMap', function(req, res, next) {
-    
+
 });
 
 
@@ -326,7 +322,7 @@ router.post('/setResources', function (req, res, next) {
 router.post('/createProject', function (req, res, next) {
 
     console.log('creating project')
-	
+
 	service.createProject(req.body.projectName, function (error, body) {
 		if(error) {
 		    console.error(error);
@@ -341,8 +337,8 @@ router.post('/createProject', function (req, res, next) {
 						     getAllTestCases: { map: 'function (doc) {if(doc.type == \'testcase\') {emit(doc._id, doc);}}' },
 						     getAllComponents: { map: 'function(doc) { doc.type === \'component\' && emit(doc._id, doc) }' },
 						     getAllLibraries: { map: 'function(doc) { doc.type === \'library\' && emit(doc._id, doc) }' },
-						     getAll: { map: 'function(doc) { doc._id !== \'_design/Automate\' && emit(doc._id, doc) }' } 
-						  } 
+						     getAll: { map: 'function(doc) { doc._id !== \'_design/Automate\' && emit(doc._id, doc) }' }
+						  }
 						};
 
 			services[req.body.projectName] = new Service(req.body.projectName, true);
@@ -579,7 +575,7 @@ router.post('/deleteTestcase', function (req, res, next) {
 
 router.post('/renameTestcase', function (req, res, next) {
     let projectService = services[req.body.projectName];
-	
+
     projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
         if(error) {
             console.error(error);
@@ -724,7 +720,7 @@ router.post('/deleteComponent', function (req, res, next) {
 
 router.post('/renameComponent', function (req, res, next) {
     let projectService = services[req.body.projectName];
-  
+
     projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
         if(error) {
             debugger;
@@ -776,7 +772,7 @@ router.post('/getAllLibraries', function (req, res, next) {
         	body.rows.forEach(function (data) {
 				result.push(data.value);
 			});
-			
+
             res.send(getResMap(true, result, null));
         }
     });
@@ -947,7 +943,7 @@ let deleteDeep0 = function (req, res, next, callback) {
 			resData = getResMap(true, body, null);
 		}
 
-		callback ? 
+		callback ?
 			callback(resData):
 			res.send(resData);
 	});
