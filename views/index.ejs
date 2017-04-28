@@ -73,11 +73,11 @@
 
                 </md-button>
 
-                
+
                 <!-- <input type="file" id="fileBrowser" style="display: none" onchange="fileChoosed()" /> -->
                 <input type="file" id="fileBrowser" style="display: none" custom-on-change="upload.fileChoosed">
-                
-                
+
+
 
 
                 <!-- MATRIX -->
@@ -188,9 +188,9 @@
             <md-content class="md-padding" flex style="display: flex; flex-flow: column;">
                 <md-nav-bar id="tabs-container" md-selected-nav-item="editor.currentTab" nav-bar-aria-label="navigation links" ng-cloak>
                     <md-nav-item
-                        ng-repeat="tab in editor.tabs track by $index" 
+                        ng-repeat="tab in editor.tabs track by $index"
                         md-nav-click=""
-                        ng-click="editor.clickOnTab($event, tab)" 
+                        ng-click="editor.clickOnTab($event, tab)"
                         name="{{tab.title}}">
                             {{tab.title + '-' + tab.type}}
                             <span ng-click="editor.removeTab($event)" value="{{tab.title}}">close</span>
@@ -200,7 +200,7 @@
                     <textarea id="code" style="flex:1" style="visibility: hidden;"></textarea>
                 </div>
             </md-content>
-            
+
         </div>
 
         <!-- Templates -->
@@ -283,12 +283,17 @@
 
 
     <!-- XLSX Module -->
-    <!--<script lang="javascript" src="dist/xlsx.core.min.js"></script>-->
     <script lang="javascript" src="javascripts/excellentexport.js"></script>
 
     <!-- Socket.IO -->
     <script src="<%= sockethost %>/socket.io/socket.io.js"></script>
 
+    <!-- Common Modules -->
+    <script src="javascripts/common-modules/controllers.js"></script>
+    <script src="javascripts/common-modules/loggers.js"></script>
+    <script src="javascripts/common-modules/settings.js"></script>
+
+    <!-- App -->
     <script>
         let app = angular.module('automate', ['ngMaterial'])
     </script>
@@ -311,7 +316,7 @@
             let fileInput = document.getElementById('fileBrowser');
             let file = fileInput.files[0];
 
-            
+
             let form = new FormData();
             form.append("file", file);
 

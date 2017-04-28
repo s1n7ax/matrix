@@ -4,8 +4,8 @@ app.service('$restService',restService);
 function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $timeout, $restService, $projectService, $testsuiteService, $testcaseService, $componentService, $libraryService, $testsuiteTreeService) {
 
     "use strict";
-    
-    
+
+
     /**
      * Following should be changed
      */
@@ -26,13 +26,13 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     /**
      * Local Properties
      */
-    
+
 
     $scope.applicationName = 'BC Creator';
 
 
     /**
-     * project 
+     * project
      */
     $scope.project = new Object();
     $scope.project._list = new Array();
@@ -204,7 +204,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
 
     /**
-     * Testcase 
+     * Testcase
      */
     $scope.testcase;
     $scope.testcase = new Object;
@@ -230,7 +230,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
 
     /**
-     * Component 
+     * Component
      */
     $scope.component;
     $scope.component = new Object;
@@ -329,7 +329,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
     $scope.testsuiteTree.tcOnClick = function (testcase) {
         let obj = $scope.testcase.getObj(testcase);
-        
+
         if(obj){
             $scope.editor.addTab(testcase, 'testcase')
             $scope.editor.setEditorContent(obj.content ? obj.content : '');
@@ -367,10 +367,10 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         $scope.libraryTree.list = result;
     };
 
-    /** 
-     * @Get: Lib object 
-     * @Set:  Lib tree 
-     * @Return: undefined 
+    /**
+     * @Get: Lib object
+     * @Set:  Lib tree
+     * @Return: undefined
      */
     $scope.libraryTree.addLib = function (obj) {
         let index = $scope.libraryTree.list.findIndex(element => element.library === obj._id);
@@ -378,7 +378,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         if(~index) {
 
             let newObj = new Object();
-            
+
             newObj.library = obj._id,
             newObj.components = obj.links,
             newObj.isExpanded = this._list[index].isExpanded
@@ -419,16 +419,15 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 //             type: null
 //         };
     };
-    
+
     $scope.libraryTree.cOnClick = function (comp) {
         let obj = $scope.component.getObj(comp);
-        
+
         if(obj){
             $scope.editor.addTab(comp, 'component')
             $scope.editor.setEditorContent(obj.content ? obj.content : '');
             $scope.editor.enableEditor();
             $scope.editor.focusTab(comp);
-            $scope.$apply();
         }else {
             alert('652198125616565465');
         }
@@ -481,25 +480,35 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
 
     /**
-     * CodeMirror 
+     * CodeMirror
      */
 
     CodeMirror.commands.autocomplete = function(cm) {
         cm.showHint({hint: CodeMirror.hint.anyword});
     };
-    
+
     $scope.editor = new Object();
     $scope.editor.tabs = new Array();
     $scope.editor.selected = new Object();
     $scope.editor.cur = 0;
-    
+
     let textArea = document.getElementById("code");
     textArea.visibility = 'hidden';
-    
+
     $scope.editor.codeMirror = CodeMirror.fromTextArea(textArea, {
         lineNumbers: true,
-        extraKeys: {"Ctrl-Space": "autocomplete"}
+        extraKeys: {"Ctrl-Space": "autocomplete"},
+        lineWrapping: true,
     });
+
+    // var charWidth = $scope.editor.codeMirror.defaultCharWidth(), basePadding = 4;
+    // $scope.editor.codeMirror.on("renderLine", function(cm, line, elt) {
+    //   var off = CodeMirror.countColumn(line.text, null, cm.getOption("tabSize")) * charWidth;
+    //   elt.style.textIndent = "-" + off + "px";
+    //   elt.style.paddingLeft = (basePadding + off) + "px";
+    // });
+    // $scope.editor.codeMirror.refresh();
+
 
     window.CMirror = $scope.editor.codeMirror;
 
@@ -511,30 +520,23 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             });
             return true;
         }
-        else 
+        else
             return false;
     };
 
     $scope.editor.removeTab = function (event) {
         $scope.editor.currentTab = undefined;
-        
+
         let tabName = event.currentTarget.getAttribute('value');
         $scope.editor.tabs = $scope.editor.tabs.filter(ele => ele.title !== tabName);
         $scope.editor.disableEditor();
     };
 
     $scope.editor.focusTab = function (title) {
-        // event.stopPropagation();
         $scope.editor.currentTab = title;
     };
 
     $scope.editor.clickOnTab = function (ev, tab) {
-        /* 
-        let result = $scope.editor.tabs.find((ele) => {
-            return ele.title === $scope.editor.currentTab;
-        });
-        */
-
         if(tab.type === 'testcase'){
             let obj = $scope.testcase.getObj(tab.title);
 
@@ -604,7 +606,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
 
     CodeMirror.hint.sanitizorAautocomplete = function (editor) {
-        let list = commandList;
+        let list = APPLICATION_COMMAND_LIST;
 
         let cursor = editor.getCursor();
         let currentLine = editor.getLine(cursor.line);
@@ -614,7 +616,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
         if(startWithCallRegExp.test(currentLine)){
             let val = currentLine.replace(startWithCallRegExp, "").replace(globalWhiteSpaceRegxp, "");
-            
+
             if(val !== ''){
                 let statement = val.split('.');
 
@@ -628,7 +630,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                         list = libObj.links ? libObj.links : []
                     }
                 }
-                    
+
             }
             else{
                 list = $scope.library.nameList;
@@ -646,7 +648,9 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         while (start && /[\w$]+/.test(currentLine.charAt(start - 1))) --start;
 
         var curWord = start != end && currentLine.slice(start, end);
-        var regex = new RegExp('^' + curWord, 'i');
+        //var regex = new RegExp('^' + curWord, 'i');
+
+        //this is the older function that is used to get the text from the start.
         /*var result = {
             list: (!curWord ? list : list.filter(function (item) {
                 if(curWord.toLowerCase() === item)
@@ -658,17 +662,40 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         };*/
 
         var result = {
-            list: (!curWord ? list : list.filter(function (item) {
-                let regexp = new RegExp(curWord, 'i')
-
-                return regexp.test(item);
-            })).sort(),
+            list: $scope.editor.filterCommandList(list, curWord),
             from: CodeMirror.Pos(cursor.line, start),
             to: CodeMirror.Pos(cursor.line, end)
         };
 
         return result;
     };
+
+    $scope.editor.filterCommandList = function (cmdList, curWord) {
+        let result = [];
+        if(!curWord)
+            return cmdList;
+        else{
+            let startWithWrd = new RegExp('^' + curWord, 'i');
+            let containsWrd = new RegExp(curWord, 'i');
+
+            result = cmdList.filter(function (item, index) {
+                if(startWithWrd.test(item)){
+                    cmdList.splice(index, 1);
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }).sort();
+
+            let val = cmdList.filter(function (item) {
+                return containsWrd.test(item);
+            });
+            result = result.concat(val)
+
+            return result;
+        }
+    }
 
 
     $scope.editor.codeMirror.addKeyMap({
@@ -773,7 +800,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                                 console.log('Saving Testcase - Successful!');
                                 console.log(res.data.val);
                                 //$scope.editor.content.isChanged = false;
-                                
+
                                 if(callback)
                                     callback();
                             }
@@ -800,7 +827,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         $scope.editor.codeMirror.doc.setCursor($scope.editor.cur);
     }
 
-    
+
 /*
     console.log('****************');
     console.log(CodeMirror.hint.anyword);
@@ -816,7 +843,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     });
 */
     /*
-    
+
     $scope.editor.content.isChanged = false;
     $scope.editor.content.type = null;
     $scope.editor.content.name = null;
@@ -906,9 +933,9 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             $scope.editor.content.type = content.type;
             $scope.editor.content.user = content.user;
             $scope.editor.content.isChanged = content.isChanged;
-            
+
             let text = content.text ? content.text : '';
-            
+
             $scope.editor.$scope.editor.codeMirror.doc.setValue(text);
         }
         else {
@@ -997,7 +1024,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                             console.log('Saving Testcase - Successful!');
                             console.log(res.data.val);
                             $scope.editor.content.isChanged = false;
-							
+
                             if(callback)
                                 callback();
                         }
@@ -1077,7 +1104,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             let fileInput = document.getElementById('fileBrowser');
             let file = fileInput.files[0];
 
-            
+
             let form = new FormData();
             form.append("file", file);
             form.append('projectName', $scope.project.selected);
@@ -1095,11 +1122,11 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                     alert('failed')
                     console.log(errorMessage);
                 }
-            });    
+            });
         }else {
             alert('select a project you idiot');
         }
-        
+
     }
 
     /**
@@ -1185,8 +1212,8 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                 let selectedProjectName = lscope.project.selected;
 
                 if(
-                    self.searchText !== '' && 
-                    self.searchText !== null && 
+                    self.searchText !== '' &&
+                    self.searchText !== null &&
                     ( (self.searchText.match(/\s+/) && itemType === 'testcase') || !self.searchText.match(/\s+/) )
 
                     ){
@@ -1300,7 +1327,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                         }
                     });
 				}
-                    
+
             };
 
             self.cancel = function($event) {
@@ -1432,7 +1459,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                     .then(
                         function successCallback(data) {
                             $mdDialog.hide(data);
-                        }, 
+                        },
                         function errorCallback(error) {
                             $mdDialog.hide({
                                 status: false,
@@ -1446,9 +1473,9 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                 $mdDialog.cancel();
             };
 
-            
+
         }
-    };    
+    };
 
     $scope.dialog.openDeleteConfirmDialog = function (ev, itemType, name) {
         let self = this;
@@ -1504,7 +1531,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
                     if(parentNode) {
                         parentNodeCopy = angular.copy(parentNode);
-                        parentNodeCopy.links.splice(index, 1);    
+                        parentNodeCopy.links.splice(index, 1);
                     }
 
                     resPromise = $restService.deleteTestcase({
@@ -1897,7 +1924,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     $scope.dialog.openErrorPromptDialog = function (error, enableClose) {
 		if(enableClose === undefined)
 			enableClose = true;
-		
+
         let config = {
             controller: ErrorPromptDialogCtrl,
             controllerAs: 'ctrl',
@@ -2204,7 +2231,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                 $scope.editor.updateEditor(data.val.content ? data.val.content : '');
         }
     };
-    
+
     /*
     should be changed
     */
@@ -2222,7 +2249,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             $scope.libraryTree.addLib(data.val);
         }
     };
-    
+
 
     let onUsersUpdate = function (data)  {
         if(data.change === 'add') {
@@ -2262,7 +2289,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                 ng-click="dialog.openDeleteConfirmDialog($event, 'testsuite', node.testsuite)">Delete Test Auite</div>
         </div>
         `
-    $scope.contextMenu.onLibrary = 
+    $scope.contextMenu.onLibrary =
         `
         <div id='contextmenu-node'>
             <div class='contextmenu-item'
@@ -2355,7 +2382,7 @@ app.directive('customOnChange', function() {
         var files = event.target.files;
         onChangeFunc(files);
       });
-        
+
       element.bind('click', function(){
         element.val('');
       });
