@@ -497,8 +497,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
     $scope.editor.codeMirror = CodeMirror.fromTextArea(textArea, {
         lineNumbers: true,
-        extraKeys: {"Ctrl-Space": "autocomplete"},
-        lineWrapping: true,
+        extraKeys: {"Ctrl-Space": "autocomplete"}
     });
 
     // var charWidth = $scope.editor.codeMirror.defaultCharWidth(), basePadding = 4;
@@ -508,9 +507,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     //   elt.style.paddingLeft = (basePadding + off) + "px";
     // });
     // $scope.editor.codeMirror.refresh();
-
-
-    window.CMirror = $scope.editor.codeMirror;
 
     $scope.editor.addTab = function (title, type) {
         if(!$scope.editor.tabs.find(ele => ele.title === title)){
@@ -576,34 +572,37 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         $scope.editor.codeMirror.doc.cantEdit = false;
     };
 
+    $scope.editor.filterCommandList = function (cmdList, curWord) {
+        let result = [];
+        if(!curWord)
+            return cmdList;
+        else{
+            let startWithWrd = new RegExp('^' + curWord, 'i');
+            let containsWrd = new RegExp(curWord, 'i');
+
+            result = cmdList.filter(function (item, index) {
+                if(startWithWrd.test(item)){
+                    cmdList = cmdList.slice(index, 1);
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }).sort();
+
+            let val = cmdList.filter(function (item) {
+                return containsWrd.test(item);
+            });
+            result = result.concat(val)
+
+            return result;
+        }
+    }
+
+    //Code Mirror Configurations
     CodeMirror.commands.autocomplete = function(cm) {
         cm.showHint({hint: CodeMirror.hint.sanitizorAautocomplete});
     }
-
-    let commandList = [
-        "Comment", "KeyPress", "GetObjectCount", "CheckDBResults", "SetDBResult", "CreateDBConnection", "Screenshot", "Fail", "Loop",
-        "Else", "CheckChartContent", "If", "CheckPattern", "NavigateToURL", "Type", "DoubleClick", "Call", "SwitchUser", "ClickAt",
-        "Click", "EditVariable", "CheckElementPresent", "GoBack", "Select", "Retrieve", "EndLoop", "MouseMoveAndClick", "SetVarProperty",
-        "ElseIf", "DoubleClickAt", "CheckTextPresent", "SelectFrame", "WriteToReport", "HandlePopup", "EndIf", "SelectWindow", "FireEvent",
-        "CheckTable", "CreateUser", "SetVariable", "Store", "StartComment", "Pause", "CheckObjectProperty", "MouseOver", "Open", "EndComment",
-         "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
-    ];
-
-    let getRegExpOfCmds = function () {
-        let result = '';
-        commandList.forEach((ele, index) => {
-            result = result + ele;
-
-            if( commandList.length > (1 + index) )
-                result = result + '|'
-        });
-        return result;
-    }
-
-    let commandsRegExp = new RegExp(getRegExpOfCmds(), 'i');
-    let startWithCallRegExp = new RegExp('^call', 'i');
-    let globalWhiteSpaceRegxp = new RegExp('\\s+', 'g');
-
 
     CodeMirror.hint.sanitizorAautocomplete = function (editor) {
         let list = APPLICATION_COMMAND_LIST;
@@ -614,8 +613,8 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         let end = start;
         let elementHint = false;
 
-        if(startWithCallRegExp.test(currentLine)){
-            let val = currentLine.replace(startWithCallRegExp, "").replace(globalWhiteSpaceRegxp, "");
+        if(STARTS_WITH_CALL_REGEX.test(currentLine)){
+            let val = currentLine.replace(STARTS_WITH_CALL_REGEX, "").replace(globalWhiteSpaceRegxp, "");
 
             if(val !== ''){
                 let statement = val.split('.');
@@ -638,10 +637,10 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
             //list = $scope.component.nameList;
         }
-
-        else if(commandsRegExp.test(currentLine)){
-            list = [];
-        }
+        //
+        // else if(STARTS_WITH_COMMAND_REGEX.test(currentLine)){
+        //     list = [];
+        // }
 
 
         while (end < currentLine.length && /[\w$]+/.test(currentLine.charAt(end))) ++end;
@@ -670,60 +669,31 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         return result;
     };
 
-    $scope.editor.filterCommandList = function (cmdList, curWord) {
-        let result = [];
-        if(!curWord)
-            return cmdList;
-        else{
-            let startWithWrd = new RegExp('^' + curWord, 'i');
-            let containsWrd = new RegExp(curWord, 'i');
-
-            result = cmdList.filter(function (item, index) {
-                if(startWithWrd.test(item)){
-                    cmdList.splice(index, 1);
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }).sort();
-
-            let val = cmdList.filter(function (item) {
-                return containsWrd.test(item);
-            });
-            result = result.concat(val)
-
-            return result;
-        }
-    }
-
-
     $scope.editor.codeMirror.addKeyMap({
-            'Ctrl-S': function (cm) {
-                $scope.editor.cur = $scope.editor.codeMirror.doc.getCursor();
-                $scope.editor.saveContent(cm)
-            },
-            'Enter': function (cm) {
-                $scope.editor.cur = $scope.editor.codeMirror.doc.getCursor();
-                /*let cur = cm.doc.getCursor();
-                let line = cm.doc.getLine(cur.line);
-                let pos = {
-                    line: cur.line,
-                    ch: line.length
-                }*/
+        'Ctrl-S': function (cm) {
+            $scope.editor.cur = $scope.editor.codeMirror.doc.getCursor();
+            $scope.editor.saveContent(cm)
+        },
+        'Enter': function (cm) {
+            $scope.editor.cur = $scope.editor.codeMirror.doc.getCursor();
+            /*let cur = cm.doc.getCursor();
+            let line = cm.doc.getLine(cur.line);
+            let pos = {
+                line: cur.line,
+                ch: line.length
+            }*/
 
-                cm.doc.replaceRange('\n', $scope.editor.cur);
-                $scope.editor.cur.line += 1;
-                $scope.editor.cur.ch = 0;
+            cm.doc.replaceRange('\n', $scope.editor.cur);
+            $scope.editor.cur.line += 1;
+            $scope.editor.cur.ch = 0;
 
-                $scope.editor.saveContent(cm);
-                //return CodeMirror.Pass
-            },
-            'Ctrl-Click': function (cm) {
-                console.log(cm);
-            }
+            $scope.editor.saveContent(cm);
+            //return CodeMirror.Pass
+        },
+        'Ctrl-Click': function (cm) {
+            console.log(cm);
+        }
     }, true);
-
 
     $scope.editor.codeMirror.on('mousedown', function (cm, e) {
         if(e.ctrlKey && e.srcElement.innerHTML !== ''){
@@ -738,11 +708,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             }
         }
     })
-
-
-/*    $scope.editor.codeMirror.on('blur', function (cm) {
-        $scope.editor.saveContent(cm);
-    });*/
 
     $scope.editor.saveContent = function(cm, callback) {
         if ($scope.editor.currentTab) {
@@ -826,263 +791,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         $scope.editor.setEditorContent(data);
         $scope.editor.codeMirror.doc.setCursor($scope.editor.cur);
     }
-
-
-/*
-    console.log('****************');
-    console.log(CodeMirror.hint.anyword);
-    console.log('****************');
-
-    CodeMirror.commands.autocomplete = function(cm) {
-        cm.showHint({hint: CodeMirror.hint.anyword});
-    }
-
-    var editor = CodeMirror.fromTextArea($scope.editor.textArea, {
-        lineNumbers: true,
-        extraKeys: {"Ctrl-Space": "autocomplete"}
-    });
-*/
-    /*
-
-    $scope.editor.content.isChanged = false;
-    $scope.editor.content.type = null;
-    $scope.editor.content.name = null;
-    $scope.editor.content.user = null;
-
-    let commandList = [
-        "Comment", "KeyPress", "GetObjectCount", "CheckDBResults", "SetDBResult", "CreateDBConnection", "Screenshot", "Fail", "Loop",
-        "Else", "CheckChartContent", "If", "CheckPattern", "NavigateToURL", "Type", "DoubleClick", "Call", "SwitchUser", "ClickAt",
-        "Click", "EditVariable", "CheckElementPresent", "GoBack", "Select", "Retrieve", "EndLoop", "MouseMoveAndClick", "SetVarProperty",
-        "ElseIf", "DoubleClickAt", "CheckTextPresent", "SelectFrame", "WriteToReport", "HandlePopup", "EndIf", "SelectWindow", "FireEvent",
-        "CheckTable", "CreateUser", "SetVariable", "Store", "StartComment", "Pause", "CheckObjectProperty", "MouseOver", "Open", "EndComment",
-         "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
-    ];
-
-    let getRegExpOfCmds = function () {
-        let result = '';
-        commandList.forEach((ele, index) => {
-            result = result + ele;
-
-            if( commandList.length > (1 + index) )
-                result = result + '|'
-        });
-
-        return result;
-    }
-
-    let commandsRegExp = new RegExp(getRegExpOfCmds(), 'i');
-    let startWithCallRegExp = new RegExp('^call', 'i');
-
-
-    CodeMirror.hint.sanitizorAautocomplete = function (editor) {
-        let list = commandList;
-
-        let cursor = editor.getCursor();
-        let currentLine = editor.getLine(cursor.line);
-        let start = cursor.ch;
-        let end = start;
-        let elementHint = false;
-
-        if(startWithCallRegExp.test(currentLine)){
-            list = $scope.component.nameList;
-            //elementHint = true;
-        }
-        else if(commandsRegExp.test(currentLine)){
-            list = [];
-        }
-
-
-        while (end < currentLine.length && /[\w$]+/.test(currentLine.charAt(end))) ++end;
-        while (start && /[\w$]+/.test(currentLine.charAt(start - 1))) --start;
-
-        var curWord = start != end && currentLine.slice(start, end);
-        var regex = new RegExp('^' + curWord, 'i');
-        /*var result = {
-            list: (!curWord ? list : list.filter(function (item) {
-                if(curWord.toLowerCase() === item)
-                    return false;
-                return item.match(regex);
-            })).sort(),
-            from: CodeMirror.Pos(cursor.line, start),
-            to: CodeMirror.Pos(cursor.line, end)
-        };*/
-
-/*
-        var result = {
-            list: (!curWord ? list : list.filter(function (item) {
-                let regexp = new RegExp(curWord, 'i')
-
-                return regexp.test(item);
-            })).sort(),
-            from: CodeMirror.Pos(cursor.line, start),
-            to: CodeMirror.Pos(cursor.line, end)
-        };
-
-        return result;
-    };
-
-
-    /**
-     * :param {name, type, user, isChanged}
-     */
-
-     /*
-    $scope.editor.setEditorContent = function (content) {
-        if(content && content.name && content.type && content.user && !content.isChanged) {
-            $scope.editor.content.name = content.name;
-            $scope.editor.content.type = content.type;
-            $scope.editor.content.user = content.user;
-            $scope.editor.content.isChanged = content.isChanged;
-
-            let text = content.text ? content.text : '';
-
-            $scope.editor.$scope.editor.codeMirror.doc.setValue(text);
-        }
-        else {
-            $scope.dialog.openErrorPromptDialog({
-                error: 'Error in $scope.editor.setEditorContent()',
-                message: 'unknown issue, this error occurred because method did not receive an object or required details\n'+content
-            })
-        }
-    };
-
-    $scope.editor.$scope.editor.codeMirror.addKeyMap({
-            'Ctrl-S': function (cm) {
-                $scope.editor.saveContent(cm)
-            },
-            'Enter': function (cm) {
-                let cur = cm.doc.getCursor();
-                let line = cm.doc.getLine(cur.line);
-                let pos = {
-                    line: cur.line,
-                    ch: line.length
-                }
-
-                cm.doc.replaceRange('\n', pos);
-
-                $scope.editor.saveContent(cm);
-                //return CodeMirror.Pass
-            }
-    }, true);
-
-
-    $scope.editor.$scope.editor.codeMirror.on('blur', function (cm) {
-        $scope.editor.saveContent(cm);
-    });
-
-    $scope.editor.saveContent = function(cm, callback) {
-        if ($scope.editor.content.name !== null && $scope.editor.content.name !== '') {
-            if($scope.editor.content.type === 'component') {
-                let component = $scope.component.getObj($scope.editor.content.name);
-                let componentCopy = angular.copy(component);
-
-                componentCopy.content = cm.doc.getValue();
-
-                $restService.setComponent({
-                    projectName: $scope.project.selected,
-                    val: componentCopy
-                })
-                    .then(
-                    function successCallback(res) {
-                        if(res.data.status) {
-                            console.log('\n');
-                            console.log('Saving Component - Successful!');
-                            console.log(res.data.val);
-                            $scope.editor.content.isChanged = false;
-
-                            if (callback)
-                                callback();
-                        }
-                        else {
-                            console.log('\n');
-                            console.error('Saving Component - Failed!');
-                            console.log(res.data.error);
-                            $scope.editor.content.isChanged = true;
-                        }
-                    }, function errorCallback(error) {
-                        console.log('\n');
-                        console.log('Saving Component - Failed!')
-                        console.error(error);
-                        $scope.editor.content.isChanged = true;
-                    });
-            }
-
-            else if($scope.editor.content.type === 'testcase') {
-                let testcase = $scope.testcase.getObj($scope.editor.content.name);
-                let testcaseCopy = angular.copy(testcase);
-
-                testcaseCopy.content = cm.doc.getValue();
-
-                $restService.setTestcase({
-                    projectName: $scope.project.selected,
-                    val: testcaseCopy
-                })
-                    .then(
-                    function successCallback (res) {
-                        if(res.data.status) {
-                            console.log('\n');
-                            console.log('Saving Testcase - Successful!');
-                            console.log(res.data.val);
-                            $scope.editor.content.isChanged = false;
-
-                            if(callback)
-                                callback();
-                        }
-                        else {
-                            console.log('\n');
-                            console.error('Saving Testcase - Failed!');
-                            console.log(res.data.error);
-                            $scope.editor.content.isChanged = true;
-                        }
-                    },
-                    function errorCallback (error) {
-                        console.log('\n');
-                        console.log('Saving Testcase - Failed!')
-                        console.error(error);
-                        $scope.editor.content.isChanged = true;
-                    });
-            }
-        }
-    };
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
