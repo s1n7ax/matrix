@@ -11,6 +11,10 @@ APPLICATION_COMMAND_LIST = [
 
 STARTS_WITH_COMMAND_REGEX = getStartsWithCommandRegex();
 
+CONTAINS_WHITE_SPACE_REGEX = new RegExp(/\s+/);
+
+CONTAINS_WHITE_SPACE_GLOBAL_REGEX = new RegExp(/\s+/, 'g');
+
 NO_SPACE_REGEX = new RegExp(/\S/);
 
 STARTS_WITH_CALL_REGEX = new RegExp(/^call/, 'i');

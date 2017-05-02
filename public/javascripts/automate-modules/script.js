@@ -500,14 +500,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         extraKeys: {"Ctrl-Space": "autocomplete"}
     });
 
-    // var charWidth = $scope.editor.codeMirror.defaultCharWidth(), basePadding = 4;
-    // $scope.editor.codeMirror.on("renderLine", function(cm, line, elt) {
-    //   var off = CodeMirror.countColumn(line.text, null, cm.getOption("tabSize")) * charWidth;
-    //   elt.style.textIndent = "-" + off + "px";
-    //   elt.style.paddingLeft = (basePadding + off) + "px";
-    // });
-    // $scope.editor.codeMirror.refresh();
-
     $scope.editor.addTab = function (title, type) {
         if(!$scope.editor.tabs.find(ele => ele.title === title)){
             $scope.editor.tabs.push({
@@ -563,6 +555,10 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         $scope.editor.codeMirror.setValue(val);
     };
 
+    $scope.editor.getEditorContent = function () {
+        return $scope.editor.codeMirror.getValue();
+    }
+
     $scope.editor.disableEditor = function () {
         $scope.editor.setEditorContent('');
         $scope.editor.codeMirror.doc.cantEdit = true;
@@ -614,7 +610,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         let elementHint = false;
 
         if(STARTS_WITH_CALL_REGEX.test(currentLine)){
-            let val = currentLine.replace(STARTS_WITH_CALL_REGEX, "").replace(globalWhiteSpaceRegxp, "");
+            let val = currentLine.replace(STARTS_WITH_CALL_REGEX, "").replace(CONTAINS_WHITE_SPACE_REGEX, "");
 
             if(val !== ''){
                 let statement = val.split('.');
@@ -629,7 +625,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
                         list = libObj.links ? libObj.links : []
                     }
                 }
-
             }
             else{
                 list = $scope.library.nameList;
@@ -647,18 +642,6 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         while (start && /[\w$]+/.test(currentLine.charAt(start - 1))) --start;
 
         var curWord = start != end && currentLine.slice(start, end);
-        //var regex = new RegExp('^' + curWord, 'i');
-
-        //this is the older function that is used to get the text from the start.
-        /*var result = {
-            list: (!curWord ? list : list.filter(function (item) {
-                if(curWord.toLowerCase() === item)
-                    return false;
-                return item.match(regex);
-            })).sort(),
-            from: CodeMirror.Pos(cursor.line, start),
-            to: CodeMirror.Pos(cursor.line, end)
-        };*/
 
         var result = {
             list: $scope.editor.filterCommandList(list, curWord),
@@ -1894,7 +1877,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
 
         $scope.socket.projectsocket.on('updates', onProjectUpdate);
 
-        $scope.socket.projectsocket.on('editor live update', onEditorLiveUpdate)
+        //$scope.socket.projectsocket.on('editor live update', onEditorLiveUpdate)
     };
 
     let onProjectUpdate = function (data) {
@@ -1935,8 +1918,13 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     let onTCChange = function (data) {
         if(data.change === 'add') {
             $scope.testcase.add(data.val);
-            if($scope.editor.currentTab === data.val._id)
-                $scope.editor.updateEditor(data.val.content ? data.val.content : '');
+            if($scope.editor.currentTab === data.val._id){
+                let currentEditorContent = $scope.editor.getEditorContent().replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+                let receivedContent = data.val.content.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+
+                if(currentEditorContent !== receivedContent)
+                    $scope.editor.updateEditor(data.val.content ? data.val.content : '');
+            }
         }
     };
 
@@ -1946,8 +1934,13 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     let onComponentChange = function (data) {
         if(data.change === 'add') {
             $scope.component.add(data.val);
-            if($scope.editor.currentTab === data.val._id)
-                $scope.editor.updateEditor(data.val.content ? data.val.content : '');
+            if($scope.editor.currentTab === data.val._id){
+                let currentEditorContent = $scope.editor.getEditorContent().replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+                let receivedContent = data.val.content.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+
+                if(currentEditorContent !== receivedContent)
+                    $scope.editor.updateEditor(data.val.content ? data.val.content : '');
+            }
         }
     };
 
@@ -1968,15 +1961,15 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     /**
      * :param {name, type, user, isChanged}
      */
-    let onEditorLiveUpdate = function (item) {
-        if($scope.editor.content.name !== null &&
-            $scope.editor.content.type !== null) {
-            if($scope.editor.content.name === content.name &&
-                $scope.editor.content.type === content.type) {
-                $scope.editor.setEditorContent(item);
-            }
-        }
-    }
+    // let onEditorLiveUpdate = function (item) {
+    //     if($scope.editor.content.name !== null &&
+    //         $scope.editor.content.type !== null) {
+    //         if($scope.editor.content.name === content.name &&
+    //             $scope.editor.content.type === content.type) {
+    //             $scope.editor.setEditorContent(item);
+    //         }
+    //     }
+    // }
 
 
 
