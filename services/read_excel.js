@@ -3,7 +3,7 @@ const XLSX = require('xlsx');
 function ReadExcel() {
 
 	this.setWorkBook = function (wb) {
-		this.workbook = wb;		
+		this.workbook = wb;
 	}
 
 	this.getWorkBook = function () {
@@ -40,7 +40,7 @@ function ReadExcel() {
 	this.getCellLocationArr = function (mergesArr){
 		let locationArr = [];
 		let row = 0;
-		
+
 		debugger;
 
 		for(i = 0; i < 20; i++){

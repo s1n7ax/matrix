@@ -369,11 +369,14 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
     //Uses component common map to get the usage of a method
     $scope.component.getUsageFromCommonMap = function (map) {
         let keys = Object.keys(map);
-        for(let i=0, list=keys, len=list.length; i<len; i++){
-            map[list[i]]['usage'] = 0;
-            for(let j=0; j<len; j++){
-                if(~map[list[j]]['calledComponents'].indexOf(map[list[i]]))
-                    map[list[i]]['usage'] += 1;
+        for(let i=0, list1=keys, len1=list1.length; i<len1; i++){
+            map[list1[i]]['usage'] = 0;
+            for(let j=0; j<len1; j++){
+                for(let v=0, list2=map[list1[j]]['calledComponents'], len2=list2.length; v<len2; v++){
+                    if(list1[i] === list2[v]){
+                        map[list1[i]]['usage'] += 1;
+                    }
+                }
             }
         }
         return map;
@@ -590,8 +593,11 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
             for(let j=0,list2=tcKeys, len2=tcKeys.length; j<len2; j++){
                 let tc = tcMap[list2[j]];
 
-                if(~tc['calledComponents'].indexOf(list1[i]))
-                    $scope.component.commonMap[list1[i]]['usage'] += 1;
+
+                for(let v=0, list=tc['calledComponents'], len=list.length; v<len; v++){
+                    if(list[v] === list1[i])
+                        $scope.component.commonMap[list1[i]]['usage'] += 1;
+                }
             }
         }
     }

@@ -69,14 +69,14 @@
                 <!-- MATRIX -->
                 <md-button class="md-icon-button">
                     <a target="_blank" aria-label="matrixLink" href="/reporter">
-                        <md-icon md-svg-src="img/icons/ic_assignment_white_24px.svg" aria-label="matrix" class="toolbar-icon"></md-icon>
+                        <md-icon md-svg-src="img/icons/ic_assignment_white_24px.svg" aria-label="matrix" class="toolbar-icon" title="This will cause a tooltip to appear"></md-icon>
                     </a>
                 </md-button>
 
                 <!-- OPTION MENU BUTTON-->
                 <md-menu>
 
-                    <md-button class="md-icon-button" 
+                    <md-button class="md-icon-button"
                     ng-click="optionMenu.openOptionMenu($mdOpenMenu, $event)">
                         <md-icon md-svg-src="img/icons/ic_list_white_24px.svg" class="toolbar-icon">list</md-icon>
                     </md-button>
@@ -129,13 +129,13 @@
 
                 <div class="view-content-common">
 
-                    
+
                     <!-- SIDE NAVIGATOR TEST SUITE VIEW CONTAINER -->
                     <div ng-if=" sideNav.selectedViewType === 'module-browser'">
                         <md-content style="height: 92%; overflow-x: hidden;">
                             <div layout="column" ng-repeat="node in testsuiteTree.list" style="position: relative;">
                                 <context-menu contextmenu-template="onTestSuite">
-                                    <md-button 
+                                    <md-button
                                         class="file-tree-main square-buttons"
                                         style="text-transform: none;"
                                         ng-click="node.isExpanded = !node.isExpanded; testsuiteTree.tsOnClick();">
@@ -162,7 +162,7 @@
                         <md-content style="height: 92%; overflow-x: hidden;">
                             <div layout="column" ng-repeat="node in libraryTree.list" style="position: relative;" >
                                 <context-menu contextmenu-template="onLibrary">
-                                    <md-button 
+                                    <md-button
                                         class="file-tree-main square-buttons"
                                         style="text-transform: none;"
                                         ng-click="node.isExpanded = !node.isExpanded;">
@@ -209,7 +209,7 @@
                 <textarea id="code" style="flex:1"></textarea>
             </md-content>
         </div>
-		
+
 		<!-- Templates -->
 		<script type="text/ng-template" id="dialog1.tmpl">
 		<md-dialog aria-label="Error Message" style="width: 600px;">
@@ -251,8 +251,8 @@
 			</md-dialog-actions>
 		</md-dialog>
 		</script>
-		
-		
+
+
     </div>
 
 

@@ -699,37 +699,47 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             if(obj && obj.type){
                 if(obj.type === 'component') {
                     let component = $scope.component.getObj($scope.editor.currentTab);
-                    let componentCopy = angular.copy(component);
+                    let currentContent = $scope.editor.getEditorContent();
 
-                    componentCopy.content = cm.doc.getValue();
+                    if(!component.content) component.content = '';
+                    let cmpNoSpaceContent = component.content.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+                    let currentCmpNoSpaceContent = currentContent.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
 
-                    $restService.setComponent({
-                        projectName: $scope.project.selected,
-                        val: componentCopy
-                    })
-                        .then(
-                        function successCallback(res) {
-                            if(res.data.status) {
+
+                    if(cmpNoSpaceContent !== currentCmpNoSpaceContent){
+
+                        let componentCopy = angular.copy(component);
+
+                        componentCopy.content = currentContent;
+
+                        $restService.setComponent({
+                            projectName: $scope.project.selected,
+                            val: componentCopy
+                        })
+                            .then(
+                            function successCallback(res) {
+                                if(res.data.status) {
+                                    console.log('\n');
+                                    console.log('Saving Component - Successful!');
+                                    console.log(res.data.val);
+                                    //$scope.editor.content.isChanged = false;
+
+                                    if (callback)
+                                        callback();
+                                }
+                                else {
+                                    console.log('\n');
+                                    console.error('Saving Component - Failed!');
+                                    console.log(res.data.error);
+                                    //$scope.editor.content.isChanged = true;
+                                }
+                            }, function errorCallback(error) {
                                 console.log('\n');
-                                console.log('Saving Component - Successful!');
-                                console.log(res.data.val);
-                                //$scope.editor.content.isChanged = false;
-
-                                if (callback)
-                                    callback();
-                            }
-                            else {
-                                console.log('\n');
-                                console.error('Saving Component - Failed!');
-                                console.log(res.data.error);
+                                console.log('Saving Component - Failed!')
+                                console.error(error);
                                 //$scope.editor.content.isChanged = true;
-                            }
-                        }, function errorCallback(error) {
-                            console.log('\n');
-                            console.log('Saving Component - Failed!')
-                            console.error(error);
-                            //$scope.editor.content.isChanged = true;
-                        });
+                            });
+                    }
                 }
                 else if(obj.type === 'testcase') {
                     let testcase = $scope.testcase.getObj($scope.editor.currentTab);
@@ -1919,11 +1929,11 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         if(data.change === 'add') {
             $scope.testcase.add(data.val);
             if($scope.editor.currentTab === data.val._id){
-                let currentEditorContent = $scope.editor.getEditorContent().replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
-                let receivedContent = data.val.content.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
-
-                if(currentEditorContent !== receivedContent)
-                    $scope.editor.updateEditor(data.val.content ? data.val.content : '');
+                // let currentEditorContent = $scope.editor.getEditorContent().replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+                // let receivedContent = data.val.content.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+                //
+                // if(currentEditorContent !== receivedContent)
+                $scope.editor.updateEditor(data.val.content ? data.val.content : '');
             }
         }
     };
@@ -1935,11 +1945,11 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         if(data.change === 'add') {
             $scope.component.add(data.val);
             if($scope.editor.currentTab === data.val._id){
-                let currentEditorContent = $scope.editor.getEditorContent().replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
-                let receivedContent = data.val.content.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
-
-                if(currentEditorContent !== receivedContent)
-                    $scope.editor.updateEditor(data.val.content ? data.val.content : '');
+                // let currentEditorContent = $scope.editor.getEditorContent().replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+                // let receivedContent = data.val.content.replace(CONTAINS_WHITE_SPACE_GLOBAL_REGEX, '');
+                //
+                // if(currentEditorContent !== receivedContent)
+                $scope.editor.updateEditor(data.val.content ? data.val.content : '');
             }
         }
     };
