@@ -461,6 +461,9 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
     };
 
     $scope.testcase.getSCCalledCmpAndStatements = function (id, content) {
+		if(id && !content){
+			content = "";
+		}
         let steps = content.split('\n');
         let stepCount = 0;
         let calledComponents = [];
@@ -476,8 +479,9 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
 
                 //Consider lines starts with a call command
                 if(STARTS_WITH_CALL_REGEX.test(ele)){
+					let comp_id = undefined;
                     try{
-                        let comp_id = $scope.component.getIdFromCallStatement(ele);
+                        comp_id = $scope.component.getIdFromCallStatement(ele);
                         assertNotEqual($scope.component.commonMap[comp_id], undefined);
                         assertNotEqual($scope.component.commonMap[comp_id].stepCount, undefined);
 
@@ -485,8 +489,10 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                         calledComponents.push(comp_id);
                     }
                     catch(err){
+						let lineNumber = i + 1;
+					
                         if(err.name === 'ActualIsExpected'){
-                            err.name = 'Error while getting step count of Testcase ' + id + '\nLine number : ' + i;
+                            err.name = 'Error while getting step count of Testcase ' + id + '\nLine number : ' + lineNumber;
                             err.message = 'Unable to find the component ' + comp_id + ' of call command ' + ele + ' in the component list';
 
                             logger('error', err.name, err.message, $scope.component.commonMap);
@@ -498,7 +504,7 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                         }
                         else {
                             err.message += '\nTestcase: ' + id;
-                            err.message += '\nLine Number: ' + (i + 1);
+                            err.message += '\nLine Number: ' + lineNumber;
 
                             logger('error', err.name, err.message);
 
