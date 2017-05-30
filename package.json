@@ -15,6 +15,7 @@
     "fs-extra": "*",
     "https": "*",
     "jsonfile": "*",
+    "morgan": "^1.8.2",
     "nano": "*",
     "serve-favicon": "*",
     "socket.io": "*"
