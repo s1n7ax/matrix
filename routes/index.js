@@ -1,13 +1,18 @@
 const Locator = require('../locator');
 const Path = require('path');
 const os = require('os');
-const fs = require('fs');
+const FS = require('fs');
 const http = require('http');
 const express = require('express');
 const Nano = require('nano');
 const JsonFile = require('jsonfile');
-const multer  = require('multer');
-const WriteExcel = require(Locator.servicesPath.writeExcel);
+const Excel = require('exceljs')
+
+
+const NO_SPACE_REGEX = new RegExp(/\S/);
+const STARTS_WITH_CALL_REGEX = new RegExp(/^call/, 'i');
+//const multer  = require('multer');
+//const WriteExcel = require(Locator.servicesPath.writeExcel);
 const router = express.Router();
 const Service =  require(Locator.servicesPath.services);
 
@@ -86,26 +91,70 @@ let makeIterator = function (array){
 };
 
 let getCalledComponents = function (content) {
-    if(content) {
-        let contentArr = content.split('\n').filter(element => element.match(/\S/));
-        let components = [];
 
-        for(let i = 0; i < contentArr.length; i++) {
-            let val = contentArr[i].match(/\bbc\S+|\bBC\S+/);
+    let calledComponents = [];
 
-            if(val){
-            components.push(val[0]);
-            }
-            else {
-            statements.push(contentArr[i]);
+    //Reading statements line by line
+    for(let i = 0, list = content.split('\n'), len = list.length;
+        i < len; i++){
+
+        //Removing spaces in the line start and line end
+        list[i].replace(/^\s+|\s+$/g, '');
+
+        //Ignore lines with spaces
+        if(NO_SPACE_REGEX.test(list[i])){
+
+            //Consider lines starts with a call command
+            if(STARTS_WITH_CALL_REGEX.test(list[i])){
+                try{
+                    calledComponents.push(getIdFromCallStatement(list[i]));
+                }catch(err){
+					throw err;
+                }
             }
         }
-        return components;
     }
-    else{
-        return components;
-    }
+
+	return calledComponents;
 }
+
+
+let getIdFromCallStatement = function(statement){
+        let arr = statement.split(/\s/g);
+
+        if(arr.length < 2){
+            let error = new Error();
+            error.name = 'NoSpaceAfterCall';
+            error.message = 'Please follow the standard syntax to call a component. Use a space to seperate <command> and <library.component>';
+            throw error;
+        }
+
+        if(!NO_SPACE_REGEX.test(arr[1])){
+            let error = new Error();
+            error.name = 'NoValueAfterCall';
+            error.message = 'Please use library and component name to specify the component should be called after Call command. Use a dot(.) to seperate library and component. call <library.component>';
+            throw error;
+        }
+
+        let path = arr[1].split('.');
+
+        if(path.length < 2){
+            let error = new Error();
+            error.name = 'NoComponentAfterCall';
+            error.message = 'Please use library and component name to specify the component should be called after Call command. Use a dot(.) to seperate library and component. call <library.component>';
+            throw error;
+        }
+
+        if(path.length > 2){
+            let error = new Error();
+            error.name = 'InvalideNumberOfArgumentsAfterCall';
+            error.message = 'Please use only library and component name to specify the component should be called after Call command. Use a dot(.) to seperate library and component. call <library.component>';
+            throw error;
+        }
+
+        return path[1];
+    }
+
 
 serviceProvider();
 
@@ -201,7 +250,7 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
 
 
                  setTimeout(function () {
-                    fs.unlinkSync(Path.join(Locator.temp.temp, uploadedFilePath));
+                    FS.unlinkSync(Path.join(Locator.temp.temp, uploadedFilePath));
                 }, 10000);
 
 
@@ -212,6 +261,243 @@ router.post('/getSanitizationStepsByTemplate', function(req, res, next){
     });
 });
 
+router.get('/getSanitizationSteps', function (req, res, next){
+	let projectName = req.query['projectName'];
+
+	if(!projectName) {
+		res.send(getResMap(false, null, "Select a project before download sanitize steps document"));
+		return 0;
+	}
+
+
+	// excel file will goes in the temp folder
+	let tempFolder = Locator.temp.temp;
+
+	// format date string
+	let date = new Date();
+	let GMTString = date.toGMTString()
+
+	GMTString = GMTString.replace(/\:/g, '-');
+
+	let fileName = 'Sanitize Document '+ GMTString + '.xlsx';
+
+	// full file path in the temp folder
+	let targetFilePathPath = Path.join(tempFolder, fileName);
+
+
+	// creating the excel file
+	let workbook = new Excel.Workbook();
+
+	workbook.creator = 'Matrix Creater';
+	workbook.lastModifiedBy = 'Matrix Creater';
+	workbook.created = new Date();
+	workbook.modified = new Date();
+	workbook.lastPrinted = new Date();
+	workbook.views = [{
+		// statring from very left
+		x: 0,
+		y: 0,
+		width: 10000,
+		height: 20000,
+		firstSheet: 0,
+
+		// active first tab
+		activeTab: 1,
+		visibility: 'visible'
+	}];
+
+	let sheet1 = workbook.addWorksheet('Sanitization Document');
+	sheet1.columns = [
+		{ header: 'Test Suite', key: 'ts_col', width: 40},
+		{ header: 'Test Case Name', key: 'tc_col', width: 40},
+		{ header: 'Sanitization Steps', key: 'sanit_steps_col', width: 100},
+	];
+
+
+
+
+
+	// getting all project details
+	let _testSuiteList = [];
+	let _testCaseList = [];
+	let _componentList = [];
+
+	let projectService = services[projectName];
+
+	/*
+	 Test Suites
+	 */
+	projectService.getAllTestsuiteDocs(undefined, function(error, body){
+		if(error) res.send(getResMap(false, null, error));
+		else{
+			_testSuiteList = body.rows;
+			console.log(_testSuiteList);
+
+			/*
+			 Test Cases
+			 */
+			projectService.getAllTestCaseDocs(undefined, function (error, body) {
+				if(error) res.send(getResMap(false, null, error));
+				else{
+					_testCaseList = body.rows;
+					console.log(_testCaseList);
+
+					/*
+					 conponents
+					 */
+					projectService.getAllComponentDocs(undefined, function (error, body){
+						if(error) res.send(getResMap(false, null, error));
+						else{
+							_componentList = body.rows;
+							console.log(_componentList);
+
+							/*
+							 Mapping to excell
+							 */
+
+							// All TestSutes
+							_testSuiteList.forEach(function (testSuite) {
+
+								// If There are links
+								if(testSuite.value.links){
+
+									// TestSute's TestCases
+									testSuite.value.links.forEach(function (testCaseName) {
+
+										// Find the TestCase name in the TestCase List
+										let _testCase = _testCaseList.find(function (ele) {
+											return ele.id === testCaseName;
+										});
+
+										// If testcase is not found, send error to user
+										let errorMsg = "Error while creating excel file\n";
+										errorMsg += "In TestSuite: "+ testSuite.id +", linked testcase: "+ testCaseName +" not found";
+										errorMsg += "in the database testcase list\n";
+										errorMsg += "contact your sys admin to solve the problem";
+
+										if(!_testCase) {
+											res.send(
+												getResMap(false, null, errorMsg)
+											);
+											return 0;
+										}
+
+										let componentContentMapArray = [];
+
+
+										// get the called components from the testcase content
+										let _testcaseCalledComponentList = getCalledComponents(_testCase.value.content ? _testCase.value.content : "");
+
+										// for each testcase -> called components
+										_testcaseCalledComponentList.forEach(function (component) {
+
+											// find testcase -> called component in database component list
+											let _component = _componentList.find(function (ele) {
+												return ele.id === component;
+											});
+
+											// If testcase is not found, send error to user
+											let errorMsg = "Error while creating excel file\n";
+											errorMsg += "In TestCase: "+ testCaseName +", called component: "+ component +" not found";
+											errorMsg += "in the database compoentn list\n";
+											errorMsg += "contact your sys admin to solve the problem";
+
+											if(!_testCase) {
+												res.send(
+													getResMap(false, null, errorMsg)
+												);
+												return 0;
+											}
+
+											debugger;
+
+											// adding that component and content into array
+											componentContentMapArray.push({
+												component: _component.id,
+												content: _component.value.content? _component.value.content : "********* no content *********"
+											});
+										});
+
+
+										// TestSuite.id, testCaseName, componentContentMapArray
+										let excelRow = [];
+
+										excelRow[0] = testSuite.id;
+										excelRow[1] = testCaseName;
+										excelRow[2] = "";
+
+										if(!componentContentMapArray.length){
+											excelRow[2] += "********* no components ********";
+											excelRow[2] += "\r\n";
+
+										}else{
+											componentContentMapArray.forEach(function (ele, index) {
+												debugger;
+												excelRow[2] += (index+1) +": " + ele.component +"\r\n";
+
+												let splitedContent = ele.content.split('\n');
+												if(!splitedContent.length){
+													excelRow[2] += "	********* no content ********\r\n";
+												}else{
+													splitedContent.forEach(function (ele, index) {
+												        if(NO_SPACE_REGEX.test(ele)){
+															excelRow[2] += "\t"+(index+1) + ". " + ele + '\r\n';
+														}
+													});
+												}
+												excelRow[2] += "\r\n";
+											});
+										}
+
+										let addedRow = sheet1.addRow(excelRow);
+										addedRow.height = 50;
+
+
+									//TestSuite links attay end loop
+									});
+
+								//TestSuite links array validation end if
+							}else{
+								let excelRow = [];
+								excelRow[0] = testSuite.id;
+								excelRow[1] = "********* no testcases *********";
+								excelRow[2] = "********* no components *********";
+
+								let addedRow = sheet1.addRow(excelRow);
+								addedRow.height = 50;
+							}
+
+
+							//TestSuite loop end
+							});
+
+							workbook.xlsx.writeFile(targetFilePathPath)
+							.then(function() {
+								res.download(targetFilePathPath);
+
+								setTimeout(function () {
+									try{
+										FS.unlinkSync(targetFilePathPath)
+									}catch(error){
+										res.send(getResMap(false, null, error));
+										console.log("Error while writing the sanitize excel file");
+										console.error(error);
+									}
+								}, 1000*15)
+
+							})
+							.catch(function (error) {
+								res.send(getResMap(false, null, error));
+								console.log("Error while writing the sanitize excel file");
+								console.error(error);
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+});
 
 router.get('/upload', function(req, res){
     res.sendFile(Locator.viewsPath.upload);
@@ -647,7 +933,6 @@ router.post('/createComponent', function (req, res, next) {
 });
 
 router.post('/getAllComponents', function (req, res, next) {
-	debugger;
 	let projectService = services[req.body.projectName];
 	let result = new Array;
 
@@ -723,28 +1008,22 @@ router.post('/renameComponent', function (req, res, next) {
 
     projectService.copyDocById(req.body._id, req.body._newid, function (error, body) {
         if(error) {
-            debugger;
             console.error(error);
             res.send(getResMap(false, null, error));
         }
         else {
-            debugger;
             projectService.deleteDocById(req.body._id, function (error, body2) {
                 if(error){
-                    debugger;
                     console.error(error);
                     res.send(getResMap(false, null, error));
                 }
                 else{
-                    debugger;
                     projectService.insertOrUpdateDoc(req.body.parentNode, function (error, body) {
                         if(error) {
-                            debugger;
                             console.error(error);
                             res.send(getResMap(false, null, error));
                         }
                         else {
-                            debugger;
                             res.send(getResMap(true, body, null))
                         }
 
@@ -783,14 +1062,12 @@ router.post('/deleteItemAndChildren', function (req, res, next) {
     let projectService = services[data.projectName];
 
     projectService.deleteDocByIdAndRev(data.val._id, data.val._rev, function (error, body) {
-        debugger;
         if(error) {
             console.error(error);
             res.send(getResMap(false, null, error));
         }
         else {
             if(data.val.links) {
-                debugger;
 
                 let i;
                 for(i = 0; i < data.val.links.length; i++) {

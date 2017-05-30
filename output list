@@ -46,3 +46,48 @@ createAndLinkDoc -
 { ok: true,
   id: 'Core HR',
   rev: '12-7f92937e3a598180e0ee079a1b9cc96e' }
+
+
+
+
+
+  *************
+  [ { id: 'ts_001',
+      key: 'ts_001',
+      value:
+       { _id: 'ts_001',
+         _rev: '2-aa092210e1a4a961872113e1ebbff344',
+         type: 'testsuite',
+         links: [Object] } } ]
+  *************
+  *************
+  [ { id: 'tc_001',
+      key: 'tc_001',
+      value:
+       { _id: 'tc_001',
+         _rev: '37-7204c7cf2131238bd0c97b0759063371',
+         type: 'testcase',
+         status: 'Pending',
+         owner: 'Nisala',
+         content: 'Break\nCheckDBResults\nCheckImagePresent\nCheckDocument\nCall lib_001.bc_001\nCall lib_001.bc_001\nCall lib_001.bc_001\nCall lib_001.bc_002' } } ]
+  *************
+  *************
+  [ { id: 'bc_001',
+      key: 'bc_001',
+      value:
+       { _id: 'bc_001',
+         _rev: '114-658ab8e1f59a9cce927456c1a7e08ba2',
+         type: 'component',
+         status: 'Pending',
+         owner: 'Test',
+         content: 'Call lib_001.bc_002\n' } },
+    { id: 'bc_002',
+      key: 'bc_002',
+      value:
+       { _id: 'bc_002',
+         _rev: '10-d9fe88154b78fb560858940a06ff1d34',
+         type: 'component',
+         status: 'Pending',
+         owner: 'Nisala' } } ]
+  *************
+  GET /getSanitizationSteps?projectName=project249 200 431.000 ms - 39
