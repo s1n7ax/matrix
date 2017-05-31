@@ -199,7 +199,11 @@
                         ng-click="editor.clickOnTab($event, tab)"
                         name="{{tab.title}}">
                             {{tab.title + '-' + tab.type}}
-                            <span ng-click="editor.removeTab($event)" value="{{tab.title}}">close</span>
+                            <span ng-click="editor.removeTab($event)" value="{{tab.title}}">
+                                <md-icon style="padding: 0px;">
+                                    <img src="img/icons/cancel.svg" style="display: inline-block; height:100%; width: 13px; vertical-align: middle;">
+                                </md-icon>
+                            </span>
                     </md-nav-item>
                 </md-nav-bar>
                 <div class="ext-content">
