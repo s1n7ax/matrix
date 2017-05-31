@@ -42,10 +42,9 @@ class Service {
             this.startSocket();
             this.followDB();
             this.compaction(function (error, body) {
-
                 if(error){
-                    console.log(error);
                     console.log('##########Compaction of db '+ self.dbName +' - Failed!##########');
+                    console.log(error);
                 }
                 else{
                     console.log('Compaction of db '+ self.dbName +' - Successful!');
@@ -56,18 +55,20 @@ class Service {
 
     compaction(callback) {
         let self = this;
-        //self.server.db.compact(self.dbName, callback);
-        callback(false);
-/*
+        self.server.db.compact(self.dbName, callback);
+        // callback(false);
+
+
         setTimeout(function () {
             self.compaction(function (error, body) {
-                if(error)
+                if(error){
                     console.error(error);
+                    console.log('##########Compaction of db '+ self.dbName +' - Failed!##########');
+                }
                 else
                     console.log('Compaction of db '+ self.dbName +' - Successful!');
             });
-        }, 1000*2);
-        */
+        }, 1000*60*  2);
     }
 
     /*
