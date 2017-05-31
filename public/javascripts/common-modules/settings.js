@@ -9,11 +9,17 @@ VTAF_COMMANDS = [
     "CheckDocument", "HandleImagePopup", "CheckImagePresent", "RightClick", "Break"
 ];
 
-SEETEST_COMMANDS = ["Launch", "Tap", "Swipe", "Rotate", "PerformUserActions", "DragToElement", "CheckPattern", "ElementSwipe", "ElementDrag" ,"Landscape", 
-    "Portrait", "Home", "Enter", "Wake", "Unlock", "Browserback", "Menu", "RecentApps", "Power", "CloseKeyboard", "Paste", "Backspace", "Back", "LongTap"];
+SEETEST_COMMANDS = [
+	"Launch", "Tap", "Swipe", "Rotate", "PerformUserActions", "DragToElement", "CheckPattern", "ElementSwipe", "ElementDrag" ,"Landscape", 
+    "Portrait", "Home", "Enter", "Wake", "Unlock", "BrowserBack", "Menu", "RecentApps", "Power", "CloseKeyboard", "Paste", "Backspace", "Back", "LongTap"];
+
+	
+CENTROID_COMMANDS = [
+	"QueryDatabase"
+]
 
 
-APPLICATION_COMMAND_LIST = VTAF_COMMANDS.concat(SEETEST_COMMANDS);
+APPLICATION_COMMAND_LIST = VTAF_COMMANDS.concat(SEETEST_COMMANDS, CENTROID_COMMANDS);
 
 STARTS_WITH_COMMAND_REGEX = getStartsWithCommandRegex();
 

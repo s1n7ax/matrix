@@ -695,6 +695,8 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     })
 
     $scope.editor.saveContent = function(cm, callback) {
+		if(!cm) cm = $scope.editor.codeMirror;
+	
         if ($scope.editor.currentTab) {
             let obj = $scope.editor.tabs.find(ele => ele.title === $scope.editor.currentTab);
 
