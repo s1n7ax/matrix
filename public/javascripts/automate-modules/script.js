@@ -527,6 +527,7 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     $scope.editor.clickOnTab = function (ev, tab) {
         $scope.editor.saveContent();
 
+        
         if(tab.type === 'testcase'){
             let obj = $scope.testcase.getObj(tab.title);
 

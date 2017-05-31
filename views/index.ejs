@@ -196,7 +196,6 @@
                     <md-nav-item
                         ng-repeat="tab in editor.tabs track by $index"
                         md-nav-click="editor.clickOnTab($event, tab)"
-                        ng-click=""
                         name="{{tab.title}}">
                             {{tab.title + '-' + tab.type}}
                             <span ng-click="editor.removeTab($event)" value="{{tab.title}}">
