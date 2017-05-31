@@ -195,8 +195,8 @@
                 <md-nav-bar id="tabs-container" md-selected-nav-item="editor.currentTab" nav-bar-aria-label="navigation links" ng-cloak>
                     <md-nav-item
                         ng-repeat="tab in editor.tabs track by $index"
-                        md-nav-click=""
-                        ng-click="editor.clickOnTab($event, tab)"
+                        md-nav-click="editor.clickOnTab($event, tab)"
+                        ng-click=""
                         name="{{tab.title}}">
                             {{tab.title + '-' + tab.type}}
                             <span ng-click="editor.removeTab($event)" value="{{tab.title}}">
