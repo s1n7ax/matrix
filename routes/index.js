@@ -331,7 +331,6 @@ router.get('/getSanitizationSteps', function (req, res, next){
 		if(error) res.send(getResMap(false, null, error));
 		else{
 			_testSuiteList = body.rows;
-			console.log(_testSuiteList);
 
 			/*
 			 Test Cases
@@ -340,7 +339,6 @@ router.get('/getSanitizationSteps', function (req, res, next){
 				if(error) res.send(getResMap(false, null, error));
 				else{
 					_testCaseList = body.rows;
-					console.log(_testCaseList);
 
 					/*
 					 conponents
@@ -349,7 +347,6 @@ router.get('/getSanitizationSteps', function (req, res, next){
 						if(error) res.send(getResMap(false, null, error));
 						else{
 							_componentList = body.rows;
-							console.log(_componentList);
 
 							/*
 							 Mapping to excell
