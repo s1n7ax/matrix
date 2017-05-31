@@ -1994,10 +1994,8 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         <div id='contextmenu-node'>
             <div class='contextmenu-item'
                 ng-click="dialog.openCreatePromptDialog($event, 'create', 'testcase', node.testsuite)">Create Testcase</div>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openRenamePromptDialog($event, 'testsuite', node.testsuite)">Rename</div>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openDeleteConfirmDialog($event, 'testsuite', node.testsuite)">Delete Test Auite</div>
         </div>
@@ -2007,10 +2005,8 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
         <div id='contextmenu-node'>
             <div class='contextmenu-item'
                 ng-click="dialog.openCreatePromptDialog($event, 'create', 'component', node.library)">Create Component</div>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openRenamePromptDialog($event, 'library', node.library)">Rename</div>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openDeleteConfirmDialog($event, 'library', node.library)">Delete Library</div>
         </div>
@@ -2019,16 +2015,12 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
     $scope.contextMenu.onComponent =
         `
         <div id='contextmenu-node'>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openRenamePromptDialog($event, 'component', component, node.library)">Rename Component</div>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openDeleteConfirmDialog($event, 'component', component)">Delete Component</div>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openChangeOwnerConfirmDialog($event, 'component', component)">Change Owner</div>
-
             <div class='contextmenu-item'
                 ng-click="dialog.openChangeStatusConfirmDialog($event, 'component', component)">Change Status</div>
         </div>
@@ -2039,13 +2031,10 @@ function automate_ctrl ($scope, $compile, $mdSidenav, $http, $mdDialog, $q, $tim
             <div id='contextmenu-node'>
                 <div class='contextmenu-item'
                     ng-click="dialog.openRenamePromptDialog($event, 'testcase', testcase, node.testsuite)">Rename Testcase</div>
-
                 <div class='contextmenu-item'
                     ng-click="dialog.openDeleteConfirmDialog($event, 'testcase', testcase)">Delete Testcase</div>
-
                 <div class='contextmenu-item'
                     ng-click="dialog.openChangeOwnerConfirmDialog($event, 'testcase', testcase)">Change Owner</div>
-
                 <div class='contextmenu-item'
                     ng-click="dialog.openChangeStatusConfirmDialog($event, 'testcase', testcase)">Change Status</div>
             </div>
