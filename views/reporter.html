@@ -119,7 +119,7 @@
 
 
             <div flex layout="row" class="table-container" ng-show="project.selected && showTable" ng-cloak>
-                <table id="metrix" flex class="table table-striped table-bordered">
+                <table id="metrix" flex class="table table-striped table-bordered" style="visibility: hidden;">
                     <thead>
                         <tr class="text-nowrap">
                             <td ng-repeat="column in matrix.getNameList() track by $index">{{column}}</td>

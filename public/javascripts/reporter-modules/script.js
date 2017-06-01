@@ -1,7 +1,7 @@
 reporter.controller('reporter_ctrl', reporterCtrl);
 reporter.service('$restService',restService);
 
-function reporterCtrl ($scope, $restService, $mdDialog) {
+function reporterCtrl ($scope, $restService, $mdDialog, $timeout) {
 
 
 
@@ -55,8 +55,28 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
             }
         };
     $scope.dialog.openErrorPromptDialog_callback = function (){
-
     }
+
+
+    /**
+     * Datatable
+     */
+    $scope.dttable = new Object();
+    $scope.dttable.showCustomTable = function () {
+        var table = $('#metrix');
+        table.DataTable({
+            "paging":   false,
+            "ordering": false,
+            "info":     false
+        });
+
+        table.css({ 'visibility': "visible" });
+
+        let searchInput = document.evaluate('//div[@id=\'metrix_filter\']/label', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        searchInput.style.float = "left";
+    }
+
+
 
 
 
@@ -164,13 +184,8 @@ function reporterCtrl ($scope, $restService, $mdDialog) {
                 $scope.matrix.setTCMatrix();
 
             }).then(function (){
-                // setTimeout(function () {
-                //     var table = $('#metrix').DataTable();
-                //     let searchInput = document.evaluate('//div[@id=\'metrix_filter\']/label', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                //     console.log(searchInput);
-                //     searchInput.style.float = "left";
-                // }, 5000);
-            })
+                $timeout($scope.dttable.showCustomTable, 0);
+            });
         }
     };
 
