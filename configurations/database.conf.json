@@ -5,5 +5,5 @@
     "password":"admin",
   
     "database":"automate_project_db",
-    "db_compaction_interval_min": 20
+    "db_compaction_interval_min": 350
 }
