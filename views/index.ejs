@@ -206,7 +206,7 @@
                     </md-nav-item>
                 </md-nav-bar>
                 <div class="ext-content">
-                    <textarea id="code" style="flex:1" style="visibility: hidden;"></textarea>
+                    <textarea id="code" style="flex:1; visibility: hidden;"></textarea>
                 </div>
             </md-content>
 
@@ -280,18 +280,19 @@
     <!--  Angular Material js  -->
     <script src="javascripts/angular-modules/angular-material.js"></script>
 
+
+    <!-- Common Modules -->
+    <script src="javascripts/common-modules/controllers.js"></script>
+    <script src="javascripts/common-modules/loggers.js"></script>
+    <script src="javascripts/common-modules/settings.js"></script>
+
+
     <!-- CodeMirror js -->
     <script src="javascripts/codemirror-modules/codemirror.js"></script>
     <script src="javascripts/codemirror-modules/show-hint.js"></script>
-    <script src="javascripts/codemirror-modules/anyword-hint.js"></script>
-    <script src="javascripts/codemirror-modules/javascript.js"></script>
-    <!-- <script src="javascripts/codemirror-modules/codemirror.js"></script> -->
-    <!-- <script src="javascripts/codemirror-modules/show-hint.js"></script> -->
-    <!--<script src="javascripts/codemirror-modules/javascript-hint.js"></script>-->
-    <!-- <script src="javascripts/codemirror-modules/javascript.js"></script> -->
-    <!--<script src="javascripts/codemirror-modules/markdown.js"></script>-->
-    <!--<script src="javascripts/codemirror-modules/anyword-hint.js"></script>-->
-
+    <!-- <script src="javascripts/codemirror-modules/anyword-hint.js"></script> -->
+    <!-- <script src="javascripts/codemirror-modules/javascript2.js"></script> -->
+    <script src="javascripts/codemirror-modules/python.js"></script>
 
     <!-- XLSX Module -->
     <script lang="javascript" src="javascripts/excellentexport.js"></script>
@@ -299,10 +300,6 @@
     <!-- Socket.IO -->
     <script src="<%= sockethost %>/socket.io/socket.io.js"></script>
 
-    <!-- Common Modules -->
-    <script src="javascripts/common-modules/controllers.js"></script>
-    <script src="javascripts/common-modules/loggers.js"></script>
-    <script src="javascripts/common-modules/settings.js"></script>
 
     <!-- App -->
     <script>

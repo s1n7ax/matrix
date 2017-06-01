@@ -57,7 +57,8 @@ class Service {
         let self = this;
 
 
-        console.log('\n\n************** Compaction of db '+ self.dbName +' - Started! **************\n**************Next automated compaction will be in **************' + this.compactionInterval + ' sec!\n');
+        console.log('\n\n************** Compaction of db '+ self.dbName +' - Started! **************\n'+
+        '**************Next automated compaction will be in **************' + this.compactionInterval + ' sec!\n');
         self.server.db.compact(self.dbName, callback);
         // callback(false);
 

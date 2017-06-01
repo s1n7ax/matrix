@@ -47,6 +47,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     // Extend the 'normal' keywords with the TypeScript language extensions
     if (isTS) {
       var type = {type: "variable", style: "variable-3"};
+
       var tsKeywords = {
         // object-like things
         "interface": kw("class"),
