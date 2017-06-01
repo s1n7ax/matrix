@@ -28,12 +28,12 @@ class Service {
 
         let dbConf = JsonFile.readFileSync(Locator.configurationPath.database_conf);
         let connectionQuery = `http://${dbConf.username}:${dbConf.password}@${dbConf.host}:${dbConf.port}`;
+        this.compactionInterval = dbConf.db_compaction_interval_min * 1000 * 60;
 
         this.server = Nano(connectionQuery);
 
         this.dbName = dbName;
         this.database = this.server.use(dbName);
-
 
         if((dbName !== undefined) && startSocket){
             this.feed = this.database.follow({since: "now"});
@@ -55,6 +55,9 @@ class Service {
 
     compaction(callback) {
         let self = this;
+
+
+        console.log('\n\n************** Compaction of db '+ self.dbName +' - Started! **************\n**************Next automated compaction will be in **************' + this.compactionInterval + ' sec!\n');
         self.server.db.compact(self.dbName, callback);
         // callback(false);
 
@@ -66,9 +69,9 @@ class Service {
                     console.log('##########Compaction of db '+ self.dbName +' - Failed!##########');
                 }
                 else
-                    console.log('Compaction of db '+ self.dbName +' - Successful!');
+                    console.log('************** Compaction of db '+ self.dbName +' - Successful! **************');
             });
-        }, 1000*60*  2);
+        }, this.compactionInterval);
     }
 
     /*
