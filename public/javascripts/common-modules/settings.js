@@ -15,7 +15,7 @@ SEETEST_COMMANDS = [
 
 	
 CENTROID_COMMANDS = [
-	"QueryDatabase"
+	"QueryDatabase", "ScreenShot", "CheckFileInfo", "CheckSorting", "CheckWindowProperty", "CallWebService", "OnParadigm", "EndOnParadigm", "Compare", "CheckPropertyValue", "ChangeContext", "ClearCache", "ResizeApplication", "DragToText", "ConnectDatabase", "CheckSameHeight", "CloseApplication", "ContinueApplication", "GetCurrentURL", "CheckSameWidth", "CheckSameXAxis", "CheckSameYAxis", "CheckSameBox", "SendFixMessage", "ReceiveFixMessage", "CallCommand", "LoadLibrary", "SetOCRText", "HideKeyboard", "EditDataContainer", "ReadDataContainer", "BrowseDataContainer", "SendEmail", "ResolveTemplate", "CommitThis", "AssignValue", "DragAndDrop", "Process", "ConnectSsh", "SendSshCommand", "Continue", "StoredProcedure", "MoveFile", "DeleteFile", "ImportExcel", "ExportExcel", "Trigger", "FieldOperation", "ActiveDirectory", "ArrayOperation", "WriteExcel", "WriteToExcel", "ReadExcel", "ReturnValue", "ReadPdf", "ReadWord", "WriteWord", "Zoom"
 ]
 
 

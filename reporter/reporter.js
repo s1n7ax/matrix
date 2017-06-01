@@ -16,6 +16,7 @@ class Reporter {
         this.testcaseMap;
 
         this.setData();
+        ''.split("jello");
     }
 
     logger (customMsg, actualError) {
