@@ -288,7 +288,6 @@ class Service {
         let self = this;
 
         this.feed.on('change', function(change) {
-            debugger;
             let result;
 
             if(change.deleted) {

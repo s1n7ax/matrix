@@ -352,14 +352,16 @@ router.get('/getSanitizationSteps', function (req, res, next){
 							 Mapping to excell
 							 */
 
+							debugger;
+
 							// All TestSutes
-							_testSuiteList.forEach(function (testSuite) {
+							let tsLoopPassed = _testSuiteList.every(function (testSuite) {
 
 								// If There are links
 								if(testSuite.value.links){
 
 									// TestSute's TestCases
-									testSuite.value.links.forEach(function (testCaseName) {
+									let tsLinkLoopPassed = testSuite.value.links.every(function (testCaseName) {
 
 										// Find the TestCase name in the TestCase List
 										let _testCase = _testCaseList.find(function (ele) {
@@ -370,13 +372,12 @@ router.get('/getSanitizationSteps', function (req, res, next){
 										let errorMsg = "Error while creating excel file\n";
 										errorMsg += "In TestSuite: "+ testSuite.id +", linked testcase: "+ testCaseName +" not found";
 										errorMsg += "in the database testcase list\n";
-										errorMsg += "contact your sys admin to solve the problem";
 
 										if(!_testCase) {
 											res.send(
 												getResMap(false, null, errorMsg)
 											);
-											return 0;
+											return false;
 										}
 
 										let componentContentMapArray = [];
@@ -386,7 +387,7 @@ router.get('/getSanitizationSteps', function (req, res, next){
 										let _testcaseCalledComponentList = getCalledComponents(_testCase.value.content ? _testCase.value.content : "");
 
 										// for each testcase -> called components
-										_testcaseCalledComponentList.forEach(function (component) {
+										let tcCalledComponentListPassed = _testcaseCalledComponentList.every(function (component) {
 
 											// find testcase -> called component in database component list
 											let _component = _componentList.find(function (ele) {
@@ -396,24 +397,26 @@ router.get('/getSanitizationSteps', function (req, res, next){
 											// If testcase is not found, send error to user
 											let errorMsg = "Error while creating excel file\n";
 											errorMsg += "In TestCase: "+ testCaseName +", called component: "+ component +" not found";
-											errorMsg += "in the database compoentn list\n";
-											errorMsg += "contact your sys admin to solve the problem";
+											errorMsg += "in the database component list\n";
 
-											if(!_testCase) {
+											if(!_component) {
 												res.send(
 													getResMap(false, null, errorMsg)
 												);
-												return 0;
+												return false;
 											}
 
-											debugger;
 
 											// adding that component and content into array
 											componentContentMapArray.push({
 												component: _component.id,
 												content: _component.value.content? _component.value.content : "********* no content *********"
 											});
+											return true;
 										});
+
+										if(!tcCalledComponentListPassed)
+											return false;
 
 
 										// TestSuite.id, testCaseName, componentContentMapArray
@@ -429,7 +432,6 @@ router.get('/getSanitizationSteps', function (req, res, next){
 
 										}else{
 											componentContentMapArray.forEach(function (ele, index) {
-												debugger;
 												excelRow[2] += (index+1) +": " + ele.component +"\r\n";
 
 												let splitedContent = ele.content.split('\n');
@@ -451,7 +453,10 @@ router.get('/getSanitizationSteps', function (req, res, next){
 
 
 									//TestSuite links attay end loop
+										return true;
 									});
+									if(!tsLinkLoopPassed)
+										return false;
 
 								//TestSuite links array validation end if
 							}else{
@@ -464,30 +469,33 @@ router.get('/getSanitizationSteps', function (req, res, next){
 								addedRow.height = 50;
 							}
 
-
 							//TestSuite loop end
+								return true;
 							});
 
-							workbook.xlsx.writeFile(targetFilePathPath)
-							.then(function() {
-								res.download(targetFilePathPath);
 
-								setTimeout(function () {
-									try{
-										FS.unlinkSync(targetFilePathPath)
-									}catch(error){
-										res.send(getResMap(false, null, error));
-										console.log("Error while writing the sanitize excel file");
-										console.error(error);
-									}
-								}, 1000*15)
+							if(tsLoopPassed){
+								workbook.xlsx.writeFile(targetFilePathPath)
+								.then(function() {
+									res.download(targetFilePathPath);
 
-							})
-							.catch(function (error) {
-								res.send(getResMap(false, null, error));
-								console.log("Error while writing the sanitize excel file");
-								console.error(error);
-							});
+									setTimeout(function () {
+										try{
+											FS.unlinkSync(targetFilePathPath)
+										}catch(error){
+											res.send(getResMap(false, null, error));
+											console.log("Error while writing the sanitize excel file");
+											console.error(error);
+										}
+									}, 1000*15)
+
+								})
+								.catch(function (error) {
+									res.send(getResMap(false, null, error));
+									console.log("Error while writing the sanitize excel file");
+									console.error(error);
+								});
+							}
 						}
 					});
 				}
