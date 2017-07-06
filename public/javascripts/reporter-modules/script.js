@@ -314,6 +314,8 @@ function reporterCtrl ($scope, $restService, $mdDialog, $timeout) {
                                 stepCount += $scope.component.getStepCountById(comp_id, tempMap);
                             }
                             finally{
+								//adding the count of the call command 
+								stepCount += 1;
                                 calledComponents.push(comp_id);
                             }
                         }catch(err){
@@ -501,6 +503,9 @@ function reporterCtrl ($scope, $restService, $mdDialog, $timeout) {
                         assertNotEqual($scope.component.commonMap[comp_id].stepCount, undefined);
 
                         stepCount += $scope.component.commonMap[comp_id].stepCount;
+						
+						//adding  the call  command step
+						stepCount += 1;
                         calledComponents.push(comp_id);
                     }
                     catch(err){

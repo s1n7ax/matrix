@@ -6,7 +6,8 @@ function getStartsWithCommandRegex() {
         result += '^' + cmds[i];
         if(len > 1 + i) result += '|';
     }
-    return new RegExp(result);
+	
+    return new RegExp(result, 'i');
 }
 
 function assertEqual(expected, actual){
